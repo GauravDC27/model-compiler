@@ -10,7 +10,8 @@ THINK = Executor("hub.think", "system2", frozenset({"analyze.reason"}), 600, 200
                  {"analyze.reason": 0.92})
 SPOKE = Executor("spoke.27b", "spoke", frozenset({"analyze.reason", "decide.classify"}), 600, 3000, 90,
                  {"analyze.reason": 0.95, "decide.classify": 0.97})
-CODE = Executor("tool.python", "tool", frozenset({"analyze.data"}), 0, 0, 2, {"analyze.data": 1.0})
+CODE = Executor("tool.python", "tool", frozenset({"analyze.data"}), 0, 0, 2, {"analyze.data": 1.0},
+                input_reads=0)
 ALL = [S1, HUB, THINK, SPOKE, CODE]
 
 
@@ -95,7 +96,9 @@ def test_joint_calibration_accounts_for_correlated_errors():
         easy = i < 5
         items.append({
             "s1": Outcome(answered=easy, correct=easy, correct_forced=easy, tokens=0),
-            "hub": Outcome(answered=True, correct=easy or i < 9, correct_forced=easy or i < 9, tokens=100),
+            # Hard items are also longer: the hub spends 200 tokens on them, not its mean of 100.
+            "hub": Outcome(answered=True, correct=easy or i < 9, correct_forced=easy or i < 9,
+                           tokens=100 if easy else 200),
         })
     node = Node("a", "op", required_accuracy=0.85)
     ind = compile_schedule([node], [s1, hub], token_budget=10**6).assignments[0]
@@ -104,6 +107,8 @@ def test_joint_calibration_accounts_for_correlated_errors():
     assert ind.ladder == joint.ladder == ("s1", "hub")
     assert ind.expected_accuracy == pytest.approx(0.95)  # 0.5*1.0 + 0.5*0.9
     assert joint.expected_accuracy == pytest.approx(0.9)  # 5 easy + 4 of 5 hard
+    assert ind.expected_tokens == pytest.approx(50)  # half escalate, at the hub's mean cost
+    assert joint.expected_tokens == pytest.approx(100)  # half escalate, at what they really cost
     with pytest.raises(CompileError):
         compile_schedule([Node("a", "op", required_accuracy=0.93)], [s1, hub], token_budget=10**6,
                          calibration={"op": items})
@@ -147,3 +152,12 @@ def test_program_bounds_guards_variants_and_capabilities():
         compile_program(risky, ALL, token_budget=10**6)
     with pytest.raises(CompileError, match="allowance is 0"):
         compile_program(Program(main, guards=(Guard("g", "check", "p", "recompile"),)), ALL, token_budget=10**6)
+
+
+def test_input_reads_scale_the_capped_input():
+    # Code never feeds the input to a model; order-averaged scoring reads it once per order.
+    assert CODE.call_tokens(1000) == 0
+    two_orders = Executor("hub.scored", "system2", frozenset({"decide.classify"}), 600, 0, 5,
+                          {"decide.classify": 0.97}, input_reads=2)
+    assert two_orders.call_tokens(1000) == 600 + 2 * 1000
+    assert two_orders.call_tokens(1000, discount=500) == 600 + 2 * 1000 - 500

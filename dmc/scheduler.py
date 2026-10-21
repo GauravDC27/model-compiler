@@ -49,21 +49,27 @@ class Executor:
     threshold; ``accuracy`` is its accuracy on the inputs it answers (per op type);
     ``accuracy_all`` is its accuracy when it may not abstain (needed for it to end a ladder;
     an abstaining executor without it can only be a lower rung). These summary numbers are
-    used only when no joint calibration set is supplied. ``consumes_input`` says whether a
-    node's tool-output input is fed to this executor (and so counts against tokens).
+    used only when no joint calibration set is supplied.
+
+    Token fields are compiled sizes and budgets, so they bound a call: ``tokens_in`` is the
+    fixed prompt (template, instructions; not the node's input), ``tokens_out`` the decode
+    budget, and ``input_reads`` how many times the node's capped input enters the prompt per
+    call (0 for executors that never feed it to a model, such as code; 2 for order-averaged
+    scoring over two label orders). Expected tokens come from joint calibration records, which
+    hold what calls really spent; without them the estimate falls back to these bounds.
     """
 
     name: str
     kind: Kind
     ops: frozenset[str]
-    tokens_in: int  # prompt tokens per call (0 for non-LLM executors)
+    tokens_in: int  # fixed prompt tokens per call, excluding the node's input
     tokens_out: int  # generated-token budget per call (thinking + answer)
     latency: int  # integer time units per call
     accuracy: dict[str, float]
     coverage: float = 1.0
     accuracy_all: dict[str, float] | None = None
     contract: str = "D0"
-    consumes_input: bool = True
+    input_reads: int = 1
     version: str = "0"
 
     def terminal_accuracy(self, op: str) -> float:
@@ -72,7 +78,7 @@ class Executor:
         return self.accuracy.get(op, 0.0) if self.coverage >= 1.0 else 0.0
 
     def call_tokens(self, input_cap: int, discount: int = 0) -> int:
-        llm_in = self.tokens_in + (input_cap if self.consumes_input and self.tokens_in > 0 else 0)
+        llm_in = self.tokens_in + self.input_reads * input_cap
         return max(0, llm_in - discount) + self.tokens_out
 
 
@@ -158,24 +164,34 @@ def _topo_order(nodes: Sequence[Node]) -> list[Node]:
     return order
 
 
-def _estimate_independent(node: Node, ladder: Sequence[Executor]) -> tuple[float, float]:
-    acc, cost, reach = 0.0, 0.0, 1.0
+# (accuracy, expected tokens, share of requests reaching each rung)
+Estimate = tuple[float, float, tuple[float, ...]]
+
+
+def _estimate_independent(node: Node, ladder: Sequence[Executor]) -> Estimate:
+    acc, cost, reach, reaches = 0.0, 0.0, 1.0, []
     for i, e in enumerate(ladder):
         last = i == len(ladder) - 1
+        reaches.append(reach)
         acc += reach * (e.terminal_accuracy(node.op) if last else e.coverage * e.accuracy.get(node.op, 0.0))
         cost += reach * e.call_tokens(node.input_cap)
         reach *= 0.0 if last else 1.0 - e.coverage
-    return acc, cost
+    return acc, cost, tuple(reaches)
 
 
-def _estimate_joint(node: Node, ladder: Sequence[Executor], items) -> tuple[float, float] | None:
-    """Replay the ladder on calibration items: exact under correlated errors across rungs."""
+def _estimate_joint(node: Node, ladder: Sequence[Executor], items) -> Estimate | None:
+    """Replay the ladder on calibration items: exact under correlated errors across rungs.
+
+    Tokens are the ones each executor actually spent on the items that reached it, so a
+    correlation between input length and escalation is priced in too.
+    """
     if not items or any(e.name not in items[0] for e in ladder):
         return None
-    correct, cost = 0, 0.0
+    correct, cost, reached = 0, 0.0, [0] * len(ladder)
     for rec in items:
         for i, e in enumerate(ladder):
             o = rec[e.name]
+            reached[i] += 1
             cost += o.tokens
             if i == len(ladder) - 1:
                 correct += o.correct_forced
@@ -183,11 +199,12 @@ def _estimate_joint(node: Node, ladder: Sequence[Executor], items) -> tuple[floa
             if o.answered:
                 correct += o.correct
                 break
-    return correct / len(items), cost / len(items)
+    n = len(items)
+    return correct / n, cost / n, tuple(r / n for r in reached)
 
 
 def _ladder(node: Node, executors: Sequence[Executor], max_rungs: int,
-            calibration: Calibration | None) -> tuple[list[Executor], float, str]:
+            calibration: Calibration | None) -> tuple[list[Executor], Estimate, str]:
     """Cheapest cascade meeting the node's accuracy bar.
 
     A ladder is any cost-ordered subsequence of the capable executors (so a System-1 model may
@@ -210,13 +227,14 @@ def _ladder(node: Node, executors: Sequence[Executor], max_rungs: int,
     for size in range(1, min(max_rungs, len(cands)) + 1):
         for ladder in itertools.combinations(cands, size):
             joint = _estimate_joint(node, ladder, items)
-            acc, cost = joint if joint is not None else _estimate_independent(node, ladder)
+            est = joint if joint is not None else _estimate_independent(node, ladder)
+            acc, cost, _ = est
             top_acc = max(top_acc, acc)
             if acc + 1e-12 < node.required_accuracy:
                 continue
             names = [e.name for e in ladder]
             if best is None or (cost, names) < (best[0], best[1]):
-                best = (cost, names, list(ladder), acc, "joint" if joint is not None else "independent")
+                best = (cost, names, list(ladder), est, "joint" if joint is not None else "independent")
     if best is None:
         raise CompileError(
             f"node {node.id!r} needs accuracy {node.required_accuracy} but the best ladder "
@@ -271,17 +289,16 @@ def compile_schedule(
 
         lane = min(range(lanes), key=lane_key)
         start = max(lane_free[lane], earliest)
-        ladder, acc, estimate = plans[n.id]
-        reach, exp_tokens, worst = 1.0, 0.0, 0
-        for i, e in enumerate(ladder):
+        ladder, (acc, exp_tokens, reaches), estimate = plans[n.id]
+        worst = 0
+        for e, reach in zip(ladder, reaches):
             key = (lane, n.prefix_group or "", e.name)
             discount = n.prefix_tokens if (n.prefix_group is not None and key in seen_prefix) else 0
             if n.prefix_group is not None and e.tokens_in > 0:
                 seen_prefix.add(key)
-            call = e.call_tokens(n.input_cap, discount)
-            exp_tokens += reach * call
-            worst += call
-            reach *= 0.0 if i == len(ladder) - 1 else 1.0 - e.coverage
+            # The estimate priced every call at full prompt; credit the cached prefix.
+            exp_tokens -= reach * (e.call_tokens(n.input_cap) - e.call_tokens(n.input_cap, discount))
+            worst += e.call_tokens(n.input_cap, discount)
         end = start + node_lat[n.id]
         lane_free[lane], lane_group[lane] = end, n.prefix_group
         finish[n.id] = end
