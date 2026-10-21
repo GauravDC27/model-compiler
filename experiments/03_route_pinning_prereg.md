@@ -59,3 +59,7 @@ and §3 cut guidance).
   probabilities are the same conditional probabilities; only the kernel call pattern changes,
   identically on every stack. Calibration result: ALT is in the **stress** regime (mean
   per-position KL 0.0205 = 13.7 × 1.5e-3), ε_H4 = 0.0331.
+- *Amendment 1b (2026-10-21, after the 21-item smoke run and before the full run):* H4 is
+  **uninformative** (consequence: inconclusive, not demote) when half B contains fewer than 5
+  ALT fresh flips, because parity cannot improve when there is nothing to predict; the smoke run
+  showed the original rule would return "demote" on a zero-flip half.

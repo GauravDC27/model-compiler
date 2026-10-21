@@ -230,11 +230,15 @@ def main() -> None:
                         - at_coverage(sample, "ALT_fresh", C0, "ALT_margin")["rate"])
         boot.sort()
         lo, hi = boot[int(0.025 * len(boot))], boot[int(0.975 * len(boot)) - 1]
-        verdict = ("support (ND2 stays a MUST)" if lo > 0
+        flips_b = sum(not r["ALT_fresh"] for r in B)
+        verdict = ("uninformative (fewer than 5 ALT flips in half B; treated as inconclusive)"
+                   if flips_b < 5
+                   else "support (ND2 stays a MUST)" if lo > 0
                    else "demote (ND2 becomes a diagnostic)" if hi < 0.005
                    else "inconclusive at this n (confirmatory test at hub scale, n >= 2000)")
         return {"alpha": best, "parity_margin_only_B": base_b, "parity_combined_B": comb_b,
-                "delta": comb_b - base_b, "delta_ci95": (lo, hi), "H4": verdict}
+                "delta": comb_b - base_b, "delta_ci95": (lo, hi), "alt_flips_in_B": flips_b,
+                "H4": verdict}
 
     result["ND2_incremental"] = {
         "primary_all_positions": nd2("ALT_fragile"),
