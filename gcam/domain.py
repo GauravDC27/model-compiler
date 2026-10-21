@@ -168,6 +168,21 @@ MEMO_RISK_UP = ("receipt lost, amount from memory", "gift cards for the team hol
 MEMO_RISK_DOWN = ("pre-approved by finance, approval ref FIN-{n}", "client-billable, recharged on invoice INV-{n}",
                   "budgeted team offsite, approved in the quarterly plan", "conference fee, registration confirmation attached",
                   "replacement for a broken office monitor, IT ticket IT-{n}")
+# Held-out phrasings: reports from the last HELD_OUT_DAYS days (the evaluation period) word the same
+# memos differently, so anything that reads memos is tested on wording it never saw.
+HELD_OUT_DAYS = 30
+MEMO_CLEAR_TEST = {"meals": "Lunch meeting with a client ({who}), receipt included",
+                   "travel": "Rail fare to the client office for the {who} workshop",
+                   "software": "Yearly subscription renewal for the team's tools",
+                   "office": "Paper and ink cartridges for the office printer",
+                   "gifts": "Flowers sent to a client as thanks after the launch"}
+MEMO_RISK_UP_TEST = ("lost the receipt, estimated the amount", "gift vouchers for the team party",
+                     "item for personal use, I will pay it back", "divided over two claims so each stays under the cap",
+                     "paid in cash, the vendor gave no invoice")
+MEMO_RISK_DOWN_TEST = ("finance signed this off in advance, ref FIN-{n}", "billed back to the client on invoice INV-{n}",
+                       "part of the approved quarterly team offsite budget",
+                       "registration fee for an industry conference, confirmation attached",
+                       "new monitor after the old one broke, IT ticket IT-{n}")
 
 
 def _expenses(rng: np.random.Generator, customers: pd.DataFrame) -> pd.DataFrame:
@@ -188,16 +203,20 @@ def _expenses(rng: np.random.Generator, customers: pd.DataFrame) -> pd.DataFrame
                 + 0.7 * round_amount + 1.5 * duplicate + 0.5 * (tenure < 6) + 0.4 * (cat == "gifts")
                 + rng.normal(0, 0.35))
         who = FIRST[int(rng.integers(len(FIRST)))]
-        memo = MEMO_CLEAR[cat].format(who=who)
-        memo_shift = 0.0
+        kind, k, ref, memo_shift = "clear", 0, 0, 0.0
         # Near the threshold the memo carries the deciding information (a reviewer reads it).
         if 1.2 < risk < 2.6:
             if rng.random() < 0.5:
-                memo, memo_shift = MEMO_RISK_UP[int(rng.integers(5))], 1.5
+                kind, k, memo_shift = "up", int(rng.integers(5)), 1.5
             else:
-                memo, memo_shift = MEMO_RISK_DOWN[int(rng.integers(5))].format(n=int(rng.integers(1000, 9999))), -1.5
+                kind, k = "down", int(rng.integers(5))
+                ref, memo_shift = int(rng.integers(1000, 9999)), -1.5
         needs_review = bool(risk + memo_shift > 1.9)
         d = (NOW_DT - timedelta(days=int(rng.integers(0, 180)))).date().isoformat()
+        held_out = d >= (NOW_DT - timedelta(days=HELD_OUT_DAYS)).date().isoformat()
+        memo = {"clear": (MEMO_CLEAR_TEST if held_out else MEMO_CLEAR)[cat],
+                "up": (MEMO_RISK_UP_TEST if held_out else MEMO_RISK_UP)[k],
+                "down": (MEMO_RISK_DOWN_TEST if held_out else MEMO_RISK_DOWN)[k]}[kind].format(who=who, n=ref)
         rows.append({"expense_id": f"E-{20000 + i}", "date": d, "submitter": customers.name[int(rng.integers(len(customers)))],
                      "category": cat, "vendor": vendor, "amount": amount, "has_receipt": has_receipt,
                      "tenure_months": tenure, "weekend": weekend, "round_amount": round_amount,

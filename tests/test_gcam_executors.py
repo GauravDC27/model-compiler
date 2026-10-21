@@ -175,3 +175,45 @@ def test_reply_verifier_reads_denials_and_invented_offers():
     assert not reply_checks(offer, "Kofi Khan", "A-1", "deny")["no_false_promise"]
     approve = "Hi Kofi, your refund for order A-1 has been approved under policy P2. We'll confirm by email."
     assert all(reply_checks(approve, "Kofi Khan", "A-1", "approve").values())
+
+
+def test_held_out_period_memos_use_unseen_wording(world):
+    from datetime import timedelta
+
+    from gcam.domain import (HELD_OUT_DAYS, MEMO_CLEAR, MEMO_CLEAR_TEST, MEMO_RISK_DOWN, MEMO_RISK_DOWN_TEST,
+                             MEMO_RISK_UP, MEMO_RISK_UP_TEST, NOW_DT)
+
+    def stems(memos):  # template text before any placeholder
+        return tuple(m.split("{")[0] for m in memos)
+
+    train = stems((*MEMO_CLEAR.values(), *MEMO_RISK_UP, *MEMO_RISK_DOWN))
+    test = stems((*MEMO_CLEAR_TEST.values(), *MEMO_RISK_UP_TEST, *MEMO_RISK_DOWN_TEST))
+    cut = (NOW_DT - timedelta(days=HELD_OUT_DAYS)).date().isoformat()
+    ex = world.expenses
+    assert all(m.startswith(test) and not m.startswith(train) for m in ex[ex.date >= cut].memo)
+    assert all(m.startswith(train) for m in ex[ex.date < cut].memo)
+
+
+def test_memo_head_reads_only_the_memo():
+    import numpy as np
+
+    from gcam.executors.system1 import EncoderHeads, LinearHead
+
+    class BagEncoder:  # deterministic stand-in for MiniLM: hashed bag of words
+        def embed(self, text):
+            v = np.zeros(64)
+            for w in text.lower().split():
+                v[sum(map(ord, w)) % 64] += 1.0
+            return v / (np.linalg.norm(v) or 1.0), len(text.split())
+
+    enc = BagEncoder()
+    memos = [("receipt lost, amount from memory", "review"), ("cash payment, no invoice available", "review"),
+             ("pre-approved by finance, approval ref FIN-1234", "approve"),
+             ("client-billable, recharged on invoice INV-5678", "approve")] * 5
+    head = LinearHead(("approve", "review")).fit(np.stack([enc.embed(m)[0] for m, _ in memos]), [y for _, y in memos])
+    head.tau = 0.0
+    s1 = EncoderHeads(enc, {"decide.expense_review": head})
+    row = {"expense_id": "E-1", "memo": "receipt lost, amount from memory", "amount": 99999.0}
+    res = s1.run("decide.expense_review", {"row": row}, forced=False)
+    assert res.answered and res.value == {"expense_id": "E-1", "needs_review": True}
+    assert res.usage == {"encoder": 5}

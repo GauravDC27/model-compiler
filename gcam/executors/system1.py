@@ -89,6 +89,12 @@ class EncoderHeads:
             return ExecResult(forced or margin >= self.retrieval_tau, value, margin, usage={"encoder": n})
         if op not in self.heads:
             raise NotSupported(op)
+        if op == "decide.expense_review":  # the memo head: reads only the free text the GBDT never sees
+            row = payload["row"]
+            v, n = self.encoder.embed(row["memo"])
+            label, conf = self.heads[op].predict(v)
+            value = {"expense_id": row["expense_id"], "needs_review": label == "review"}
+            return ExecResult(forced or conf >= self.heads[op].tau, value, conf, usage={"encoder": n})
         v, n = self.encoder.embed(payload["text"])
         head = self.heads[op]
         label, conf = head.predict(v)

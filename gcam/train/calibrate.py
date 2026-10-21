@@ -137,6 +137,14 @@ def fit_system1(world, items) -> dict:
         thr = items[op]["thr"]
         head.calibrate(np.stack([enc.embed(p["text"])[0] for p, _ in thr]), [y for _, y in thr], TARGET)
         heads[op] = head
+    # memo head for expense review: memo text -> approve/review, trained on the fit-period rows
+    ex = items["decide.expense_review"]
+    to_label = lambda b: "review" if b else "approve"  # noqa: E731
+    head = LinearHead(("approve", "review")).fit(np.stack([enc.embed(r["memo"])[0] for r in ex["fit"]]),
+                                                  [to_label(r["needs_review"]) for r in ex["fit"]])
+    head.calibrate(np.stack([enc.embed(p["row"]["memo"])[0] for p, _ in ex["thr"]]), [to_label(y) for _, y in ex["thr"]],
+                   TARGET)
+    heads["decide.expense_review"] = head
     # dense retrieval margin threshold
     s1 = EncoderHeads(enc, heads)
     thr = items["retrieve.policy"]["thr"]

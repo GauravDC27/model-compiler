@@ -42,7 +42,7 @@ CANDIDATES = {
     "create.reply_fallback": ("spoke",),
     "create.summary": ("hub", "spoke"),
     "analyze.estimate": ("code.arith", "hub", "spoke"),
-    "decide.expense_review": ("ml.gbdt", "hub", "spoke"),
+    "decide.expense_review": ("ml.gbdt", "s1.encoder", "hub", "spoke"),
     "retrieve.policy": ("ml.tfidf", "s1.encoder", "hub", "spoke"),
 }
 # Ops with one exact executor (compiled code or a deterministic model): accuracy 1 by contract.
@@ -129,7 +129,8 @@ class System:
         facts = self.impls["code.analytics"].run("analyze.refund_rates", {"days": 180, "now": "2026-10-21T10:00:00+00:00"},
                                                  forced=True).value
         reply = {"customer_name": "Leila Petrov-Nasser", "order_id": "A-5000", "product": "kitchen knife set",
-                 "reason": "not_received", "decision": "deny", "rule": "P3"}
+                 "reason": "not_received", "decision": "deny", "rule": "P3",  # the longest decision line
+                 "explanation": "Tracking shows the order was delivered; open a carrier investigation before refunding."}
         return {"decide.claim_reason": {"text": ""}, "tool.select": {"text": ""}, "retrieve.policy": {"query": ""},
                 "decide.expense_review": {"row": {**row, "vendor": "FlowerPost", "category": "software",
                                                   "amount": 99999.99, "tenure_months": 119}},
