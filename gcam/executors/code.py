@@ -197,8 +197,11 @@ def execute_tool(world: World, log: EffectLog) -> Handler:
 
 # --------------------------------------------------------------------------- verifiers (contrastive and creative)
 
-PROMISES = ("twice the amount", "free gift", "refunded you twice", "guarantee", "lifetime")
-NEXT_STEP = ("opened a case", "you will hear from us", "within 24 hours", "next step", "we will", "i will")
+# Offers no refund decision includes: a reply that makes one promises something the policy did not grant.
+PROMISES = ("twice the amount", "free gift", "refunded you twice", "guarantee", "lifetime", "replace", "store credit",
+            "credit note", "a credit", "complimentary", "voucher", "discount")
+NEXT_STEP = ("opened a case", "you will hear from us", "within 24 hours", "next step", "we will", "i will", "we'll",
+             "i'll", "follow up", "keep you updated", "let us know", "contact us")
 
 
 def reply_checks(text: str, customer_name: str, order_id: str, decision: str | None = None) -> dict:
@@ -213,7 +216,10 @@ def reply_checks(text: str, customer_name: str, order_id: str, decision: str | N
         "length_ok": 12 <= len(text.split()) <= 90,
     }
     if decision == "deny":
-        checks["no_refund_promise"] = not re.search(r"\b(refunded|we will refund|your refund|issue a refund)\b", low)
+        # Affirmative refund statements only: "we are unable to issue a refund" is a correct denial.
+        checks["no_refund_promise"] = not re.search(
+            r"\b(we have refunded|we've refunded|(has|have) been refunded|we will refund|we'll refund|"
+            r"refund (has been|will be) (approved|issued|processed)|your refund (has been|will be|is on))\b", low)
     if decision == "approve":
         checks["states_refund"] = "refund" in low
     return checks

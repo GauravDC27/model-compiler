@@ -53,7 +53,7 @@ EXACT = {
     "create.policy_answer": "code.analytics", "forecast.orders": "ml.forecast",
 }
 LATENCY = {"code": 0, "ml": 1, "s1": 1, "hub": 4, "spoke": 12}
-GENERATIVE = {"create.reply": 3 * 70, "create.reply_fallback": 70, "create.summary": 90, "analyze.estimate": 48}
+GENERATIVE = {"create.reply": 3 * 110, "create.reply_fallback": 110, "create.summary": 90, "analyze.estimate": 48}
 
 
 @dataclass
@@ -201,10 +201,8 @@ class System:
             if mid is None:
                 continue
             if mid not in cached:
-                from huggingface_hub import snapshot_download
-                path = Path(snapshot_download(mid, local_files_only=True))
-                cached[mid] = content_hash([file_hash(str(p)) for p in sorted(path.glob("*.safetensors"))])
-            models[key] = {"id": mid, "weights": cached[mid]}
+                cached[mid] = _model_fingerprint(mid)
+            models[key] = {"id": mid, "files": cached[mid]}
         fp.write_text(json.dumps(cached, indent=1))
         # Only what changes outputs: hub capacity, System-1/classic models, thresholds and records.
         files = [self.art / "system1.pkl", self.art / "calibration.json", *sorted((self.art / "capacity").glob("*"))]
@@ -215,6 +213,23 @@ class System:
 
     def lock_hash(self) -> str:
         return content_hash(self.lock())
+
+
+FINGERPRINTED = ("config.json", "generation_config.json", "tokenizer.json", "tokenizer_config.json")
+
+
+def _model_fingerprint(model_id: str) -> str:
+    """Hash of the cached snapshot's weights, config and tokenizer files (the chat template lives in
+    the tokenizer config). Located through a cached file, so a snapshot without its README or
+    LICENSE still resolves offline."""
+    from huggingface_hub import try_to_load_from_cache
+
+    config = try_to_load_from_cache(model_id, "config.json")
+    if not isinstance(config, str):
+        raise FileNotFoundError(f"{model_id} is not in the local Hugging Face cache")
+    snap = Path(config).parent
+    files = sorted(snap.glob("*.safetensors")) + [snap / f for f in FINGERPRINTED if (snap / f).exists()]
+    return content_hash({p.name: file_hash(str(p)) for p in files})
 
 
 def _summary(items: list | None, name: str) -> tuple[float, float, float]:

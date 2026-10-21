@@ -164,3 +164,14 @@ def test_best_of_k_reply_is_seeded_by_content_and_selects_a_verified_candidate()
     assert res.answered == any(passing) and (not any(passing) or "A-1" in res.value)
     forced = LLMExecutor("hub", _FakeLM(), k=1).run("create.reply_fallback", p, forced=True)
     assert forced.answered and forced.detail["candidates"][0]["passed"] is False  # k = 1 is greedy (seed None)
+
+
+def test_reply_verifier_reads_denials_and_invented_offers():
+    deny = "Hi Kofi, we are unable to issue a refund for order A-1 under policy P3. You will hear from us within 24 hours."
+    assert all(reply_checks(deny, "Kofi Khan", "A-1", "deny").values())
+    promised = "Hi Kofi, we have refunded order A-1 in full. You will hear from us within 24 hours."
+    assert not reply_checks(promised, "Kofi Khan", "A-1", "deny")["no_refund_promise"]
+    offer = "Hi Kofi, sorry about order A-1. We will replace it and add store credit. We'll be in touch."
+    assert not reply_checks(offer, "Kofi Khan", "A-1", "deny")["no_false_promise"]
+    approve = "Hi Kofi, your refund for order A-1 has been approved under policy P2. We'll confirm by email."
+    assert all(reply_checks(approve, "Kofi Khan", "A-1", "approve").values())

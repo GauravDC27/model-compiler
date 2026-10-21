@@ -109,7 +109,8 @@ def _plan_write(goal: Goal, world: World) -> GoalPlan:
         cust = w.customer(g.slots["customer"])
         order = o["order"]
         return {"customer_name": cust["name"], "order_id": g.slots["order"], "product": order["product"],
-                "reason": g.slots["reason"], "decision": o["decision"]["decision"], "rule": o["decision"]["rule"]}
+                "reason": g.slots["reason"], "decision": o["decision"]["decision"], "rule": o["decision"]["rule"],
+                "explanation": o["decision"]["explanation"]}
     nodes = {
         "order": NodePlan(_node("order", "tool.get_order", contract="D1"),
                           lambda g, o, w: {"order_id": g.slots["order"]}),

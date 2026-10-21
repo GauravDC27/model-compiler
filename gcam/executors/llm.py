@@ -96,9 +96,13 @@ def reply_user(p: dict) -> str:
     issue = {"damaged": "the item arrived damaged", "not_received": "the order has not arrived",
              "wrong_item": "the wrong item was delivered", "changed_mind": "the customer changed their mind"}[p["reason"]]
     decision = (f"refund approved under policy {p['rule']}" if p["decision"] == "approve"
-                else f"no refund under policy {p['rule']}; explain kindly and offer the next step")
+                else f"no refund under policy {p['rule']}; explain kindly")
+    why = f"\nWhy: {p['explanation']}" if p.get("explanation") else ""
     return (f"Customer first name: {first}\nOrder: {p['order_id']} ({p['product']})\nIssue: {issue}\n"
-            f"Decision: {decision}\nWrite the reply in 2 to 4 sentences.")
+            f"Decision: {decision}{why}\n\n"
+            f"Write the reply in 2 to 4 sentences. Start with \"Hi {first},\". Write the order number {p['order_id']} "
+            f"exactly. State the decision. End by saying what happens next, for example that they will hear from us "
+            f"within 24 hours. Offer nothing else: no replacement, credit, discount or gift.")
 
 
 def summary_user(p: dict) -> str:
@@ -156,7 +160,7 @@ def blank_inputs(op: str, payload: dict) -> dict:
 
 class LLMExecutor:
     def __init__(self, name: str, lm: LM, *, family: dict[str, str | None] | None = None, k: int = 3,
-                 max_reply_tokens: int = 70):
+                 max_reply_tokens: int = 110):
         self.name = name
         self.lm = lm
         self.family = family or {}  # op -> goal family whose capacity is switched on

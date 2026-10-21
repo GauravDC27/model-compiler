@@ -74,7 +74,8 @@ def build_items(world) -> dict[str, dict[str, list[tuple[dict, object]]]]:
             reason = ("damaged", "not_received", "wrong_item")[len(rows) % 3]
             d = refund_rule(o, reason, NOW)
             rows.append(({"customer_name": world.customer(o["customer_id"])["name"], "order_id": o["order_id"],
-                          "product": o["product"], "reason": reason, "decision": d["decision"], "rule": d["rule"]}, True))
+                          "product": o["product"], "reason": reason, "decision": d["decision"], "rule": d["rule"],
+                          "explanation": d["explanation"]}, True))
         items.setdefault("create.reply", {})[split] = rows
         items.setdefault("create.reply_fallback", {})[split] = rows
     code = System(llms=False, world=world).impls["code.analytics"]
