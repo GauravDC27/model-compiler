@@ -1,7 +1,7 @@
 """Command line for GCAM v1.
 
     python -m gcam run "Review expense reports from the last 7 days"
-    python -m gcam run 'Handle request from C-1007: "Cancel order A-8391."' --approve cancel_order:A-8391
+    python -m gcam run 'Handle request from C-1222: "Cancel order A-8374."' --approve cancel_order:A-8374
     python -m gcam train        # hub capacity (goal experts + LoRA), then System-1 fit and calibration
     python -m gcam eval         # per-op ladders vs baselines, end-to-end goals, replay check
 """
