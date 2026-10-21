@@ -1,0 +1,41 @@
+{
+ "model": "ibm-granite/granite-3.1-1b-a400m-instruct",
+ "D1_greedy_text_repeat_agreement": 1.0,
+ "D1_greedy_text_thread_agreement": 1.0,
+ "D1_greedy_text_dtype_agreement": 0.68,
+ "D2_decision_thread_agreement": 1.0,
+ "D2_decision_dtype_agreement": 0.9666666666666667,
+ "D2_decision_dtype_agreement_with_abstain_band_1.0": 1.0,
+ "abstain_band_coverage": 0.4666666666666667,
+ "n_generation_prompts": 25,
+ "n_decisions": 30,
+ "flipped_decision_margins_fp32": [
+  0.0258
+ ],
+ "median_decision_margin_fp32": 1.0230372548103333,
+ "thread_disagreements": [],
+ "dtype_disagreements": [
+  {
+   "request": "Our policy allows refunds within 30 days of purchase. The customer bought the item 45 days ago. Should we issue a refund? Answer yes or no.",
+   "outputs": {
+    "float32|4|r0": "No, based on our refund policy, a refund should be issued within 30 days of purchase.",
+    "bfloat16|4|r0": "No, based on the policy, a refund should be issued within 30 days of purchase."
+   }
+  },
+  {
+   "request": "Get the weather forecast for Paris for tomorrow.",
+   "outputs": {
+    "float32|4|r0": "As an AI, I don't have real-time capabilities to provide current weather forecasts. I recommend checking a reliable weather forecasting website or app for the",
+    "bfloat16|4|r0": "I'm sorry for the inconvenience, but as an AI, I don't have real-time capabilities to access current or future weather forecasts. I recommend"
+   }
+  },
+  {
+   "request": "Convert 100 US dollars to euros.",
+   "outputs": {
+    "float32|4|r0": "As of the current exchange rate, 100 US dollars is approximately 85.50 Euros. Please note that this rate fl",
+    "bfloat16|4|r0": "100 US dollars is approximately 85.70 Euros."
+   }
+  }
+ ],
+ "elapsed_s": 3480.5
+}
