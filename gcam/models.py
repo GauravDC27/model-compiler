@@ -7,7 +7,7 @@ multiple-choice scoring over single-token letters, seeded generation, and hidden
 ``Capacity`` installs the hub's goal-conditioned capacity (plan §I.2.3), switched per request by
 the compiler's goal:
 
-* goal-gated new experts (item ii, ``dmc.expansion``, routed variant) — trained for the
+* goal-gated new experts (item ii, ``dmc.expansion``, additive variant) — trained for the
   ``policy`` family;
 * hot-expert LoRA (item i, ``dmc.expert_lora``) — trained for the ``support`` family.
 
@@ -143,8 +143,8 @@ class Capacity:
         expert, scaled by a learned sigmoid gate (router row + goal bias). The new expert starts as
         a copy of the layer's hottest expert with its down-projection zeroed, so at step 0 the
         model is exactly the base model. ``routed``: the new expert competes inside the top-8 and
-        starts as a noisy copy of its parent (UMoE-style). On this hub the routed copies lost their
-        traffic during training (share 0.74 → 0.30, 0.13 at the answer token), so v1 uses additive.
+        starts as a noisy copy of its parent (UMoE-style), so step 0 already differs from the base.
+        v1 uses additive: it keeps the base top-8 intact and starts from the base model exactly.
         """
         if self.gated:
             raise ValueError("v1 supports goal-gated experts for one family")

@@ -1,9 +1,10 @@
 """Train the hub's goal-family capacity (plan §I.2.3, items i and ii; stages T0 + T2 on CPU).
 
-* ``policy`` family (refund-claim reasons) → goal-gated new experts (item ii): one routed expert
-  per layer, warm-started from that layer's most-selected expert on policy prompts, router row
-  from the parent plus noise on the copy only, goal bias +0.1; only the new experts, their rows
-  and the bias train.
+* ``policy`` family (refund-claim reasons) → goal-gated new experts (item ii): one additive
+  expert in each of the hub's last 8 layers, warm-started from that layer's most-selected expert on policy prompts with
+  its down-projection zeroed (step 0 is the base model), sigmoid gate from a zero router row and
+  a zero goal bias; only the new experts, their rows and the bias train
+  (``GCAM_VARIANT=routed`` selects the routed variant).
 * ``support`` family (tool selection) → hot-expert LoRA (item i): rank 4 on each layer's hot
   experts (80% of selection mass on support prompts, the A3B rule); the router stays frozen.
 
@@ -31,8 +32,11 @@ from ..executors.llm import CLAIM_OPTIONS, SYSTEMS, TOOL_OPTIONS, LLMExecutor, c
 from ..models import HUB_ID, LETTERS, LM, Capacity, artifacts_dir
 
 SMOKE = bool(os.environ.get("GCAM_SMOKE"))
-STEPS, BATCH = (2 if SMOKE else 90), 4  # ~0.9 s per forward on this 4-core CPU: 360 sequences per family
-LR = {"policy": 1e-3, "support": 3e-4}  # new experts train from a copy; LoRA from zero B needs a gentler rate
+# ~3 s per forward + backward on this 4-core CPU. Policy: 160 sequences; support: 360.
+STEPS = {"policy": 2, "support": 2} if SMOKE else {"policy": 40, "support": 90}
+BATCH = 4
+LR = {"policy": 1e-4, "support": 3e-4}
+GOAL_LAYERS = range(16, 24)  # the hub's last 8 of 24 layers
 VARIANT = os.environ.get("GCAM_VARIANT", "additive")
 ONLY = os.environ.get("GCAM_ONLY")  # "policy": retrain only the goal experts, keep the support LoRA
 SPECS = {
@@ -57,15 +61,20 @@ def _data(world):
 
 
 def examples(lm: LM, family: str, items) -> list[tuple[list[int], int]]:
+    """Every item in both option orderings, as at inference.
+
+    One ordering per item is not enough: the generators cycle labels (item i has label i mod 4 or
+    i mod 6), so alternating orderings by item would pin each label to one ordering and make the
+    answer letter predictable without reading the text."""
     spec = SPECS[family]
     canon = spec["labels"]
     out = []
-    for i, (text, label) in enumerate(items):
-        order = canon if i % 2 == 0 else tuple(reversed(canon))  # both orderings, as at inference
-        prompt = lm.render(SYSTEMS[spec["op"]], spec["user"]({"text": text}, order))
-        ids = lm.backend._ids(prompt)
-        target = lm.backend._ids(prompt + LETTERS[order.index(label)])[len(ids)]
-        out.append((ids, target))
+    for text, label in items:
+        for order in (canon, tuple(reversed(canon))):
+            prompt = lm.render(SYSTEMS[spec["op"]], spec["user"]({"text": text}, order))
+            ids = lm.backend._ids(prompt)
+            target = lm.backend._ids(prompt + LETTERS[order.index(label)])[len(ids)]
+            out.append((ids, target))
     return out
 
 
@@ -106,7 +115,7 @@ def train(lm: LM, params, exs, family: str, log_prefix: str) -> list[dict]:
     torch.use_deterministic_algorithms(False)
     log = []
     with lm.family(family):
-        for step in range(STEPS):
+        for step in range(STEPS[family]):
             batch = [exs[order[(step * BATCH + j) % len(order)]] for j in range(BATCH)]
             loss = 0.0
             for ids, target in batch:  # one sequence at a time: no padding, fixed shapes
@@ -114,8 +123,9 @@ def train(lm: LM, params, exs, family: str, log_prefix: str) -> list[dict]:
                 loss = loss + torch.nn.functional.cross_entropy(logits[None], torch.tensor([target])) / BATCH
             opt.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(params, 1.0)
             opt.step()
-            if step % 20 == 0 or step == STEPS - 1:
+            if step % 20 == 0 or step == STEPS[family] - 1:
                 log.append({"step": step, "loss": round(float(loss), 4)})
                 print(log_prefix, log[-1], flush=True)
     torch.use_deterministic_algorithms(True)
@@ -167,7 +177,7 @@ def main() -> None:
     use = {fam: usage(lm, exs[fam]) for fam in SPECS}
 
     # item (ii): goal-gated experts for the policy family (additive variant; see Capacity.add_goal_experts)
-    parents = {i: [int(torch.argmax(use["policy"][i]))] for i in layers}
+    parents = {i: [int(torch.argmax(use["policy"][i]))] for i in GOAL_LAYERS}
     wrapped = cap.add_goal_experts("policy", parents, variant=VARIANT)
     from dmc.expansion import trainable_parameters
     params = trainable_parameters(wrapped)
