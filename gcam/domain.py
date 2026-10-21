@@ -66,7 +66,11 @@ POLICY = (
     PolicySection("P4", "Wrong item shipped", "If we shipped the wrong item, colour or size, the customer gets a refund "
                   "or exchange within 60 days of delivery, and we pay return shipping."),
     PolicySection("P5", "Expense approval", "Expense reports under 500 dollars with a receipt are approved automatically. "
-                  "Reports without a receipt, over 500 dollars, or for personal items need manual review."),
+                  "Reports without a receipt, over 500 dollars, or for personal items need manual review. For "
+                  "borderline reports the memo decides: finance pre-approval, client-billable costs, budgeted team "
+                  "plans, conference fees and IT-ticketed equipment are approved; a lost receipt, gift cards, personal "
+                  "purchases, reports split to stay under the limit and cash payments without an invoice need manual "
+                  "review."),
     PolicySection("P6", "Callbacks", "Customers can ask for a phone callback. Callbacks are scheduled between 9am and 6pm "
                   "on weekdays, in the customer's local time."),
     PolicySection("P7", "Address changes", "Shipping addresses can be changed until the order ships. After shipping, "

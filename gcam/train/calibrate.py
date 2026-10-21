@@ -15,6 +15,11 @@ Expense rows are split by date so that every expense-review goal (last 7–30 da
 the GBDT never saw.
 
     python -m gcam.train.calibrate
+    GCAM_OPS=decide.expense_review,retrieve.policy python -m gcam.train.calibrate   # redo these ops only
+
+With ``GCAM_OPS`` the System-1 and classic models are refit (seconds, deterministic), the hub-state
+probe is kept, and only the listed ops' thresholds and records are recomputed and merged into the
+existing calibration and test records.
 """
 
 from __future__ import annotations
@@ -36,6 +41,7 @@ from ..models import artifacts_dir
 from ..system import CANDIDATES, System, rung_name
 
 SMOKE = bool(os.environ.get("GCAM_SMOKE"))
+OPS = tuple(o for o in os.environ.get("GCAM_OPS", "").split(",") if o)
 TARGET = 0.95
 # Sized for a 4-core CPU (~0.9 s per hub forward, ~1.5 s per spoke forward).
 N = {"fit": 480, "thr": 40, "cal": 80, "test": 80, "pair_thr": 20, "pair": 40, "reply": 9, "est": 30,
@@ -169,16 +175,30 @@ def main() -> None:
              "gbdt": s1["gbdt"], "probe_layer": PROBE_LAYER, "probe_heads": {}}
     with open(art / "system1.pkl", "wb") as f:
         pickle.dump(saved, f)
+    old_cal = json.loads((art / "calibration.json").read_text()) if OPS else None
+    old_test = json.loads((art / "test_records.json").read_text()) if OPS else None
+    if OPS:  # the probe reads the hub's claims features only: keep it
+        with open(art / "system1.pkl", "rb") as f:
+            saved_old = pickle.load(f)
+        saved["probe_heads"] = saved_old["probe_heads"]
+        with open(art / "system1.pkl", "wb") as f:
+            pickle.dump(saved, f)
     system = System(llms=True, art=art, world=world)
-    saved["probe_heads"] = fit_probe(system.models["hub"], items)
-    with open(art / "system1.pkl", "wb") as f:
-        pickle.dump(saved, f)
+    if not OPS:
+        saved["probe_heads"] = fit_probe(system.models["hub"], items)
+        with open(art / "system1.pkl", "wb") as f:
+            pickle.dump(saved, f)
     system.impls["s1.hubprobe"].heads = saved["probe_heads"]
-    print("probe fitted", f"{time.time() - t0:.0f}s", flush=True)
+    print("probe fitted" if not OPS else f"probe kept; recalibrating {OPS}", f"{time.time() - t0:.0f}s", flush=True)
 
     # LLM thresholds on the threshold split (spoke is always the last rung: no threshold needed).
-    thresholds = {}
+    thresholds = {k: v for k, v in old_cal["thresholds"].items() if k.split("|")[1] not in OPS} if OPS else {}
+    for k, v in thresholds.items():
+        impl, op = k.split("|")
+        system.impls[impl].tau[op] = v
     for op in ("decide.claim_reason", "tool.select", "evaluate.pairwise", "decide.expense_review", "retrieve.policy"):
+        if OPS and op not in OPS:
+            continue
         for impl in CANDIDATES[op]:
             if not impl.startswith("hub"):
                 continue
@@ -192,7 +212,12 @@ def main() -> None:
               flush=True)
 
     records: dict[str, dict[str, list]] = {"cal": {}, "test": {}}
+    if OPS:
+        records = {"cal": {k: v for k, v in old_cal["records"].items() if k not in OPS},
+                   "test": {k: v for k, v in old_test["records"].items() if k not in OPS}}
     for op, impls in CANDIDATES.items():
+        if OPS and op not in OPS:
+            continue
         for split in ("cal", "test"):
             rows = []
             for payload, truth in items[op][split]:
@@ -217,6 +242,10 @@ def main() -> None:
             "probe_layer": PROBE_LAYER, "encoder_thresholds": {op: h.tau for op, h in s1["encoder_heads"].items()},
             "retrieval_tau": s1["retrieval_tau"], "tfidf_tau": s1["tfidf"].tau, "gbdt_tau": s1["gbdt"].tau,
             "probe_tau": saved["probe_heads"]["decide.claim_reason"].tau, "elapsed_s": round(time.time() - t0, 1)}
+    if OPS:
+        meta["recalibrated"] = old_cal["meta"].get("recalibrated", []) + [{"ops": list(OPS),
+                                                                           "elapsed_s": meta["elapsed_s"]}]
+        meta["elapsed_s"] = old_cal["meta"]["elapsed_s"]
     (art / "calibration.json").write_text(json.dumps({"thresholds": thresholds, "records": records["cal"],
                                                       "meta": meta}, indent=1))
     (art / "test_records.json").write_text(json.dumps({"records": records["test"], "meta": meta}, indent=1))
