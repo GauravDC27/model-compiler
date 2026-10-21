@@ -24,6 +24,9 @@ from typing import Literal
 from .canonical import content_hash
 
 Kind = Literal["system1", "system2", "spoke", "tool", "classic_ml"]
+# Determinism contract an executor can deliver on its certified stack (PLAN Part II):
+# D0 = replay only (recorded result), D1 = bitwise recompute. Ordered weakest to strongest.
+CONTRACTS = ("D0", "D1")
 
 
 @dataclass(frozen=True)
@@ -46,6 +49,7 @@ class Executor:
     accuracy: dict[str, float]
     coverage: float = 1.0
     accuracy_all: dict[str, float] | None = None
+    contract: str = "D0"
     version: str = "0"
 
     def terminal_accuracy(self, op: str) -> float:
@@ -62,6 +66,7 @@ class Node:
     required_accuracy: float = 0.0
     prefix_group: str | None = None  # nodes sharing a prompt prefix (e.g. same document)
     prefix_tokens: int = 0  # length of that shared prefix
+    requires_contract: str = "D0"  # weakest determinism contract acceptable for this node
 
 
 @dataclass(frozen=True)
@@ -124,12 +129,15 @@ def _ladder(node: Node, executors: Sequence[Executor], max_rungs: int) -> tuple[
     escalate straight to a specialist), at most ``max_rungs`` long; every rung but the last
     may abstain. Ties break on executor names, so the choice is deterministic.
     """
+    need = CONTRACTS.index(node.requires_contract)
     cands = sorted(
-        (e for e in executors if node.op in e.ops),
+        (e for e in executors if node.op in e.ops and CONTRACTS.index(e.contract) >= need),
         key=lambda e: (e.tokens_in + e.tokens_out, e.latency, e.name),
     )
     if not cands:
-        raise CompileError(f"no executor can run op {node.op!r} (node {node.id!r})")
+        raise CompileError(
+            f"no executor can run op {node.op!r} at contract {node.requires_contract} (node {node.id!r})"
+        )
     best: tuple[float, list[str], list[Executor], float] | None = None
     for size in range(1, min(max_rungs, len(cands)) + 1):
         for ladder in itertools.combinations(cands, size):
@@ -228,7 +236,7 @@ def compile_schedule(
         )
     sched = Schedule(tuple(out), round(total_exp, 3), total_worst, max(finish.values(), default=0))
     executors_used = sorted({name for a in out for name in a.ladder})
-    versions = {e.name: e.version for e in executors if e.name in executors_used}
+    versions = {e.name: (e.version, e.contract) for e in executors if e.name in executors_used}
     h = content_hash({
         "assignments": [a.__dict__ for a in sched.assignments],
         "budget": token_budget, "lanes": lanes, "executors": versions,

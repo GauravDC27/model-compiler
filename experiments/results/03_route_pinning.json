@@ -1,0 +1,66 @@
+{
+ "model": "ibm-granite/granite-3.1-1b-a400m-instruct",
+ "stacks": {
+  "REF": [
+   "bf16",
+   4
+  ],
+  "ALT": [
+   "bf16",
+   3
+  ],
+  "STRESS": [
+   "fp32",
+   4
+  ]
+ },
+ "C0": 0.85,
+ "eps_H4": 0.033109483122825606,
+ "eps_secondary": 0.01,
+ "proxy_regime": "stress",
+ "R7_routing_flip_REF_vs_ALT": {
+  "stock": {
+   "rate": 0.0477,
+   "k": 3699,
+   "n": 77544,
+   "ci95": [
+    0.0462,
+    0.0492
+   ]
+  },
+  "hardened": {
+   "rate": 0.0469,
+   "k": 3635,
+   "n": 77544,
+   "ci95": [
+    0.0454,
+    0.0484
+   ]
+  }
+ },
+ "decision_rows_partial": [
+  {
+   "group": "compare:0",
+   "answer": "yes",
+   "ref": "yes",
+   "REF_margin": 0.4241944186529114,
+   "REF_fragile": 0.25,
+   "REF_fragile_content": 0.24348958333333334,
+   "ALT_margin": 0.7554567063047819,
+   "ALT_fragile": 0.254590395480226,
+   "ALT_fragile_content": 0.24609375,
+   "ALT_fragile_001": 0.08757062146892655,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.851953669039176,
+   "STRESS_fragile": 0.2478813559322034,
+   "STRESS_fragile_content": 0.24348958333333334,
+   "STRESS_fragile_001": 0.0882768361581921,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": true
+  }
+ ]
+}

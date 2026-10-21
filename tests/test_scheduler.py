@@ -64,3 +64,20 @@ def test_shared_prefix_is_paid_once_per_lane():
     sch = compile_schedule(g, [HUB], token_budget=10_000, lanes=1)
     worst = [a.worst_case_tokens for a in sch.assignments]
     assert worst == [640, 140, 140]
+
+
+def test_nodes_requiring_bitwise_determinism_only_use_d1_executors():
+    d1_s1 = Executor("s1.head", "system1", frozenset({"decide.classify"}), 0, 0, 1,
+                     {"decide.classify": 0.99}, coverage=0.7, contract="D1")
+    d1_dense = Executor("dense.student", "system2", frozenset({"decide.classify"}), 300, 0, 3,
+                        {"decide.classify": 0.93}, contract="D1")
+    hub_d0 = Executor("hub.decide", "system2", frozenset({"decide.classify"}), 200, 0, 2,
+                      {"decide.classify": 0.97}, contract="D0")
+    loose = compile_schedule([Node("a", "decide.classify", required_accuracy=0.95)],
+                             [d1_s1, d1_dense, hub_d0], token_budget=10_000).assignments[0]
+    strict = compile_schedule([Node("a", "decide.classify", required_accuracy=0.95, requires_contract="D1")],
+                              [d1_s1, d1_dense, hub_d0], token_budget=10_000).assignments[0]
+    assert "hub.decide" in loose.ladder
+    assert strict.ladder == ("s1.head", "dense.student")
+    with pytest.raises(CompileError, match="contract D1"):
+        compile_schedule([Node("a", "analyze.reason", requires_contract="D1")], [hub_d0, THINK], token_budget=10**6)
