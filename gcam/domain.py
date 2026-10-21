@@ -136,7 +136,7 @@ def build_world(seed: int = 7) -> World:
             if age > ship_days + 1:
                 status = "delivered" if rng.random() > 0.015 else "lost_in_transit"
             else:
-                status = "shipped" if age >= 1 else "processing"
+                status = "shipped" if age >= 2 else "processing"
             delivered = (d + timedelta(days=ship_days)).isoformat() if status == "delivered" else None
             refunded = bool(status == "delivered" and rng.random() < REFUND_RATE[cat])
             rows.append({
@@ -410,3 +410,39 @@ def estimates(n: int, *, split: str, seed: int) -> list[Estimate]:
         p, n_, a = rng.choice((5, 8, 10, 12, 15, 20)), rng.choice((120, 250, 340, 500, 800)), rng.choice((12, 25, 45, 60, 80))
         out.append(Estimate(text=tmpl.format(p=p, n=n_, a=a), answer=round(fn(p, n_, a), 2), split=split))
     return out
+
+
+# --------------------------------------------------------------------------- policy questions
+
+POLICY_QUERIES = {
+    "P1": {"train": ("changing my mind about a purchase", "the return window", "returning an item I no longer want"),
+           "test": ("how long I have to send back a sweater I just do not like", "regret purchases")},
+    "P2": {"train": ("damaged items", "broken or defective products", "items that arrive broken"),
+           "test": ("a lamp that showed up cracked", "goods that do not work out of the box")},
+    "P3": {"train": ("orders that never arrived", "items not received", "missing deliveries"),
+           "test": ("a parcel that is two weeks late", "packages lost by the courier")},
+    "P4": {"train": ("receiving the wrong item", "wrong size or colour", "getting someone else's product"),
+           "test": ("a jacket in the wrong size", "an order mixed up with another one")},
+    "P5": {"train": ("expense approval", "expense reports without a receipt", "expenses over 500 dollars"),
+           "test": ("claiming a client dinner", "reimbursement for a taxi ride")},
+    "P6": {"train": ("phone callbacks", "scheduling a call", "callback hours"),
+           "test": ("talking to an agent on the phone", "when someone can ring me")},
+    "P7": {"train": ("changing my shipping address", "address changes", "updating the delivery address"),
+           "test": ("moving house before my order arrives", "sending a parcel to my office instead")},
+    "P8": {"train": ("cancelling an order", "order cancellations", "stopping an order before it ships"),
+           "test": ("calling off a purchase I made by accident", "undoing an order")},
+}
+
+
+@dataclass(frozen=True)
+class PolicyQuery:
+    text: str
+    section: str
+    split: str
+
+
+def policy_queries(n: int, *, split: str, seed: int) -> list[PolicyQuery]:
+    rng = random.Random(f"pq:{split}:{seed}")
+    ids = sorted(POLICY_QUERIES)
+    return [PolicyQuery(text=rng.choice(POLICY_QUERIES[s][split]), section=s, split=split)
+            for s in (ids[i % len(ids)] for i in range(n))]

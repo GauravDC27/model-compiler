@@ -70,8 +70,82 @@ def tool_user(payload: dict, order: tuple[str, ...]) -> str:
     return f"Request: {payload['text']}\n\nWhich tool handles this request?\n{_options_text(order, TOOL_OPTIONS)}"
 
 
-def _seed(payload: dict, i: int) -> int:
-    return int(content_hash(payload)[7:15], 16) + i
+def expense_user(payload: dict, order: tuple[str, ...]) -> str:
+    r = payload["row"]
+    return (f"Policy: {POLICY[4].text}\n\nExpense report {r['expense_id']}: ${r['amount']:.2f} for "
+            f"{r['category']} at {r['vendor']}; receipt {'attached' if r['has_receipt'] else 'missing'}; "
+            f"submitted on a {'weekend' if r['weekend'] else 'weekday'}; submitter tenure {r['tenure_months']} "
+            f"months; {'possible duplicate within 7 days' if r['duplicate_7d'] else 'no duplicate'}.\n"
+            f"Memo: {r['memo']}\n\nDecision?\n{_options_text(order, REVIEW_OPTIONS)}")
+
+
+POLICY_DESC = {s.id: f"{s.title}: {s.text}" for s in POLICY}
+
+
+def policy_user(payload: dict, order: tuple[str, ...]) -> str:
+    return f"Question: {payload['query']}\n\nWhich section answers it?\n{_options_text(order, POLICY_DESC)}"
+
+
+def pair_user(p: dict, first: str, second: str) -> str:
+    return (f"Customer: {p['customer_name']}, order {p['order_id']}.\n\nReply 1:\n{p[first.lower()]}\n\n"
+            f"Reply 2:\n{p[second.lower()]}\n\nWhich reply is better? Answer 1 or 2.")
+
+
+def reply_user(p: dict) -> str:
+    first = p["customer_name"].split()[0]
+    issue = {"damaged": "the item arrived damaged", "not_received": "the order has not arrived",
+             "wrong_item": "the wrong item was delivered", "changed_mind": "the customer changed their mind"}[p["reason"]]
+    decision = (f"refund approved under policy {p['rule']}" if p["decision"] == "approve"
+                else f"no refund under policy {p['rule']}; explain kindly and offer the next step")
+    return (f"Customer first name: {first}\nOrder: {p['order_id']} ({p['product']})\nIssue: {issue}\n"
+            f"Decision: {decision}\nWrite the reply in 2 to 4 sentences.")
+
+
+def summary_user(p: dict) -> str:
+    f = p["facts"]
+    return (f"Window: last {f['days']} days. Category with the highest refund rate: {f['top_category']}, "
+            f"{100 * f['top_rate']:.1f}%. All other categories together: {100 * f['rest_rate']:.1f}%. "
+            f"Two-proportion z-test: z = {f['z']}, p = {f['p_value']}, "
+            f"{'statistically significant' if f['significant'] else 'not statistically significant'} at the 5% level.\n"
+            "Write the two-sentence summary.")
+
+
+CHOICE = {
+    "decide.claim_reason": (CLAIM_OPTIONS, claim_user),
+    "tool.select": (TOOL_OPTIONS, tool_user),
+    "decide.expense_review": (REVIEW_OPTIONS, expense_user),
+    "retrieve.policy": (POLICY_DESC, policy_user),
+}
+# Payload fields that carry the node's capped input (truncated by the runtime to the node's cap).
+INPUT_FIELDS = {"decide.claim_reason": ("text",), "tool.select": ("text",), "decide.expense_review": ("row.memo",),
+                "retrieve.policy": ("query",), "evaluate.pairwise": ("a", "b"), "analyze.estimate": ("text",)}
+
+
+def prompts(op: str, payload: dict, k: int = 3) -> list[tuple[str, str]]:
+    """The (system, user) prompts an executor processes for one call, in order."""
+    if op in CHOICE:
+        canon = tuple(sorted(CHOICE[op][0]))
+        return [(SYSTEMS[op], CHOICE[op][1](payload, o)) for o in (canon, tuple(reversed(canon)))]
+    if op == "evaluate.pairwise":
+        return [(SYSTEMS[op], pair_user(payload, a, b)) for a, b in (("A", "B"), ("B", "A"))]
+    if op in ("create.reply", "create.reply_fallback"):
+        return [(SYSTEMS["create.reply"], reply_user(payload))] * (k if op == "create.reply" else 1)
+    if op == "create.summary":
+        return [(SYSTEMS[op], summary_user(payload))]
+    if op == "analyze.estimate":
+        return [(SYSTEMS[op], payload["text"])]
+    raise NotSupported(op)
+
+
+def blank_inputs(op: str, payload: dict) -> dict:
+    out = {k: (dict(v) if isinstance(v, dict) else v) for k, v in payload.items()}
+    for field in INPUT_FIELDS.get(op, ()):
+        if "." in field:
+            a, b = field.split(".")
+            out[a][b] = ""
+        else:
+            out[field] = ""
+    return out
 
 
 class LLMExecutor:
@@ -108,33 +182,22 @@ class LLMExecutor:
     def _decided(self, op: str, conf: float, forced: bool) -> bool:
         return forced or conf >= self.tau.get(op, 0.0)
 
+    def template_tokens(self, op: str, sample: dict) -> int:
+        """Prompt tokens per call with the capped input fields blanked: the fixed part of the bound."""
+        return sum(self.lm.n_tokens(self.lm.render(sys_, user)) for sys_, user in prompts(op, blank_inputs(op, sample), self.k))
+
     def run(self, op: str, payload: dict, *, forced: bool) -> ExecResult:
         role = self.lm.role
-        if op == "decide.claim_reason":
-            lab, conf, margin, n, sc = self._choice(op, tuple(CLAIM_OPTIONS), lambda order: claim_user(payload, order))
-            return ExecResult(self._decided(op, conf, forced), lab, conf, {role: n}, {"margin": margin, "scores": sc})
-        if op == "tool.select":
-            lab, conf, margin, n, sc = self._choice(op, tuple(TOOL_OPTIONS), lambda order: tool_user(payload, order))
-            return ExecResult(self._decided(op, conf, forced), lab, conf, {role: n}, {"margin": margin, "scores": sc})
-        if op == "decide.expense_review":
-            r = payload["row"]
-            def user(order):
-                return (f"Policy: {POLICY[4].text}\n\nExpense report {r['expense_id']}: ${r['amount']:.2f} for "
-                        f"{r['category']} at {r['vendor']}; receipt {'attached' if r['has_receipt'] else 'missing'}; "
-                        f"submitted on a {'weekend' if r['weekend'] else 'weekday'}; submitter tenure {r['tenure_months']} "
-                        f"months; {'possible duplicate within 7 days' if r['duplicate_7d'] else 'no duplicate'}.\n"
-                        f"Memo: {r['memo']}\n\nDecision?\n{_options_text(order, REVIEW_OPTIONS)}")
-            lab, conf, margin, n, sc = self._choice(op, tuple(REVIEW_OPTIONS), user)
-            value = {"expense_id": r["expense_id"], "needs_review": lab == "review"}
+        if op in CHOICE:
+            options, user_fn = CHOICE[op]
+            lab, conf, margin, n, sc = self._choice(op, tuple(options), lambda order: user_fn(payload, order))
+            value = lab
+            if op == "decide.expense_review":
+                value = {"expense_id": payload["row"]["expense_id"], "needs_review": lab == "review"}
+            elif op == "retrieve.policy":
+                sec = next(s for s in POLICY if s.id == lab)
+                value = {"id": sec.id, "title": sec.title, "score": round(conf, 4)}
             return ExecResult(self._decided(op, conf, forced), value, conf, {role: n}, {"margin": margin, "scores": sc})
-        if op == "retrieve.policy":
-            desc = {s.id: f"{s.title}: {s.text}" for s in POLICY}
-            def user(order):
-                return f"Question: {payload['query']}\n\nWhich section answers it?\n{_options_text(order, desc)}"
-            lab, conf, margin, n, sc = self._choice(op, tuple(desc), user)
-            sec = next(s for s in POLICY if s.id == lab)
-            return ExecResult(self._decided(op, conf, forced), {"id": sec.id, "title": sec.title, "score": conf}, conf,
-                              {role: n}, {"margin": margin})
         if op == "evaluate.pairwise":
             return self._pairwise(payload, forced)
         if op in ("create.reply", "create.reply_fallback"):
@@ -147,13 +210,10 @@ class LLMExecutor:
 
     def _pairwise(self, p: dict, forced: bool) -> ExecResult:
         op = "evaluate.pairwise"
-        head = f"Customer: {p['customer_name']}, order {p['order_id']}."
         scores = {"A": 0.0, "B": 0.0}
         tokens = 0
         for first, second in (("A", "B"), ("B", "A")):  # both orders: position bias cancels (Judge MUST)
-            user = (f"{head}\n\nReply 1:\n{p[first.lower()]}\n\nReply 2:\n{p[second.lower()]}\n\n"
-                    "Which reply is better? Answer 1 or 2.")
-            lp, n = self.lm.choice_logprobs(self.lm.render(SYSTEMS[op], user), "12")
+            lp, n = self.lm.choice_logprobs(self.lm.render(SYSTEMS[op], pair_user(p, first, second)), "12")
             tokens += n
             scores[first] += float(lp[0]) / 2
             scores[second] += float(lp[1]) / 2
@@ -164,13 +224,7 @@ class LLMExecutor:
                           {"margin": margin, "scores": scores})
 
     def _reply(self, p: dict, forced: bool, k: int) -> ExecResult:
-        first = p["customer_name"].split()[0]
-        issue = {"damaged": "the item arrived damaged", "not_received": "the order has not arrived",
-                 "wrong_item": "the wrong item was delivered"}[p["reason"]]
-        decision = (f"refund approved under policy {p['rule']}" if p["decision"] == "approve"
-                    else f"no refund under policy {p['rule']}; explain kindly and offer the next step")
-        user = (f"Customer first name: {first}\nOrder: {p['order_id']} ({p['product']})\nIssue: {issue}\n"
-                f"Decision: {decision}\nWrite the reply in 2 to 4 sentences.")
+        user = reply_user(p)
         prompt = self.lm.render(SYSTEMS["create.reply"], user)
         n_prompt = self.lm.n_tokens(prompt)
         cands, used = [], {self.lm.role: 0}
@@ -188,11 +242,7 @@ class LLMExecutor:
 
     def _summary(self, p: dict, forced: bool) -> ExecResult:
         f = p["facts"]
-        user = (f"Window: last {f['days']} days. Category with the highest refund rate: {f['top_category']}, "
-                f"{100 * f['top_rate']:.1f}%. All other categories together: {100 * f['rest_rate']:.1f}%. "
-                f"Two-proportion z-test: z = {f['z']}, p = {f['p_value']}, "
-                f"{'statistically significant' if f['significant'] else 'not statistically significant'} at the 5% level.\n"
-                "Write the two-sentence summary.")
+        user = summary_user(p)
         prompt = self.lm.render(SYSTEMS["create.summary"], user)
         text, ids, _ = self.lm.generate(prompt, 90)
         checks = summary_checks(text, f)
