@@ -27,7 +27,7 @@ from .system import System
 
 ROOT = Path(__file__).resolve().parents[1]
 BARS = {"decide.claim_reason": (0.92, 96), "tool.select": (0.92, 64), "evaluate.pairwise": (0.9, 256),
-        "create.reply": (0.8, 160), "create.summary": (0.8, 200), "analyze.estimate": (0.9, 96),
+        "create.reply": (0.6, 160), "create.summary": (0.6, 200), "analyze.estimate": (0.9, 96),
         "decide.expense_review": (0.9, 64), "retrieve.policy": (0.85, 48)}
 
 

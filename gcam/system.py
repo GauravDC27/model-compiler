@@ -53,7 +53,7 @@ EXACT = {
     "create.policy_answer": "code.analytics", "forecast.orders": "ml.forecast",
 }
 LATENCY = {"code": 0, "ml": 1, "s1": 1, "hub": 4, "spoke": 12}
-GENERATIVE = {"create.reply": 3 * 110, "create.reply_fallback": 110, "create.summary": 90, "analyze.estimate": 48}
+GENERATIVE = {"create.reply": 3 * 110, "create.reply_fallback": 3 * 110, "create.summary": 90, "analyze.estimate": 48}
 
 
 @dataclass

@@ -139,7 +139,7 @@ def prompts(op: str, payload: dict, k: int = 3) -> list[tuple[str, str]]:
     if op == "evaluate.pairwise":
         return [(SYSTEMS[op], pair_user(payload, a, b)) for a, b in (("A", "B"), ("B", "A"))]
     if op in ("create.reply", "create.reply_fallback"):
-        return [(SYSTEMS["create.reply"], reply_user(payload))] * (k if op == "create.reply" else 1)
+        return [(SYSTEMS["create.reply"], reply_user(payload))] * k
     if op == "create.summary":
         return [(SYSTEMS[op], summary_user(payload))]
     if op == "analyze.estimate":
@@ -211,7 +211,7 @@ class LLMExecutor:
         if op == "evaluate.pairwise":
             return self._pairwise(payload, forced)
         if op in ("create.reply", "create.reply_fallback"):
-            return self._reply(payload, forced, k=1 if op == "create.reply_fallback" else self.k)
+            return self._reply(payload, forced, k=self.k)
         if op == "create.summary":
             return self._summary(payload, forced)
         if op == "analyze.estimate":

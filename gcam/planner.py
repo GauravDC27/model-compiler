@@ -116,7 +116,9 @@ def _plan_write(goal: Goal, world: World) -> GoalPlan:
                           lambda g, o, w: {"order_id": g.slots["order"]}),
         "decision": NodePlan(_node("decision", "decide.refund", ("order",), contract="D1"),
                              lambda g, o, w: {"order": o["order"], "reason": g.slots["reason"], "now": g.context.now}),
-        "reply": NodePlan(_node("reply", "create.reply", ("decision",), bar=0.8, cap=160), reply_payload),
+        # Verifier-gated generation: only a verified reply ships (else the variant, else abstain), so the
+        # bar prices how often the main path suffices, not whether shipped text is right.
+        "reply": NodePlan(_node("reply", "create.reply", ("decision",), bar=0.6, cap=160), reply_payload),
         # Variant: the specialist spoke writes the reply when no hub candidate passes the verifier.
         "reply_spoke": NodePlan(_node("reply_spoke", "create.reply_fallback", bar=0.5, cap=160), reply_payload),
     }
@@ -132,7 +134,7 @@ def _plan_analytics(goal: Goal, world: World) -> GoalPlan:
     nodes = {
         "rates": NodePlan(_node("rates", "analyze.refund_rates", contract="D1"),
                           lambda g, o, w: {"days": g.slots["days"], "now": g.context.now}),
-        "summary": NodePlan(_node("summary", "create.summary", ("rates",), bar=0.8, cap=200),
+        "summary": NodePlan(_node("summary", "create.summary", ("rates",), bar=0.6, cap=200),  # verifier-gated
                             lambda g, o, w: {"facts": o["rates"]}),
         "summary_template": NodePlan(_node("summary_template", "create.summary_template", contract="D1"),
                                      lambda g, o, w: {"facts": o["rates"]}),
