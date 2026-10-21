@@ -158,7 +158,7 @@ def decision_ops():
     """Decide-profile IR ops for every decide and judge prompt (30 decisions)."""
     from dmc.ir import Context, DecideClassify
 
-    ctx = Context(now="2026-10-21T00:00:00Z", locale="en-US", timezone="UTC")
+    ctx = Context(now=None, locale="en-US", timezone=None, session_state_hash=None)
     return [
         DecideClassify(context=ctx, ambiguities=(), question=text, labels=labels_for(text),
                        policy=None, evidence=())

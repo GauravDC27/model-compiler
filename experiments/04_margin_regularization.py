@@ -1,8 +1,11 @@
-"""Router margin-regularization pilot. Pre-registration: 04_margin_regularization_prereg.md."""
+"""Router margin-regularization pilot. Pre-registration: 04_margin_regularization_prereg.md
+(amendment 1)."""
 
 from __future__ import annotations
 
 import json
+import math
+import os
 import random
 import sys
 import time
@@ -11,21 +14,23 @@ from pathlib import Path
 import pandas as pd
 import torch
 from huggingface_hub import hf_hub_download
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "experiments"))
 
 from dmc import moe_probe as mp  # noqa: E402
+from dmc.oracle import generate  # noqa: E402
 from dmc.profiles.decide import DecideProfile  # noqa: E402
-from dmc.routing import find_routers  # noqa: E402
+from dmc.routing import TOKENS, RouteTracer, find_routers, harden_routers  # noqa: E402
 from dmc.runtime import HFBackend  # noqa: E402
 from prompts_v0 import FAMILIES, decision_ops  # noqa: E402
 
 MODEL = "ibm-granite/granite-3.1-1b-a400m-instruct"
-LAMBDA, GAMMA, LR, STEPS, BATCH, SEQ = 5.0, 0.1, 2e-4, 120, 4, 128
 SYSTEM = "You are a helpful assistant."
+SMOKE = bool(os.environ.get("DMC_SMOKE"))  # tiny end-to-end run to catch crashes
+LR, STEPS, BATCH, SEQ = 2e-4, (2 if SMOKE else 80), 4, 128
+GRID = [(g, lam) for g in (0.05, 0.1, 0.2) for lam in (1.0, 5.0)][: 1 if SMOKE else None]
 
 
 def chunks(tok, split: str, n: int, seed: int) -> list[torch.Tensor]:
@@ -34,7 +39,7 @@ def chunks(tok, split: str, n: int, seed: int) -> list[torch.Tensor]:
     text = "\n".join(t for t in pd.read_parquet(path)["text"] if t.strip())
     ids = tok(text, add_special_tokens=False).input_ids
     rng = random.Random(seed)
-    starts = sorted(rng.sample(range(0, len(ids) - SEQ - 1), n))
+    starts = rng.sample(range(0, len(ids) - SEQ - 1), n)
     return [torch.tensor(ids[s:s + SEQ]) for s in starts]
 
 
@@ -42,128 +47,179 @@ def routers(model):
     return [mod for _, mod, _ in find_routers(model)]
 
 
-def eval_routing(m32, m16, tok, held: list[torch.Tensor]) -> dict:
-    k = m32.config.num_experts_per_tok
-    flips, margins, ce = [], [], []
+def eval_inputs(b16, held):
     inputs = [x[None] for x in held]
     for fam in FAMILIES.values():
         for paras in fam:
             for text in paras:
-                msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": text}]
-                r = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
-                inputs.append(torch.tensor([tok(r, add_special_tokens=False).input_ids]))
-    for i, ids in enumerate(inputs):
-        mask = torch.ones_like(ids)
-        a = mp.router_logits(m32, ids, mask)[:, 0]
-        b = mp.router_logits(m16, ids, mask)[:, 0]
-        flips.append(mp.flips(a, b, k).flatten())
-        margins.append(mp.margins(a, k).flatten())
-        if i < len(held):
-            with torch.no_grad():
-                out = m32(input_ids=ids, labels=ids)
-            ce.append(float(out.loss))
-    f = torch.cat(flips).double()
-    m = torch.cat(margins).double()
-    return {
-        "bf16_flip_rate": float(f.mean()),
-        "margin_below_0.01": float((m < 0.01).double().mean()),
-        "margin_median": float(m.median()),
-        "heldout_ce": sum(ce) / len(ce),
-    }
+                inputs.append(torch.tensor([b16._ids(b16.render_chat(SYSTEM, text))]))
+    return inputs
 
 
-def sync_bf16(m32, m16) -> None:
+def routes(model, ids, threads):
+    torch.set_num_threads(threads)
+    with torch.no_grad(), harden_routers(model), RouteTracer(model, record_margins=True) as tr:
+        model(input_ids=ids)
+    return tr.trace(), torch.cat(tr.margins)
+
+
+def evaluate(b32, b16, held, inputs, ops, oracle_answers) -> dict:
+    m32, m16 = b32.model, b16.model
     with torch.no_grad():
         for r32, r16 in zip(routers(m32), routers(m16)):
             r16.weight.copy_(r32.weight.to(torch.bfloat16))
-
-
-def decisions(backend_32, backend_16) -> dict[str, list]:
-    p32 = DecideProfile(backend_32, abstain_margin=0.0)
-    p16 = DecideProfile(backend_16, abstain_margin=0.0)
-    ops = decision_ops()
-    return {"fp32": [p32.run(op).label for op in ops], "bf16": [p16.run(op).label for op in ops]}
-
-
-def main() -> None:
-    t0 = time.time()
-    torch.manual_seed(0)
-    random.seed(0)
+    k = m32.config.num_experts_per_tok
+    flips, margins, stress = [], [], []
+    for ids in inputs:
+        a, ma = routes(m16, ids, 4)
+        c, _ = routes(m16, ids, 3)
+        s, _ = routes(m32, ids, 4)
+        margins.append(ma)
+        for key in a:
+            if key == TOKENS:
+                continue
+            x = a[key].sort(-1).values
+            flips.append((x != c[key].sort(-1).values).any(-1))
+            stress.append((x != s[key].sort(-1).values).any(-1))
     torch.set_num_threads(4)
-    tok = AutoTokenizer.from_pretrained(MODEL)
-    b32 = HFBackend(MODEL, dtype="float32")
-    b16 = HFBackend(MODEL, dtype="bfloat16")
-    m32, m16 = b32.model, b16.model
-    train = chunks(tok, "train", STEPS * BATCH, seed=0)
-    held = chunks(tok, "validation", 16, seed=1)
+    ce = []
+    usage = None
+    for x in held:
+        with torch.no_grad(), harden_routers(m32):
+            out = m32(input_ids=x[None], labels=x[None], output_router_logits=True)
+        ce.append(float(out.loss))
+        rl = torch.stack([r.float() for r in out.router_logits])[:, None]  # L,1,T,E
+        u = mp.expert_usage(rl, k)
+        usage = u if usage is None else usage + u
+    p = usage / usage.sum(dim=1, keepdim=True)
+    ent = -(p * p.clamp_min(1e-30).log()).sum(dim=1) / math.log(usage.shape[1])
+    with harden_routers(m32):
+        labels = [DecideProfile(b32, abstain_margin=0.0).run(op).label for op in ops]
+    parity_ops = ops[30:90]  # first 60 oracle decisions (secondary metric; bounded for CPU time)
+    torch.set_num_threads(4)
+    with harden_routers(m16):
+        labels16_4 = [DecideProfile(b16, abstain_margin=0.0).run(op).label for op in parity_ops]
+    torch.set_num_threads(3)
+    with harden_routers(m16):
+        labels16_3 = [DecideProfile(b16, abstain_margin=0.0).run(op).label for op in parity_ops]
+    torch.set_num_threads(4)
+    m = torch.cat(margins).double()
+    return {
+        "primary_flip_rate_bf16_4v3": float(torch.cat(flips).double().mean()),
+        "stress_flip_rate_fp32_vs_bf16": float(torch.cat(stress).double().mean()),
+        "margin_below_0.01": float((m < 0.01).double().mean()),
+        "heldout_ce": sum(ce) / len(ce),
+        "load_entropy_mean": float(ent.mean()),
+        "labels": labels,
+        "oracle_accuracy": sum(l == a for l, a in zip(labels[30:], oracle_answers)) / len(oracle_answers),
+        "oracle_parity_bf16_4v3": sum(x == y for x, y in zip(labels16_4, labels16_3)) / len(labels16_4),
+    }
 
-    before = eval_routing(m32, m16, tok, held)
-    dec_before = decisions(b32, b16)
-    print("before", before, f"{time.time() - t0:.0f}s", flush=True)
 
+def train(b32, train_chunks, gamma, lam, seed, orig_weights) -> list[dict]:
+    m32 = b32.model
+    rs = routers(m32)
+    with torch.no_grad():
+        for r, w in zip(rs, orig_weights):
+            r.weight.copy_(w)
     for p in m32.parameters():
         p.requires_grad_(False)
-    rs = routers(m32)
     for r in rs:
         r.weight.requires_grad_(True)
-    norms = [r.weight.detach().norm(dim=1, keepdim=True).clone() for r in rs]
+    norms = [w.norm(dim=1, keepdim=True) for w in orig_weights]
     opt = torch.optim.Adam([r.weight for r in rs], lr=LR)
     k = m32.config.num_experts_per_tok
-    torch.use_deterministic_algorithms(False)  # training only; evaluation runs deterministic
+    order = list(range(len(train_chunks)))
+    random.Random(seed).shuffle(order)
+    torch.manual_seed(seed)
+    torch.use_deterministic_algorithms(False)  # training only (pre-registered)
+    torch.set_num_threads(4)
     m32.train()
     log = []
     for step in range(STEPS):
-        batch = torch.stack(train[step * BATCH:(step + 1) * BATCH])
+        batch = torch.stack([train_chunks[i] for i in order[step * BATCH:(step + 1) * BATCH]])
         out = m32(input_ids=batch, labels=batch, output_router_logits=True)
-        rl = torch.stack([x.float() for x in out.router_logits])  # L, tokens, E
+        rl = torch.stack([x.float() for x in out.router_logits])
         s = rl.topk(k + 1, dim=-1).values
-        hinge = torch.relu(GAMMA - (s[..., k - 1] - s[..., k])).mean()
-        loss = out.loss + LAMBDA * hinge
+        hinge = torch.relu(gamma - (s[..., k - 1] - s[..., k])).mean()
+        loss = out.loss + lam * hinge
         opt.zero_grad()
         loss.backward()
         opt.step()
         with torch.no_grad():
             for r, n0 in zip(rs, norms):
                 r.weight.mul_(n0 / r.weight.norm(dim=1, keepdim=True))
-        if step % 10 == 0 or step == STEPS - 1:
-            log.append({"step": step, "ce": float(out.loss), "hinge": float(hinge)})
-            print(log[-1], f"{time.time() - t0:.0f}s", flush=True)
+        if step % 20 == 0 or step == STEPS - 1:
+            log.append({"step": step, "ce": round(float(out.loss), 4), "hinge": round(float(hinge), 5)})
     m32.eval()
+    for r in rs:
+        r.weight.requires_grad_(False)
     torch.use_deterministic_algorithms(True)
-    sync_bf16(m32, m16)
-    after = eval_routing(m32, m16, tok, held)
-    dec_after = decisions(b32, b16)
+    return log
 
-    def parity(d):
-        return sum(a == b for a, b in zip(d["fp32"], d["bf16"])) / len(d["fp32"])
 
-    flip_ratio = before["bf16_flip_rate"] / max(after["bf16_flip_rate"], 1e-12)
-    mass_ratio = before["margin_below_0.01"] / max(after["margin_below_0.01"], 1e-12)
-    ce_rise = after["heldout_ce"] / before["heldout_ce"] - 1
-    passed = (
-        (flip_ratio >= 2 or (mass_ratio >= 2 and after["bf16_flip_rate"] <= before["bf16_flip_rate"]))
-        and ce_rise <= 0.01
-    )
-    result = {
-        "model": MODEL,
-        "hyper": {"lambda": LAMBDA, "gamma": GAMMA, "lr": LR, "steps": STEPS, "batch": BATCH, "seq": SEQ},
-        "before": before,
-        "after": after,
-        "flip_rate_reduction_x": flip_ratio,
-        "margin_mass_reduction_x": mass_ratio,
-        "heldout_ce_relative_rise": ce_rise,
-        "decision_agreement_with_original_fp32": sum(
-            a == b for a, b in zip(dec_before["fp32"], dec_after["fp32"])) / len(dec_before["fp32"]),
-        "decision_parity_fp32_vs_bf16_before": parity(dec_before),
-        "decision_parity_fp32_vs_bf16_after": parity(dec_after),
-        "train_log": log,
-        "PASS": passed,
-        "elapsed_s": round(time.time() - t0, 1),
+def passes(arm: dict, control: dict, base: dict) -> dict:
+    checks = {
+        "flip_halved_vs_control": arm["primary_flip_rate_bf16_4v3"] <= 0.5 * control["primary_flip_rate_bf16_4v3"],
+        "ce_within_1pct": arm["heldout_ce"] <= 1.01 * base["heldout_ce"],
+        "load_entropy_within_5pct": arm["load_entropy_mean"] >= 0.95 * base["load_entropy_mean"],
+        "probe_agreement_ge_90": sum(a == b for a, b in zip(arm["labels"][:30], base["labels"][:30])) / 30 >= 0.90,
+        "oracle_agreement_ge_95": sum(a == b for a, b in zip(arm["labels"][30:], base["labels"][30:]))
+        / len(base["labels"][30:]) >= 0.95,
+        "oracle_accuracy_within_2pts": arm["oracle_accuracy"] >= base["oracle_accuracy"] - 0.02,
     }
-    out = ROOT / "experiments/results/04_margin_regularization.json"
+    checks["PASS"] = all(checks.values())
+    return checks
+
+
+def main() -> None:
+    t0 = time.time()
+    b32 = HFBackend(MODEL, dtype="float32")
+    b16 = HFBackend(MODEL, dtype="bfloat16")
+    tok = b32.tok
+    train_chunks = chunks(tok, "train", STEPS * BATCH, seed=0)
+    held = chunks(tok, "validation", 2 if SMOKE else 16, seed=1)
+    inputs = eval_inputs(b16, held)[: 4 if SMOKE else None]
+    oracle = generate(1 if SMOKE else 7, seed=5)
+    ops = decision_ops() + [o.op() for o in oracle]
+    answers = [o.answer for o in oracle]
+    orig = [r.weight.detach().clone() for r in routers(b32.model)]
+
+    def log(msg):
+        print(f"{msg}  {time.time() - t0:.0f}s", flush=True)
+
+    base = evaluate(b32, b16, held, inputs, ops, answers)
+    log(f"original {({k: v for k, v in base.items() if k != 'labels'})}")
+    results = {"original": base, "arms": {}}
+    for seed in (0, 1):
+        arms = [(0.0, 0.0)] + (GRID if seed == 0 else [
+            (g, lam) for g, lam in GRID if results["arms"].get(f"s0_g{g}_l{lam}", {}).get("checks", {}).get("PASS")
+        ])
+        for gamma, lam in arms:
+            name = f"s{seed}_g{gamma}_l{lam}"
+            tlog = train(b32, train_chunks, gamma, lam, seed, orig)
+            ev = evaluate(b32, b16, held, inputs, ops, answers)
+            results["arms"][name] = {"gamma": gamma, "lambda": lam, "seed": seed, "train_log": tlog, **ev}
+            log(f"{name} {({k: v for k, v in ev.items() if k != 'labels'})}")
+        control = results["arms"][f"s{seed}_g0.0_l0.0"]
+        for name, arm in results["arms"].items():
+            if arm["seed"] == seed and arm["lambda"] > 0:
+                arm["checks"] = passes(arm, control, base)
+    survivors = [
+        f"g{g}_l{lam}" for g, lam in GRID
+        if results["arms"].get(f"s0_g{g}_l{lam}", {}).get("checks", {}).get("PASS")
+        and results["arms"].get(f"s1_g{g}_l{lam}", {}).get("checks", {}).get("PASS")
+    ]
+    results["survivors"] = survivors
+    results["LEVER_SURVIVES"] = bool(survivors)
+    results["elapsed_s"] = round(time.time() - t0, 1)
+    for arm in results["arms"].values():
+        arm["labels"] = None
+    base["labels"] = None
+    out = ROOT / f"experiments/results/04_margin_regularization{'_smoke' if SMOKE else ''}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(result, indent=1))
-    print(json.dumps(result, indent=1))
+    out.write_text(json.dumps(results, indent=1))
+    print(json.dumps({k: v for k, v in results.items() if k != "arms"}, indent=1))
 
 
 if __name__ == "__main__":

@@ -62,11 +62,25 @@ class RuleParser:
         if not m:
             return Clarify(reason="request is outside the grammar of parser rule.p0")
         question = m.group("q").strip()
+        # Context minimization: a yes/no question does not depend on time or time zone.
+        ctx = Context(now=None, locale=context.locale, timezone=None,
+                      session_state_hash=context.session_state_hash)
         op = DecideClassify(
-            context=context, ambiguities=(), question=question, labels=("yes", "no"),
+            context=ctx, ambiguities=(), question=question, labels=("yes", "no"),
             policy=None, evidence=(),
         )
         return Program(ops=(op,))
+
+
+# Versioned static dispatch table (plan §3 step 5). Changing it is a lock change.
+DISPATCH_TABLE: dict[str, str] = {
+    "decide": "decide",
+    "tool": "call",
+    "evaluate": "judge",
+    "create": "create",
+    "analyze": "reason",
+    "research": "reason",
+}
 
 
 class Profile(Protocol):
@@ -100,11 +114,12 @@ class Compiler:
         self.verifiers = verifiers or {}
 
     def dispatch(self, op) -> Profile:
-        """Static dispatch on the IR op family (e.g. 'decide.classify' -> 'decide')."""
+        """Static dispatch: IR op family -> profile name (DISPATCH_TABLE) -> registered profile."""
         family = op.op.split(".", 1)[0]
-        if family not in self.profiles:
+        name = DISPATCH_TABLE.get(family)
+        if name is None or name not in self.profiles:
             raise KeyError(f"no profile registered for op family {family!r}")
-        return self.profiles[family]
+        return self.profiles[name]
 
     def compile(self, prompt: str, context: Context) -> Program | Clarify:
         return self.parser.parse(normalize(prompt), context)
@@ -129,8 +144,10 @@ class Compiler:
         verdict = self.verifiers.get(profile.name, lambda _op, _r: {})(op, result)
         margins = {"decision": result.margin} if hasattr(result, "margin") else {}
         receipt = Receipt(
-            key=key, lock_hash=self.lock_hash, ir_hash=program.hash, profile=profile.name,
-            profile_version=profile.version, seed=seed, margins=margins, verifier=verdict,
+            key=key, lock_hash=self.lock_hash, ir_hash=program.hash,
+            session_state_hash=op.context.session_state_hash, profile=profile.name,
+            profile_version=profile.version, seed=seed, margins=margins,
+            coverage_band=getattr(profile, "abstain_margin", None), verifier=verdict,
         )
         self.store.put(Record(receipt=receipt, output=canonical_json(result)))
         return Compiled(result, receipt, False)

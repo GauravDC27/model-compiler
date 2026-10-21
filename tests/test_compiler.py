@@ -4,7 +4,7 @@ from dmc.profiles.decide import SYSTEM, DecideProfile, label_orderings, render_u
 from dmc.runtime import TableBackend
 from dmc.store import ResultStore
 
-CTX = Context(now="2026-10-21T00:00:00Z", locale="en-US", timezone="UTC")
+CTX = Context(now="2026-10-21T00:00:00Z", locale="en-US", timezone="UTC", session_state_hash=None)
 
 
 def backend_for(question, yes, no):
@@ -66,3 +66,27 @@ def test_case_marginalization_reads_capitalized_preference(tmp_path):
     marg = DecideProfile(b, abstain_margin=0.0, marginalize_case=True).run(op)
     assert plain.label == "yes"  # misled by lowercase-only scoring
     assert marg.label == "no"
+
+
+def test_session_state_changes_the_cache_key(tmp_path):
+    c = make(tmp_path, backend_for("Is 91 prime?", yes=-3.0, no=-0.1))
+    a = c.run("Is 91 prime? Answer yes or no.", CTX)
+    other = Context(now=CTX.now, locale="en-US", timezone="UTC", session_state_hash="sha256:prior-turns")
+    b = c.run("Is 91 prime? Answer yes or no.", other)
+    assert a.receipt.key != b.receipt.key and not b.replayed
+    assert b.receipt.session_state_hash == "sha256:prior-turns"
+
+
+def test_time_independent_request_ignores_the_clock(tmp_path):
+    c = make(tmp_path, backend_for("Is 91 prime?", yes=-3.0, no=-0.1))
+    later = Context(now="2027-01-01T00:00:00Z", locale="en-US", timezone="Asia/Kolkata",
+                    session_state_hash=None)
+    a = c.run("Is 91 prime? Answer yes or no.", CTX)
+    b = c.run("Is 91 prime? Answer yes or no.", later)
+    assert b.replayed and a.receipt.key == b.receipt.key
+
+
+def test_dispatch_table_routes_research_to_reason():
+    from dmc.compiler import DISPATCH_TABLE
+
+    assert DISPATCH_TABLE["research"] == DISPATCH_TABLE["analyze"] == "reason"

@@ -24,13 +24,20 @@ class Receipt(BaseModel):
 
     key: str
     lock_hash: str
-    ir_hash: str
+    ir_hash: str  # covers the IR context, including session_state_hash
+    session_state_hash: str | None = None
+    rendered_prompt_hash: str | None = None  # bytes actually fed to the model
     profile: str
     profile_version: str
     seed: int | None
     margins: dict[str, float] = {}
+    coverage_band: float | None = None  # abstention threshold in force
     verifier: dict[str, str] = {}
     fragile_routing_share: float | None = None
+    routing_trace_ref: str | None = None  # content address of the routing trace (R27)
+    pinned: str | None = None  # "full" | "partial" | "none" for re-executions
+    sampling_mask: str | None = None  # summary of the truncation support used when sampling
+    normalization: str | None = None  # Judge style-normalization mode
 
 
 class Record(BaseModel):

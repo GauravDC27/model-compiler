@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from dmc.ir import Ambiguity, Context, DecideClassify, Program, op_json_schema, parse_op
 
-CTX = Context(now="2026-10-21T00:00:00Z", locale="en-US", timezone="UTC")
+CTX = Context(now="2026-10-21T00:00:00Z", locale="en-US", timezone="UTC", session_state_hash=None)
 
 
 def decide(**kw):
@@ -47,3 +47,13 @@ def test_discriminated_union_round_trip_and_schema():
 def test_extra_fields_forbidden():
     with pytest.raises(ValidationError):
         parse_op({**decide().model_dump(mode="json"), "temperature": 0.7})
+
+
+def test_all_twelve_ops_parse_and_clarify_blocks_execution():
+    from dmc.ir import MetaClarify
+
+    schema = op_json_schema()
+    ops = {m["properties"]["op"]["const"] for m in schema["$defs"].values() if "op" in m.get("properties", {})}
+    assert len(ops) == 12
+    clarify = MetaClarify(context=CTX, ambiguities=(), reason="which account?")
+    assert not Program(ops=(clarify,)).executable

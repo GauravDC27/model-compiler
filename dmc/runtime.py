@@ -84,7 +84,8 @@ class HFBackend:
             out.append(float(sum(logp[len(base) - 1 + i, t] for i, t in enumerate(target))))
         return out
 
-    def generate(self, prompt: str, max_new_tokens: int, seed: int | None = None) -> str:
+    def generate_ids(self, prompt: str, max_new_tokens: int, seed: int | None = None) -> list[int]:
+        """Generated token ids (EOS excluded); greedy when ``seed`` is None."""
         torch = self._torch
         ids = self._ids(prompt)
         start = len(ids)
@@ -107,7 +108,10 @@ class HFBackend:
                 break
             ids.append(nxt)
             inp = torch.tensor([[nxt]])
-        return self.tok.decode(ids[start:], skip_special_tokens=True)
+        return ids[start:]
+
+    def generate(self, prompt: str, max_new_tokens: int, seed: int | None = None) -> str:
+        return self.tok.decode(self.generate_ids(prompt, max_new_tokens, seed), skip_special_tokens=True)
 
     def lock_fields(self) -> dict[str, object]:
         import transformers
