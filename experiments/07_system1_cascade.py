@@ -9,6 +9,7 @@ import os
 import re
 import sys
 import time
+from dataclasses import replace
 from pathlib import Path
 
 import torch
@@ -20,11 +21,16 @@ from dmc.oracle import generate  # noqa: E402
 from dmc.profiles.decide import SYSTEM as DECIDE_SYSTEM  # noqa: E402
 from dmc.profiles.decide import DecideProfile, label_orderings, render_user  # noqa: E402
 from dmc.runtime import HFBackend  # noqa: E402
-from dmc.scheduler import CompileError, Executor, Node, compile_schedule  # noqa: E402
+from dmc.scheduler import CompileError, Executor, Node, Outcome, compile_schedule  # noqa: E402
 
 MODEL = "ibm-granite/granite-3.1-1b-a400m-instruct"
 OP = "decide.classify"
 LAYERS = (6, 12, 18, 23)
+# Amendment 1: compiled input cap (tokens) on the question every executor reads. Questions are
+# truncated to it before any executor runs, which makes the worst-case bound hold by construction.
+Q_CAP = 128
+# Tokenizer boundary slack per label ordering when bounding the Decide template's fixed size.
+TEMPLATE_SLACK = 4
 SMOKE = bool(os.environ.get("DMC_SMOKE"))
 OUT = ROOT / f"experiments/results/07_system1_cascade{'_smoke' if SMOKE else ''}.json"
 
@@ -90,9 +96,22 @@ def wilson(p: float, n: int) -> tuple[float, float]:
 def main() -> None:
     t0 = time.time()
     b = HFBackend(MODEL, dtype="float32")
-    train = generate(2 if SMOKE else 60, seed=100)
-    calib = generate(2 if SMOKE else 10, seed=7)
-    test = generate(1 if SMOKE else 20, seed=0)
+    cap_hits = 0
+
+    def capped(items):
+        nonlocal cap_hits
+        out = []
+        for it in items:
+            ids = b._ids(it.question)
+            if len(ids) > Q_CAP:
+                cap_hits += 1
+                it = replace(it, question=b.tok.decode(ids[:Q_CAP]))
+            out.append(it)
+        return out
+
+    train = capped(generate(2 if SMOKE else 60, seed=100))
+    calib = capped(generate(2 if SMOKE else 10, seed=7))
+    test = capped(generate(1 if SMOKE else 20, seed=0))
 
     def feats(items):
         fs, ns = zip(*(features(b, it.question) for it in items))
@@ -139,15 +158,34 @@ def main() -> None:
 
     s2_ca = [prof.run(it.op()).label == it.answer for it in calib]
     s2_acc_all = sum(s2_ca) / len(s2_ca)
-    s2_tok = sum(s2_tokens(it) for it in calib) / len(calib)
+    s2_tok_ca = [s2_tokens(it) for it in calib]
+    s2_tok = sum(s2_tok_ca) / len(calib)
     s1_tok = sum(nca) / len(nca)
+    # Amendment 1 (M6): per-item outcomes of every executor on the calibration split, so the
+    # scheduler prices a ladder on the items that actually reach each rung (joint estimate).
+    joint_items = []
+    for i, it in enumerate(calib):
+        s1_right = (p_ca[i] > 0.5) == yca[i]
+        joint_items.append({
+            "code.canonical": Outcome(code_ca[i] is not None, code_ca[i] == it.answer,
+                                      code_ca[i] == it.answer, 0),
+            "s1.probe": Outcome(conf[i] >= tau, s1_right, s1_right, nca[i]),
+            "s2.decide": Outcome(True, s2_ca[i], s2_ca[i], s2_tok_ca[i]),
+        })
+    # Compiled sizes (amendment 1): the Decide prompt is a fixed template read once per label
+    # ordering around the capped question; the probe reads only the question; code reads none.
+    n_orders = len(label_orderings(calib[0].op().labels))
+    s2_fixed = max(t - n_orders * q for t, q in zip(s2_tok_ca, nca)) + n_orders * TEMPLATE_SLACK
     executors = [
-        Executor("code.canonical", "tool", frozenset({OP}), 0, 0, 1, {OP: code_acc}, coverage=code_cov),
-        Executor("s1.probe", "system1", frozenset({OP}), round(s1_tok), 0, 2, {OP: s1_acc},
+        Executor("code.canonical", "tool", frozenset({OP}), 0, 0, 1, {OP: code_acc}, coverage=code_cov,
+                 input_reads=0),
+        Executor("s1.probe", "system1", frozenset({OP}), 0, 0, 2, {OP: s1_acc},
                  coverage=s1_cov, accuracy_all={OP: s1_acc_all}),
-        Executor("s2.decide", "system2", frozenset({OP}), round(s2_tok), 0, 10, {OP: s2_acc_all}),
+        Executor("s2.decide", "system2", frozenset({OP}), s2_fixed, 0, 10, {OP: s2_acc_all},
+                 input_reads=n_orders),
     ]
-    result = {"model": MODEL, "probe_layer": layer, "tau": tau, "calibration": {
+    result = {"model": MODEL, "probe_layer": layer, "tau": tau, "input_cap": Q_CAP,
+              "cap_hits": cap_hits, "s2_fixed_tokens": s2_fixed, "calibration": {
         "code": {"coverage": code_cov, "accuracy": code_acc},
         "s1_probe": {"coverage": s1_cov, "accuracy_answered": s1_acc, "accuracy_all": s1_acc_all,
                      "mean_tokens": s1_tok},
@@ -159,12 +197,19 @@ def main() -> None:
     s2_te = [prof.run(it.op()).label for it in test]
     s2_te_tok = [s2_tokens(it) for it in test]
     out = {}
-    for req in (0.6, 0.7, 0.8):
+    for req in (0.6, 0.7, 0.8, 0.9):
+        nodes = [Node(f"q{i}", OP, required_accuracy=req, input_cap=Q_CAP) for i in range(len(test))]
         try:
-            sch = compile_schedule([Node(f"q{i}", OP, required_accuracy=req) for i in range(len(test))],
-                                   executors, token_budget=10**9)
+            ind = compile_schedule(nodes, executors, token_budget=10**9)
+            independent = {"ladder": ind.assignments[0].ladder,
+                           "predicted_accuracy": ind.assignments[0].expected_accuracy,
+                           "predicted_tokens_per_decision": ind.expected_tokens / len(test)}
         except CompileError as e:
-            out[str(req)] = {"compile_error": str(e)}
+            independent = {"compile_error": str(e)}
+        try:
+            sch = compile_schedule(nodes, executors, token_budget=10**9, calibration={OP: joint_items})
+        except CompileError as e:
+            out[str(req)] = {"compile_error": str(e), "independent": independent}
             continue
         ladder = sch.assignments[0].ladder
         worst_of = {a.node: a.worst_case_tokens for a in sch.assignments}
@@ -197,6 +242,7 @@ def main() -> None:
             "realized_tokens_per_decision": sum(tokens) / len(tokens),
             "token_prediction_error": (sum(tokens) / len(tokens)) / max(1e-9, sch.expected_tokens / len(test)) - 1,
             "worst_case_respected": worst_ok, "schedule_hash": sch.hash,
+            "estimate": sch.assignments[0].estimate, "independent": independent,
         }
     base_acc = sum(a == it.answer for a, it in zip(s2_te, test)) / len(test)
     result["always_s2"] = {"accuracy": base_acc, "tokens_per_decision": sum(s2_te_tok) / len(test)}
