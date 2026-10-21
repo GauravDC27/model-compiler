@@ -229,7 +229,7 @@ def _ladder(node: Node, executors: Sequence[Executor], max_rungs: int,
     if items:
         # Records are all-or-none per op: pricing some ladders on recorded spend and others on
         # bounds would bias the choice toward the executors that happen to have records.
-        missing = sorted(e.name for e in cands if e.name not in items[0])
+        missing = sorted({e.name for e in cands for rec in items if e.name not in rec})
         if missing:
             raise CompileError(f"calibration for {key!r} has no records for executors {missing}")
     best: tuple[float, list[str], list[Executor], float, str] | None = None
@@ -344,7 +344,8 @@ class Guard:
 
     ``predicate`` names an IR-level check over the node's typed output (e.g. "tests_pass",
     "nonempty_result"); it is evaluated over data, never by free-text model judgement.
-    ``on_fail`` is a variant id, or "recompile" to spend one unit of the recompile allowance.
+    ``on_fail`` is a variant id, "recompile" to spend one unit of the recompile allowance, or
+    "abstain" to stop with a defined failure (what a refused confirmation should do).
     """
 
     name: str
@@ -384,19 +385,31 @@ def compile_program(program: Program, executors: Sequence[Executor], *, token_bu
         if unknown:
             raise CompileError(f"node {n.id!r} has unknown capabilities {sorted(unknown)}")
     if program.require_confirmation:
+        # A confirmation gates only if refusing it has a compiled consequence: a guard on the
+        # confirm node that abstains, or falls back to a variant with no irreversible node.
+        safe = {vid for vid, v in program.variants.items() if not any(n.capabilities & IRREVERSIBLE for n in v)}
+        gated = {g.node for g in program.guards if g.on_fail == "abstain" or g.on_fail in safe}
         for graph in (program.main, *program.variants.values()):
             ops = {n.id: n.op for n in graph}
             for n in graph:
-                if n.capabilities & IRREVERSIBLE and not any(ops.get(d) in CONFIRM_OPS for d in n.deps):
+                if not n.capabilities & IRREVERSIBLE:
+                    continue
+                confirms = [d for d in n.deps if ops.get(d) in CONFIRM_OPS]
+                if not confirms:
                     raise CompileError(
                         f"node {n.id!r} is irreversible ({sorted(n.capabilities & IRREVERSIBLE)}) "
                         f"but does not depend on a {sorted(CONFIRM_OPS)} node"
+                    )
+                if not any(c in gated for c in confirms):
+                    raise CompileError(
+                        f"node {n.id!r}: no guard on its confirmation node abstains or falls back "
+                        "to a variant without irreversible capabilities"
                     )
     main_ids = {n.id for n in program.main}
     for g in program.guards:
         if g.node not in main_ids and not any(g.node in {n.id for n in v} for v in program.variants.values()):
             raise CompileError(f"guard {g.name!r} watches unknown node {g.node!r}")
-        if g.on_fail != "recompile" and g.on_fail not in program.variants:
+        if g.on_fail not in ("recompile", "abstain") and g.on_fail not in program.variants:
             raise CompileError(f"guard {g.name!r} targets unknown variant {g.on_fail!r}")
     if any(g.on_fail == "recompile" for g in program.guards) and program.recompile_allowance == 0:
         raise CompileError("a guard may recompile but the recompile allowance is 0")
@@ -444,8 +457,10 @@ class GuardRuntime:
         self.variants_used: list[str] = []
 
     def on_failure(self, guard_name: str) -> str:
-        """Returns a variant id, "recompile", or "abstain" when the allowance is exhausted."""
+        """Returns a variant id, "recompile", or "abstain" (asked for, or allowance exhausted)."""
         g = self.guards[guard_name]
+        if g.on_fail == "abstain":
+            return "abstain"
         if g.on_fail != "recompile":
             if g.on_fail in self.variants_used:  # a variant runs at most once: no silent loops
                 return "abstain"

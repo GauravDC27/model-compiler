@@ -194,21 +194,33 @@ def test_program_bound_covers_a_chain_through_several_variants():
 
 
 def test_irreversible_nodes_need_a_confirmation_dependency():
-    from dmc.scheduler import Program, compile_program
+    from dmc.scheduler import Guard, GuardRuntime, Program, compile_program
 
     ceiling = frozenset({"read", "external_send"})
     send = Node("send", "analyze.data", deps=("draft",), capabilities=frozenset({"external_send"}))
     unconfirmed = Program((Node("draft", "analyze.data"), send), capability_ceiling=ceiling)
     with pytest.raises(CompileError, match="does not depend on"):
         compile_program(unconfirmed, ALL, token_budget=10**6)
-    confirmed = Program((Node("draft", "analyze.data"), Node("ok", "meta.confirm", deps=("draft",)),
-                         Node("send", "analyze.data", deps=("ok",), capabilities=frozenset({"external_send"}))),
-                        capability_ceiling=ceiling)
+    graph = (Node("draft", "analyze.data"), Node("ok", "meta.confirm", deps=("draft",)),
+             Node("send", "analyze.data", deps=("ok",), capabilities=frozenset({"external_send"})))
+    ungated = Program(graph, capability_ceiling=ceiling)  # ordered after a confirm, but refusal does nothing
+    with pytest.raises(CompileError, match="no guard on its confirmation node"):
+        compile_program(ungated, ALL, token_budget=10**6)
+    confirmed = Program(graph, guards=(Guard("approved", "ok", "approved", "abstain"),), capability_ceiling=ceiling)
     with pytest.raises(CompileError, match="no executor"):  # meta.confirm has no executor in ALL
         compile_program(confirmed, ALL, token_budget=10**6)
     confirmer = Executor("human.confirm", "tool", frozenset({"meta.confirm"}), 0, 0, 1, {"meta.confirm": 1.0},
                          input_reads=0)
     assert compile_program(confirmed, ALL + [confirmer], token_budget=10**6).worst_case_tokens >= 0
+    assert GuardRuntime(confirmed).on_failure("approved") == "abstain"  # a refusal stops the send
+    # A fallback variant gates too, but only if it holds no irreversible node itself.
+    resend = (Node("ok2", "meta.confirm"),
+              Node("send2", "analyze.data", deps=("ok2",), capabilities=frozenset({"external_send"})))
+    leaky = Program(graph, {"retry": resend}, (Guard("approved", "ok", "approved", "retry"),
+                                               Guard("again", "ok2", "approved", "abstain")),
+                    capability_ceiling=ceiling)
+    with pytest.raises(CompileError, match="no guard on its confirmation node"):
+        compile_program(leaky, ALL + [confirmer], token_budget=10**6)
 
 
 def test_partial_calibration_records_are_refused():
@@ -218,3 +230,8 @@ def test_partial_calibration_records_are_refused():
     with pytest.raises(CompileError, match="no records for executors"):
         compile_schedule([Node("a", "decide.classify", required_accuracy=0.9)], [S1, HUB],
                          token_budget=10**6, calibration={"decide.classify": items})
+    # A gap in a later item is refused too, not left to fail inside the estimator.
+    full = {"s1.probe": Outcome(True, True, True, 0), "hub.decide": Outcome(True, True, True, 600)}
+    with pytest.raises(CompileError, match="no records for executors"):
+        compile_schedule([Node("a", "decide.classify", required_accuracy=0.9)], [S1, HUB],
+                         token_budget=10**6, calibration={"decide.classify": [full, items[0]]})

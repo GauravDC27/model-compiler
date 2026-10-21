@@ -155,8 +155,8 @@ tr:last-child td{border-bottom:none}
   </div>
   <div class="tb-cells">
     <div>Project</div><div>GCAM</div>
-    <div>Plan</div><div>v6.1 · <span class="mono">docs/PLAN.md</span></div>
-    <div>Review</div><div>Round 5 approved with changes; round 6 in progress</div>
+    <div>Plan</div><div>v6.2 · <span class="mono">docs/PLAN.md</span></div>
+    <div>Review</div><div>Round 6 approved with changes (applied); round 7 in progress</div>
     <div>Date</div><div class="mono">2026-10-21</div>
     <div>Hub</div><div>Qwen3.6-35B-A3B</div>
     <div>Reference</div><div>Qwen3.8-27B</div>
@@ -327,10 +327,10 @@ tr:last-child td{border-bottom:none}
 <!-- ============================ SHEET 02 ============================ -->
 <section class="sheet" id="s2">
   <div class="sheet-h"><span class="sheet-no">Sheet 02</span><h2>Compiling a goal into a static schedule</h2><span class="ref">Plan §I.2.1 · <span class="mono">dmc/scheduler.py</span></span></div>
-  <p class="claim">Example goal: “fix the failing date-parsing test in this repository and open a pull request.” The compiler places eight nodes on two lanes, sizes every bar at its worst case, and attaches a guard and a pre-compiled variant before execution starts.</p>
+  <p class="claim">Example goal: “fix the failing date-parsing test in this repository and open a pull request.” The compiler places nine nodes on two lanes, sizes every bar at its worst case, and attaches a guard and a pre-compiled variant before execution starts.</p>
   <figure>
     <div class="fig">
-<svg class="dg" viewBox="0 0 1160 330" role="img" aria-label="Gantt chart of a compiled schedule on two lanes: eight nodes with ladders whose escalation rungs are drawn dashed, cross-lane dependency arrows, and a guard on the test node that leads to a pre-compiled variant and then to one recompile.">
+<svg class="dg" viewBox="0 0 1160 330" role="img" aria-label="Gantt chart of a compiled schedule on two lanes: nine nodes with ladders whose escalation rungs are drawn dashed, cross-lane dependency arrows, and a guard on the test node that leads to a pre-compiled variant and then to one recompile.">
   <defs>
     <marker id="f2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker>
     <marker id="f2-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-warn" d="M0,0L10,5L0,10z"/></marker>
@@ -341,58 +341,58 @@ tr:last-child td{border-bottom:none}
   <rect class="soft" x="150" y="70" width="690" height="56"/>
   <rect class="soft" x="150" y="150" width="690" height="56"/>
   <!-- lane 1 -->
-  <rect class="bx" x="150" y="78" width="46" height="40"/>
+  <rect class="bx" x="150" y="78" width="43" height="40"/>
   <text class="m" x="158" y="95">n1</text><text class="s" x="158" y="111">code</text>
-  <rect class="bx" x="196" y="78" width="46" height="40"/>
-  <text class="m" x="204" y="95">n3</text><text class="s" x="204" y="111">s1</text>
-  <rect class="dashbx" x="242" y="78" width="46" height="40"/>
-  <text class="s" x="250" y="103">hub</text>
-  <rect class="bx" x="334" y="78" width="138" height="40"/>
-  <text class="m" x="342" y="95">n4</text><text class="s" x="342" y="111">hub · think ≤ 3k</text>
-  <rect class="dashbx" x="472" y="78" width="138" height="40"/>
-  <text class="s" x="480" y="103">27B (on abstention)</text>
-  <rect class="bx" x="610" y="78" width="92" height="40"/>
-  <text class="m" x="618" y="95">n5</text><text class="s" x="618" y="111">hub · call</text>
-  <rect class="bx" x="702" y="78" width="46" height="40"/>
-  <text class="m" x="710" y="95">n6</text><text class="s" x="710" y="111">code</text>
-  <rect class="bx" x="794" y="78" width="46" height="40"/>
-  <text class="m" x="802" y="95">n8</text><text class="s" x="802" y="111">code</text>
+  <rect class="bx" x="193" y="78" width="43" height="40"/>
+  <text class="m" x="201" y="95">n3</text><text class="s" x="201" y="111">s1</text>
+  <rect class="dashbx" x="236" y="78" width="43" height="40"/>
+  <text class="s" x="244" y="103">hub</text>
+  <rect class="bx" x="322" y="78" width="129" height="40"/>
+  <text class="m" x="330" y="95">n4</text><text class="s" x="330" y="111">hub · think ≤ 3k</text>
+  <rect class="dashbx" x="451" y="78" width="129" height="40"/>
+  <text class="s" x="459" y="103">27B (on abstention)</text>
+  <rect class="bx" x="580" y="78" width="86" height="40"/>
+  <text class="m" x="588" y="95">n5</text><text class="s" x="588" y="111">hub · call</text>
+  <rect class="bx" x="666" y="78" width="43" height="40"/>
+  <text class="m" x="674" y="95">n6</text><text class="s" x="674" y="111">code</text>
+  <rect class="bx" x="752" y="78" width="43" height="40"/>
+  <text class="m" x="760" y="95">n8</text><text class="s" x="760" y="111">human</text>
+  <rect class="bx" x="795" y="78" width="43" height="40"/>
+  <text class="m" x="803" y="95">n9</text><text class="s" x="803" y="111">code</text>
   <!-- lane 2 -->
-  <rect class="bx" x="196" y="158" width="46" height="40"/>
-  <text class="m" x="204" y="175">n2</text><text class="s" x="204" y="191">kNN</text>
-  <rect class="dashbx" x="242" y="158" width="92" height="40"/>
-  <text class="s" x="250" y="183">hub</text>
-  <rect class="bx" x="702" y="158" width="92" height="40"/>
-  <text class="m" x="710" y="175">n7</text><text class="s" x="710" y="191">hub · create</text>
+  <rect class="bx" x="193" y="158" width="43" height="40"/>
+  <text class="m" x="201" y="175">n2</text><text class="s" x="201" y="191">kNN</text>
+  <rect class="dashbx" x="236" y="158" width="86" height="40"/>
+  <text class="s" x="244" y="183">hub</text>
+  <rect class="bx" x="666" y="158" width="86" height="40"/>
+  <text class="m" x="674" y="175">n7</text><text class="s" x="674" y="191">hub · create</text>
   <!-- cross-lane dependencies -->
-  <line class="ln" x1="200" y1="118" x2="200" y2="156" marker-end="url(#f2-a)"/>
-  <line class="ln" x1="338" y1="158" x2="338" y2="120" marker-end="url(#f2-a)"/>
-  <line class="ln" x1="706" y1="118" x2="706" y2="156" marker-end="url(#f2-a)"/>
-  <line class="ln" x1="798" y1="158" x2="798" y2="120" marker-end="url(#f2-a)"/>
+  <line class="ln" x1="197" y1="118" x2="197" y2="156" marker-end="url(#f2-a)"/>
+  <line class="ln" x1="326" y1="158" x2="326" y2="120" marker-end="url(#f2-a)"/>
+  <line class="ln" x1="670" y1="118" x2="670" y2="156" marker-end="url(#f2-a)"/>
+  <line class="ln" x1="756" y1="158" x2="756" y2="120" marker-end="url(#f2-a)"/>
   <!-- guard -->
-  <path class="warnb" d="M748,58 L756,66 L748,74 L740,66 Z"/>
-  <text class="s" x="748" y="50" text-anchor="middle">guard: tests_pass</text>
-  <line class="ln-warn" x1="756" y1="66" x2="858" y2="66" marker-end="url(#f2-w)"/>
-  <text class="s warnt" x="806" y="60" text-anchor="middle">fail</text>
-  <rect class="dashbx" x="860" y="36" width="280" height="74" rx="4"/>
-  <text class="h" x="872" y="58">Variant v1 (pre-compiled)</text>
-  <text class="s" x="872" y="77">re-plan with 27B → edit → test</text>
-  <text class="s" x="872" y="95">own bound: 14,500 tokens</text>
-  <line class="ln-warn" x1="1000" y1="110" x2="1000" y2="132" marker-end="url(#f2-w)"/>
-  <text class="s warnt" x="1008" y="125">fails again</text>
-  <rect class="dashbx" x="860" y="134" width="280" height="56" rx="4"/>
-  <text class="h" x="872" y="156">Recompile (allowance 1)</text>
-  <text class="s" x="872" y="175">then an Abstain receipt, never a loop</text>
+  <path class="warnb" d="M709,58 L717,66 L709,74 L701,66 Z"/>
+  <text class="s" x="709" y="50" text-anchor="middle">guard: tests_pass</text>
+  <line class="ln-warn" x1="717" y1="66" x2="878" y2="66" marker-end="url(#f2-w)"/>
+  <text class="s warnt" x="797" y="60" text-anchor="middle">fail</text>
+  <rect class="dashbx" x="880" y="36" width="260" height="74" rx="4"/>
+  <text class="h" x="892" y="58">Variant v1 (pre-compiled)</text>
+  <text class="s" x="892" y="77">re-plan with 27B → edit → test</text>
+  <text class="s" x="892" y="95">own bound: 14,500 tokens</text>
+  <line class="ln-warn" x1="1010" y1="110" x2="1010" y2="132" marker-end="url(#f2-w)"/>
+  <text class="s warnt" x="1018" y="125">fails again</text>
+  <rect class="dashbx" x="880" y="134" width="260" height="56" rx="4"/>
+  <text class="h" x="892" y="156">Recompile (allowance 1)</text>
+  <text class="s" x="892" y="175">then an Abstain receipt, never a loop</text>
   <!-- axis -->
-  <line class="axis" x1="150" y1="226" x2="840" y2="226"/>
+  <line class="axis" x1="150" y1="226" x2="838" y2="226"/>
   <g class="gridln">
-    <line x1="150" y1="226" x2="150" y2="232"/><line x1="196" y1="226" x2="196" y2="230"/><line x1="242" y1="226" x2="242" y2="230"/><line x1="288" y1="226" x2="288" y2="230"/><line x1="334" y1="226" x2="334" y2="230"/>
-    <line x1="380" y1="226" x2="380" y2="232"/><line x1="426" y1="226" x2="426" y2="230"/><line x1="472" y1="226" x2="472" y2="230"/><line x1="518" y1="226" x2="518" y2="230"/><line x1="564" y1="226" x2="564" y2="230"/>
-    <line x1="610" y1="226" x2="610" y2="232"/><line x1="656" y1="226" x2="656" y2="230"/><line x1="702" y1="226" x2="702" y2="230"/><line x1="748" y1="226" x2="748" y2="230"/><line x1="794" y1="226" x2="794" y2="230"/><line x1="840" y1="226" x2="840" y2="232"/>
+    <line x1="150" y1="226" x2="150" y2="230"/><line x1="193" y1="226" x2="193" y2="230"/><line x1="236" y1="226" x2="236" y2="230"/><line x1="279" y1="226" x2="279" y2="230"/><line x1="322" y1="226" x2="322" y2="230"/><line x1="365" y1="226" x2="365" y2="230"/><line x1="408" y1="226" x2="408" y2="230"/><line x1="451" y1="226" x2="451" y2="230"/><line x1="494" y1="226" x2="494" y2="230"/><line x1="537" y1="226" x2="537" y2="230"/><line x1="580" y1="226" x2="580" y2="230"/><line x1="623" y1="226" x2="623" y2="230"/><line x1="666" y1="226" x2="666" y2="230"/><line x1="709" y1="226" x2="709" y2="230"/><line x1="752" y1="226" x2="752" y2="230"/><line x1="795" y1="226" x2="795" y2="230"/><line x1="838" y1="226" x2="838" y2="230"/>
   </g>
-  <line class="axis" x1="150" y1="226" x2="150" y2="232"/><line class="axis" x1="380" y1="226" x2="380" y2="232"/><line class="axis" x1="610" y1="226" x2="610" y2="232"/><line class="axis" x1="840" y1="226" x2="840" y2="232"/>
-  <text class="m" x="150" y="248" text-anchor="middle">0</text><text class="m" x="380" y="248" text-anchor="middle">5</text><text class="m" x="610" y="248" text-anchor="middle">10</text><text class="m" x="840" y="248" text-anchor="middle">15</text>
-  <text class="s" x="495" y="270" text-anchor="middle">worst-case latency units (every rung of every ladder runs)</text>
+  <line class="axis" x1="150" y1="226" x2="150" y2="232"/><line class="axis" x1="365" y1="226" x2="365" y2="232"/><line class="axis" x1="580" y1="226" x2="580" y2="232"/><line class="axis" x1="795" y1="226" x2="795" y2="232"/>
+  <text class="m" x="150" y="248" text-anchor="middle">0</text><text class="m" x="365" y="248" text-anchor="middle">5</text><text class="m" x="580" y="248" text-anchor="middle">10</text><text class="m" x="795" y="248" text-anchor="middle">15</text>
+  <text class="s" x="494" y="270" text-anchor="middle">worst-case latency units (every rung of every ladder runs)</text>
   <!-- legend -->
   <rect class="bx" x="150" y="292" width="22" height="14"/><text class="s" x="180" y="304">first rung</text>
   <rect class="dashbx" x="270" y="292" width="22" height="14"/><text class="s" x="300" y="304">escalation rung, runs only on abstention</text>
@@ -412,7 +412,8 @@ tr:last-child td{border-bottom:none}
       <tr><td class="num">n5</td><td>edit code</td><td>hub Call, grammar-constrained</td><td class="num">4,000</td><td class="num">5,500</td><td>write</td></tr>
       <tr><td class="num">n6</td><td>run tests</td><td>code · guard <code>tests_pass</code></td><td class="num">—</td><td class="num">0</td><td>read</td></tr>
       <tr><td class="num">n7</td><td>write PR text</td><td>hub Create</td><td class="num">2,000</td><td class="num">2,800</td><td>read</td></tr>
-      <tr><td class="num">n8</td><td>open the PR</td><td>code, after a confirmation node</td><td class="num">—</td><td class="num">0</td><td>external_send</td></tr>
+      <tr><td class="num">n8</td><td>confirm the send</td><td><code>meta.confirm</code>; abstains if refused</td><td class="num">—</td><td class="num">0</td><td>read</td></tr>
+      <tr><td class="num">n9</td><td>open the PR</td><td>code, only behind n8</td><td class="num">—</td><td class="num">0</td><td>external_send</td></tr>
       <tr><td></td><td><strong>Main graph</strong></td><td></td><td></td><td class="num"><strong>31,900</strong></td><td>ceiling: read · write · external_send</td></tr>
     </tbody>
   </table></div>
@@ -563,14 +564,14 @@ tr:last-child td{border-bottom:none}
   <text class="s" x="840" y="320">capability above the program's ceiling.</text>
 </svg>
     </div>
-    <figcaption>Each variant runs at most once and recompiles stop at the allowance. A guard inside one variant can hand off to another, so the bound counts every variant, not only the largest. Irreversible nodes (external_send, destructive) compile only behind a confirmation or dry-run node. Capabilities are fixed per branch at compile time, so a failed guard cannot steer execution into a branch with more authority than the goal was compiled with. This is the defence against branch-steering attacks on static plans.</figcaption>
+    <figcaption>Each variant runs at most once and recompiles stop at the allowance. A guard inside one variant can hand off to another, so the bound counts every variant, not only the largest. Irreversible nodes (external_send, destructive) compile only behind a confirmation or dry-run node whose guard abstains when the confirmation is refused. Capabilities are fixed per branch at compile time, so a failed guard cannot steer execution into a branch with more authority than the goal was compiled with. This is the defence against branch-steering attacks on static plans.</figcaption>
   </figure>
 </section>
 
 <!-- ============================ SHEET 05 ============================ -->
 <section class="sheet" id="s5">
   <div class="sheet-h"><span class="sheet-no">Sheet 05</span><h2>Inside the hub: one MoE layer with goal capacity</h2><span class="ref">Plan §I.2.3 · <span class="mono">dmc/expansion.py</span>, <span class="mono">dmc/expert_lora.py</span></span></div>
-  <p class="claim">The goal enters the hub as a bias on the router, set by the compiler before the request runs. For the goal's family it opens trained goal experts. For every other family the bias is −∞, so the layer computes exactly what the base layer computes.</p>
+  <p class="claim">The goal enters the hub as a bias on the router, set by the compiler before the request runs. For the goal's family it opens trained goal experts. For every other family the bias is −∞, so those goal experts are never selected. With no goal set, the layer is the base layer itself and its output is bit-identical by construction.</p>
   <figure>
     <div class="fig">
 <svg class="dg" viewBox="0 0 1160 470" role="img" aria-label="One MoE layer of the hub: the token state feeds the frozen base router, which gives 256 logits, and trained goal rows plus a compiler-set goal bias, which give k logits; a stable top-8 selection picks experts from 256 frozen base experts, some of them hot experts adapted for the family, and from the family's goal experts; other families' goal experts are never selected; the weighted sum plus the always-on shared expert goes to the next layer.">
@@ -810,9 +811,9 @@ tr:last-child td{border-bottom:none}
     <tbody>
       <tr><td>T0 Atlas</td><td>Routing atlas per goal family; selection counts, not router affinity (A3B: affinity entropy 0.98, selection concentrated); super-expert profile</td><td class="num">&lt; 50 GPU-h</td></tr>
       <tr><td>T1 Transfer</td><td>SFT with top-20 KD (w = 0.3) on 27B traces, then on-policy distillation with full logits over the shared 248,320-token vocabulary; hot-expert LoRA, cached prefix + 512-token gradient tail, lr 1e-4; merge, FP8, survival check</td><td class="num">1–3K H100-h</td></tr>
-      <tr><td>Spike</td><td>~100 terminal-RL steps with R3 on public terminal tasks (AgentWorld moved a 35B-A3B Terminal 32.8 → 47.0). Evaluated on ≥ 300 held-out terminal tasks, k = 4, so that +4 points is resolvable. Pass: gain ≥ +4 with CI lower bound &gt; 0. Switch signal: CI upper bound &lt; +4. Otherwise inconclusive.</td><td class="num">1 node × ~1 week</td></tr>
+      <tr><td>Spike</td><td>~100 terminal-RL steps with R3 on public terminal tasks (AgentWorld moved a 35B-A3B Terminal 32.8 → 47.0). Evaluated on ≥ 300 held-out terminal tasks with k = 8 samples each, so that SE ≤ 1.4 points. Pass: CI lower bound &gt; 0 (≈ 80% power at a true +4). Switch signal: CI upper bound &lt; +4. Otherwise inconclusive.</td><td class="num">1 node × ~1 week</td></tr>
       <tr><td>T2 Goal experts</td><td>Per family: gain against a matched-parameter LoRA arm, off-goal identity, traffic share, drift and wrong-goal accuracy</td><td class="num">10–100 GPU-h / family</td></tr>
-      <tr><td>T3 Agentic RL</td><td>GSPO/CISPO sequence-level objectives, R3 routing replay, exact token handoff; SWE, terminal, tool simulators, browsing</td><td class="num">Tier 1 ≤ ~25K · Tier 0 ≤ 10K GPU-h</td></tr>
+      <tr><td>T3 Agentic RL</td><td>GSPO/CISPO sequence-level objectives, R3 routing replay, exact token handoff; SWE, terminal, tool simulators, browsing</td><td class="num">Tier 1 ≤ ≈ 26K · Tier 0 ≤ 10K GPU-h</td></tr>
       <tr><td>T4 Decision DPO</td><td>v1 on hub-base, re-run after T3. Two independent judges must agree; margin only on decision tokens (weight 4, β 0.5) plus anchors</td><td class="num">&lt; 100 GPU-h / round</td></tr>
       <tr><td>T5 Efficiency</td><td>v1 on hub-base, re-run after T3. Difficulty-aware length RL, learned thinking on/off, CompactionRL, early-exit probes; hard-set non-inferiority guards</td><td class="num">1–2K H100-h</td></tr>
       <tr><td>T6 System-1</td><td>Heads, encoders, SLMs and GBDTs from hub/27B labels; conformal thresholds; joint <code>Outcome</code> records for every executor</td><td class="num">CPU – small GPU</td></tr>
@@ -823,7 +824,7 @@ tr:last-child td{border-bottom:none}
 <!-- ============================ SHEET 08 ============================ -->
 <section class="sheet" id="s8">
   <div class="sheet-h"><span class="sheet-no">Sheet 08</span><h2>Cost feasibility model</h2><span class="ref">Plan §I.1.1</span></div>
-  <p class="claim">At accuracy parity, cost-of-pass relative to the 27B = r·τ_h + e. The hub's per-token cost r is measured in G0. τ_h is hub verbosity relative to the 27B, and e is the escalation budget. The targets are read off this chart, not asserted.</p>
+  <p class="claim">At accuracy parity, cost-of-pass relative to the 27B = r·τ_h + e + s, where s, the cost of System-1 executors and code, is close to 0. The hub's per-token cost r is measured in G0. τ_h is hub verbosity relative to the 27B, and e is the escalation budget. The targets are read off this chart, not asserted.</p>
   <figure>
     <div class="fig narrow">
 <svg class="dg" viewBox="0 0 960 430" role="img" aria-label="Line chart of cost-of-pass ratio against escalation budget e from 0 to 0.4, for three scenarios. With the Artificial Analysis cost basis and equal verbosity the ratio is 0.33 at no escalation and 0.48 at e = 0.15, under the 0.5 target for reasoning suites. With 20% more verbosity on agentic work it is 0.55 at e = 0.15, under the 0.6 agentic target, which it crosses at e = 0.20, the switch threshold. With the A3B cost basis it is 0.32 at e = 0.15.">
@@ -868,7 +869,7 @@ tr:last-child td{border-bottom:none}
   <div class="tbl"><table>
     <thead><tr><th>Requirement</th><th>Value</th><th>Measured as</th></tr></thead>
     <tbody>
-      <tr><td>Reasoning parity</td><td>Lower 95% CI of (GCAM − 27B) ≥ −δ_b, with δ_b = max(1.5 points, one item, 2.8·SE_b), where SE_b is the paired SE of (hub-base − 27B), fixed at G1</td><td>avg@16, paired item bootstrap; AIME 2024–2026 pooled (90 items)</td></tr>
+      <tr><td>Reasoning parity</td><td>Lower 95% CI of (GCAM − 27B) ≥ −δ_b, with δ_b = max(1.5 points, one item, 2.8·SE_b), where SE_b is the paired SE of (hub-base − 27B), fixed at G1. δ_b is capped at 4 points; a benchmark above the cap (expected: AIME, GPQA-Diamond) is reported as resolution-limited and pooled into a reasoning composite</td><td>avg@16, paired item bootstrap; AIME 2024–2026 pooled (90 items)</td></tr>
       <tr><td>Agentic parity</td><td>Same δ_b rule, floor 2 points; SWE-bench Pro, Terminal-Bench 2.x, τ³-bench pass^4, BrowseComp, goal-suite v0</td><td>pass^k and pass@1; 27B-vs-itself null control</td></tr>
       <tr><td>Cost</td><td>Compiled system with e ≤ 0.15: ≤ 0.5× cost-of-pass on reasoning suites and the goal suite, ≤ 0.6× on agentic suites; raw hub ≤ 1.0× tokens on reasoning at parity</td><td>Measured r; input, cached and output tokens; fleet-level cost under Artifact A</td></tr>
       <tr><td>Latency</td><td>Compiled system mean ≤ 0.6×; p50 and p90 reported</td><td>Wall clock on the same node</td></tr>
@@ -993,7 +994,7 @@ tr:last-child td{border-bottom:none}
   <div class="tbl"><table>
     <thead><tr><th>G0 gate</th><th>What is measured</th><th>If it fails</th></tr></thead>
     <tbody>
-      <tr><td class="num">G0-1</td><td>δ_b per benchmark: provisional from the paired SE of (base − 27B) at avg@16, fixed at G1 from hub-base</td><td>Benchmark leaves the gate or is pooled</td></tr>
+      <tr><td class="num">G0-1</td><td>δ_b per benchmark: provisional from the paired SE of (base − 27B) at avg@16, fixed at G1 from hub-base; capped at 4 points</td><td>Above the cap: reported as resolution-limited and pooled into a reasoning composite</td></tr>
       <tr><td class="num">G0-2</td><td>Hub cost per token r on our node, input and output separately</td><td>Cost target re-derived by dated amendment</td></tr>
       <tr><td class="num">G0-3</td><td>Prefix caching on the Gated-DeltaNet hybrid; cached, uncached and repeat probe beyond 8.6k-token prefixes</td><td>No KV-reuse credit; prefix groups stay a placement preference</td></tr>
       <tr><td class="num">G0-4</td><td>Accuracy versus thinking budget under hard truncation; template and KV effect of per-turn thinking toggles</td><td>Compiler keeps thinking on/off + early exit only</td></tr>
@@ -1002,7 +1003,7 @@ tr:last-child td{border-bottom:none}
       <tr><td class="num">G0-7</td><td>Goal-suite v0: first 100 goals with executable verifiers or two-judge rubrics; ≥ 250 by week 6 (≥ 200 development, 20% held out)</td><td>G1 cannot report goal-suite numbers</td></tr>
     </tbody>
   </table></div>
-  <p class="claim" style="font-size:16px">Base-switch criteria, fixed now: move the hub to Qwen3.8-Flash-Next if the spike's gain has an upper 95% bound below +4 points, or if agentic parity needs an escalation share above 0.20 on G1 calibration data. Above that share, 1/3 × 1.2 + e exceeds the 0.6× agentic target. An inconclusive spike leaves the decision to the escalation share alone.</p>
+  <p class="claim" style="font-size:16px">Base-switch rule, fixed now. (a) The spike's gain has an upper 95% bound below +4 points. (b) On the spike checkpoint, the measured agentic cost r·τ_h + e exceeds 0.6 (at the planning values, e above 0.20). Switch to Qwen3.8-Flash-Next if (a), or if the spike is inconclusive and (b) holds. If the spike passes and (b) holds, stay and re-check (b) on the T3 checkpoint at week 17. An escalation share between 0.15 and 0.20 fails the G3 gate and is reported, but does not trigger a switch.</p>
 </section>
 
 <!-- ============================ SHEET 11 ============================ -->
@@ -1036,7 +1037,7 @@ tr:last-child td{border-bottom:none}
 </section>
 
 <footer class="foot">
-  <span>GCAM implementation blueprint · plan v6 · 2026-10-21</span>
+  <span>GCAM implementation blueprint · plan v6.2 · 2026-10-21</span>
   <span>Source of truth: <span class="mono">docs/PLAN.md</span> on branch <span class="mono">claude/magical-allen-eickyt</span></span>
 </footer>
 
