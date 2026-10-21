@@ -37,8 +37,9 @@ from ..system import CANDIDATES, System, rung_name
 
 SMOKE = bool(os.environ.get("GCAM_SMOKE"))
 TARGET = 0.95
-N = {"fit": 480, "thr": 60, "cal": 120, "test": 120, "pair_thr": 30, "pair": 60, "reply": 12, "est": 40,
-     "policy": 40, "exp_cal": 120}
+# Sized for a 4-core CPU (~0.9 s per hub forward, ~1.5 s per spoke forward).
+N = {"fit": 480, "thr": 40, "cal": 80, "test": 80, "pair_thr": 20, "pair": 40, "reply": 9, "est": 30,
+     "policy": 24, "exp_cal": 80, "exp_test": 120}
 if SMOKE:
     N = {k: max(4, v // 15) for k, v in N.items()}
 PROBE_LAYER = 12
@@ -77,7 +78,7 @@ def build_items(world) -> dict[str, dict[str, list[tuple[dict, object]]]]:
         items.setdefault("create.reply", {})[split] = rows
         items.setdefault("create.reply_fallback", {})[split] = rows
     code = System(llms=False, world=world).impls["code.analytics"]
-    windows = {"cal": range(30, 181, 10), "test": range(35, 176, 10)}
+    windows = {"cal": range(30, 181, 20), "test": range(40, 171, 20)}
     for split, days in windows.items():
         days = list(days)[: (3 if SMOKE else None)]
         items.setdefault("create.summary", {})[split] = [
@@ -96,7 +97,7 @@ def build_items(world) -> dict[str, dict[str, list[tuple[dict, object]]]]:
         "fit": _rows(ex[ex.date < day(90)]),
         "thr": [({"row": r}, r["needs_review"]) for r in thr_rows],
         "cal": [({"row": r}, r["needs_review"]) for r in cal_rows],
-        "test": [({"row": r}, r["needs_review"]) for r in test_rows[: (N["exp_cal"] if SMOKE else None)]],
+        "test": [({"row": r}, r["needs_review"]) for r in test_rows[: N["exp_test"]]],
     }
     return items
 

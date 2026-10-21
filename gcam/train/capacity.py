@@ -31,7 +31,7 @@ from ..executors.llm import CLAIM_OPTIONS, SYSTEMS, TOOL_OPTIONS, LLMExecutor, c
 from ..models import HUB_ID, LETTERS, LM, Capacity, artifacts_dir
 
 SMOKE = bool(os.environ.get("GCAM_SMOKE"))
-STEPS, BATCH = (2 if SMOKE else 160), 8
+STEPS, BATCH = (2 if SMOKE else 90), 4  # ~0.9 s per forward on this 4-core CPU: 360 sequences per family
 LR = {"policy": 1e-3, "support": 3e-4}  # new experts train from a copy; LoRA from zero B needs a gentler rate
 SPECS = {
     "policy": {"op": "decide.claim_reason", "labels": tuple(sorted(CLAIM_OPTIONS)), "user": claim_user},
@@ -44,12 +44,12 @@ def _data(world):
     return {
         "policy": {
             "train": [(c.text, c.reason) for c in claims(480, split="train", seed=1)],
-            "eval": [(c.text, c.reason) for c in claims(60, split="train", seed=9) + claims(60, split="test", seed=9)],
+            "eval": [(c.text, c.reason) for c in claims(24, split="train", seed=9) + claims(24, split="test", seed=9)],
         },
         "support": {
             "train": [(r.text, r.tool) for r in tool_requests(480, split="train", seed=1, order_ids=oids)],
-            "eval": [(r.text, r.tool) for r in tool_requests(60, split="train", seed=9, order_ids=oids)
-                     + tool_requests(60, split="test", seed=9, order_ids=oids)],
+            "eval": [(r.text, r.tool) for r in tool_requests(24, split="train", seed=9, order_ids=oids)
+                     + tool_requests(24, split="test", seed=9, order_ids=oids)],
         },
     }
 
@@ -75,7 +75,7 @@ def accuracy(ex: LLMExecutor, family: str, items) -> float:
 def usage(lm: LM, exs) -> torch.Tensor:
     k = lm.model.config.num_experts_per_tok
     total = None
-    for ids, _ in exs[:160]:
+    for ids, _ in exs[:64]:
         rl = mp.router_logits(lm.model, torch.tensor([ids]), torch.ones(1, len(ids), dtype=torch.long))
         u = mp.expert_usage(rl, k)
         total = u if total is None else total + u

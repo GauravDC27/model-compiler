@@ -38,7 +38,7 @@ CANDIDATES = {
     "decide.claim_reason": ("code.keywords", "s1.encoder", "s1.hubprobe", "hub", "hub.policy", "spoke"),
     "tool.select": ("code.keywords", "s1.encoder", "hub", "hub.support", "spoke"),
     "evaluate.pairwise": ("code.verify", "hub", "spoke"),
-    "create.reply": ("hub", "spoke"),
+    "create.reply": ("hub",),  # the spoke writes only in the pre-compiled fallback variant
     "create.reply_fallback": ("spoke",),
     "create.summary": ("hub", "spoke"),
     "analyze.estimate": ("code.arith", "hub", "spoke"),
@@ -53,7 +53,7 @@ EXACT = {
     "create.policy_answer": "code.analytics", "forecast.orders": "ml.forecast",
 }
 LATENCY = {"code": 0, "ml": 1, "s1": 1, "hub": 4, "spoke": 12}
-GENERATIVE = {"create.reply": 3 * 90, "create.reply_fallback": 90, "create.summary": 90, "analyze.estimate": 48}
+GENERATIVE = {"create.reply": 3 * 70, "create.reply_fallback": 70, "create.summary": 90, "analyze.estimate": 48}
 
 
 @dataclass
@@ -206,8 +206,9 @@ class System:
                 cached[mid] = content_hash([file_hash(str(p)) for p in sorted(path.glob("*.safetensors"))])
             models[key] = {"id": mid, "weights": cached[mid]}
         fp.write_text(json.dumps(cached, indent=1))
-        arts = {p.name: file_hash(str(p)) for p in sorted(self.art.glob("**/*")) if p.is_file()
-                and p.suffix in (".pt", ".pkl", ".json") and p.name not in ("fingerprints.json",)}
+        # Only what changes outputs: hub capacity, System-1/classic models, thresholds and records.
+        files = [self.art / "system1.pkl", self.art / "calibration.json", *sorted((self.art / "capacity").glob("*"))]
+        arts = {str(p.relative_to(self.art)): file_hash(str(p)) for p in files if p.is_file()}
         return {"schema": "gcam.lock/1", "models": models, "artifacts": arts, "world": self.world.snapshot_hash(),
                 "torch": torch.__version__, "transformers": transformers.__version__,
                 "executors": {n: r.executor.version for n, r in sorted(self.rungs.items())}}

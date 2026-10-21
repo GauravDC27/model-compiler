@@ -62,7 +62,7 @@ def _records():
              for i in range(20)]
     one = lambda name, ok: [{name: {"answered": ok, "correct": ok, "correct_forced": ok, "tokens": 300}}] * 10  # noqa: E731
     return {"decide.claim_reason": rows, "tool.select": tools,
-            "create.reply": one(rung_name("spoke", "create.reply"), True),
+            "create.reply": one(rung_name("hub", "create.reply"), True),
             "create.reply_fallback": one(rung_name("spoke", "create.reply_fallback"), True),
             "create.summary": one(rung_name("spoke", "create.summary"), True)}
 
@@ -71,8 +71,10 @@ def _records():
 def rt(tmp_path):
     system = System(llms=False, art=tmp_path, world=build_world())
     system.impls["spoke"] = StubSpoke()
+    system.impls["hub"] = StubSpoke()  # stands in for the hub's best-of-K writer (create.reply)
     system.calibration = {"records": _records(), "thresholds": {}}
-    system.rungs = system._register()
+    system.rungs = {n: r for n, r in system._register().items()
+                    if not n.startswith("hub[") or n == rung_name("hub", "create.reply")}
     return Runtime(system, tmp_path / "store")
 
 

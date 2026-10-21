@@ -150,7 +150,7 @@ def blank_inputs(op: str, payload: dict) -> dict:
 
 class LLMExecutor:
     def __init__(self, name: str, lm: LM, *, family: dict[str, str | None] | None = None, k: int = 3,
-                 max_reply_tokens: int = 90):
+                 max_reply_tokens: int = 70):
         self.name = name
         self.lm = lm
         self.family = family or {}  # op -> goal family whose capacity is switched on
