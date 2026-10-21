@@ -67,3 +67,16 @@ seed (new numbers/words), same templates; a template-held-out split is out of sc
   (does training the expert matter; does the discovered parent matter).
 - *Scope:* in-template generalization only (same templates, new numbers/words); this cannot
   speak to production-scale claims about item (ii).
+
+**Amendment 2, registered 2026-10-21, before any run** (round-5 review N14).
+
+- *Multiplicity.* There are two primary comparisons (`routed` vs `lora`, `additive` vs `lora`), so
+  an arm's success uses a Bonferroni-adjusted **97.5%** paired group-bootstrap CI (lower bound > 0),
+  plus goal-off bit-identity and goal-on wikitext CE rise ≤ 5%. Item (ii) is supported if at least
+  one of the two arms succeeds. 95% CIs are still reported.
+- *Interpretation rule for the controls* (fixed now). `router_only` and `random_parent` get the
+  same comparison against `lora` (reported as `CLEARS_LORA_BAR`). If a successful arm's result is
+  matched by `random_parent` (it also clears the bar), the pilot supports "new capacity helps" but
+  not "the discovered parent matters". If `router_only` also clears the bar, the pilot supports
+  neither claim about trained expert capacity: routing alone explains the gain. Only if `routed`
+  clears the bar and both controls do not does the pilot support the full item (ii) mechanism.

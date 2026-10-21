@@ -179,7 +179,8 @@ def main() -> None:
     executors = [
         Executor("code.canonical", "tool", frozenset({OP}), 0, 0, 1, {OP: code_acc}, coverage=code_cov,
                  input_reads=0),
-        Executor("s1.probe", "system1", frozenset({OP}), 0, 0, 2, {OP: s1_acc},
+        # Truncated questions are decoded and re-tokenized, which can add boundary tokens.
+        Executor("s1.probe", "system1", frozenset({OP}), TEMPLATE_SLACK, 0, 2, {OP: s1_acc},
                  coverage=s1_cov, accuracy_all={OP: s1_acc_all}),
         Executor("s2.decide", "system2", frozenset({OP}), s2_fixed, 0, 10, {OP: s2_acc_all},
                  input_reads=n_orders),

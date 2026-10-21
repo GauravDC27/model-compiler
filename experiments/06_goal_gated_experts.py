@@ -61,7 +61,8 @@ def correct(b: HFBackend, items) -> list[bool]:
     return [prof.run(it.op()).label == it.answer for it in items]
 
 
-def boot_diff(a: list[bool], c: list[bool], groups: list[str], n: int = 1000) -> tuple[float, float]:
+def boot_diff(a: list[bool], c: list[bool], groups: list[str], n: int = 1000,
+              level: float = 0.95) -> tuple[float, float]:
     """Group-level bootstrap CI of mean(c) - mean(a) (paired on items)."""
     rng = random.Random(3)
     keys = sorted(set(groups))
@@ -71,7 +72,8 @@ def boot_diff(a: list[bool], c: list[bool], groups: list[str], n: int = 1000) ->
         idx = [i for k in (rng.choice(keys) for _ in keys) for i in by[k]]
         diffs.append(sum(c[i] for i in idx) / len(idx) - sum(a[i] for i in idx) / len(idx))
     diffs.sort()
-    return diffs[int(0.025 * n)], diffs[int(0.975 * n) - 1]
+    tail = (1 - level) / 2
+    return diffs[int(tail * n)], diffs[int((1 - tail) * n) - 1]
 
 
 def new_expert_shares(model, wrapped, ids: torch.Tensor) -> float:
@@ -260,13 +262,18 @@ def main() -> None:
     # Pre-registered comparisons: each new-capacity arm vs the matched LoRA arm.
     if "lora" in result["arms"]:
         lora_correct = result["arms"]["lora"]["_goal_correct"]
-        for arm in (a for a in ("routed", "additive") if a in result["arms"]):
+        # Amendment 2: two primary comparisons, so success uses Bonferroni-adjusted 97.5% CIs;
+        # the controls get the same comparison so the interpretation rule can be applied.
+        for arm in (a for a in ("routed", "additive", "router_only", "random_parent") if a in result["arms"]):
             rec = result["arms"][arm]
-            lo, hi = boot_diff(lora_correct, rec["_goal_correct"], g_goal)
             rec["gain_vs_lora"] = rec["goal_accuracy"] - result["arms"]["lora"]["goal_accuracy"]
-            rec["gain_vs_lora_ci95"] = (lo, hi)
-            rec["SUCCESS"] = (lo > 0 and rec["goal_off_bit_identical"] is True
-                              and rec["wikitext_ce_rise"] <= 0.05)
+            rec["gain_vs_lora_ci95"] = boot_diff(lora_correct, rec["_goal_correct"], g_goal)
+            lo, hi = boot_diff(lora_correct, rec["_goal_correct"], g_goal, level=0.975)
+            rec["gain_vs_lora_ci975"] = (lo, hi)
+            rec["CLEARS_LORA_BAR"] = (lo > 0 and rec["goal_off_bit_identical"] is True
+                                      and rec["wikitext_ce_rise"] <= 0.05)
+            if arm in ("routed", "additive"):
+                rec["SUCCESS"] = rec["CLEARS_LORA_BAR"]
     for rec in result["arms"].values():
         rec.pop("_goal_correct", None)
     result["elapsed_s"] = round(time.time() - t0, 1)

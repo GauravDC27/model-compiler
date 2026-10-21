@@ -65,3 +65,9 @@ escalated items are the hard ones, so that assumption over-predicts accuracy. Ch
   tokens (check 2) come from the joint calibration records, i.e. what calls really spent; the
   independent estimate has only the bounds and will over-predict tokens, which is reported, not
   tested.
+
+**Amendment 2, registered 2026-10-21, before any run** (round-5 review N9). The question cap
+truncates token ids and re-tokenizes the decoded text, which can add tokenizer-boundary tokens, so
+`s1.probe`'s fixed size is now the same 4-token slack the Decide template uses. The pilot truncates
+head-only at text level rather than through `dmc.scheduler.cap_input`; zero cap hits are expected
+and their count is reported, so check 4 does not exercise `cap_input` and is not claimed to.
