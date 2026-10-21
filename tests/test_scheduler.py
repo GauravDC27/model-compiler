@@ -174,3 +174,47 @@ def test_cap_input_keeps_head_and_tail_within_the_cap():
     assert cap_input(ids[:10], 10, [-1]) == (ids[:10], False)
     with pytest.raises(ValueError):
         cap_input(ids, 2, [-1, -2])
+
+
+def test_program_bound_covers_a_chain_through_several_variants():
+    from dmc.scheduler import Guard, GuardRuntime, Program, compile_program
+
+    main = (Node("a", "decide.classify", required_accuracy=0.9),
+            Node("b", "decide.classify", deps=("a",), required_accuracy=0.9))
+    x = (Node("x1", "decide.classify", required_accuracy=0.9),)
+    y = (Node("y1", "decide.classify", required_accuracy=0.9),)
+    prog = Program(main, {"X": x, "Y": y}, (Guard("ga", "a", "p", "X"), Guard("gx", "x1", "p", "Y"),
+                                            Guard("gb", "b", "p", "Y")))
+    ps = compile_program(prog, [HUB], token_budget=10**6)
+    one = ps.variants["X"].worst_case_tokens
+    # The runtime can run main, then X (guard on a), then Y (guard on x1): all must be inside the bound.
+    rt = GuardRuntime(prog)
+    assert [rt.on_failure("ga"), rt.on_failure("gx"), rt.on_failure("gb")] == ["X", "Y", "abstain"]
+    assert ps.worst_case_tokens == ps.main.worst_case_tokens + 2 * one
+
+
+def test_irreversible_nodes_need_a_confirmation_dependency():
+    from dmc.scheduler import Program, compile_program
+
+    ceiling = frozenset({"read", "external_send"})
+    send = Node("send", "analyze.data", deps=("draft",), capabilities=frozenset({"external_send"}))
+    unconfirmed = Program((Node("draft", "analyze.data"), send), capability_ceiling=ceiling)
+    with pytest.raises(CompileError, match="does not depend on"):
+        compile_program(unconfirmed, ALL, token_budget=10**6)
+    confirmed = Program((Node("draft", "analyze.data"), Node("ok", "meta.confirm", deps=("draft",)),
+                         Node("send", "analyze.data", deps=("ok",), capabilities=frozenset({"external_send"}))),
+                        capability_ceiling=ceiling)
+    with pytest.raises(CompileError, match="no executor"):  # meta.confirm has no executor in ALL
+        compile_program(confirmed, ALL, token_budget=10**6)
+    confirmer = Executor("human.confirm", "tool", frozenset({"meta.confirm"}), 0, 0, 1, {"meta.confirm": 1.0},
+                         input_reads=0)
+    assert compile_program(confirmed, ALL + [confirmer], token_budget=10**6).worst_case_tokens >= 0
+
+
+def test_partial_calibration_records_are_refused():
+    from dmc.scheduler import Outcome
+
+    items = [{"s1.probe": Outcome(True, True, True, 0)}]  # no record for the hub
+    with pytest.raises(CompileError, match="no records for executors"):
+        compile_schedule([Node("a", "decide.classify", required_accuracy=0.9)], [S1, HUB],
+                         token_budget=10**6, calibration={"decide.classify": items})

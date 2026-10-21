@@ -39,6 +39,10 @@ Kind = Literal["system1", "system2", "spoke", "tool", "classic_ml"]
 CONTRACTS = ("D0", "D1")
 # Capability lattice for actions a node may take (fixed per node and branch at compile time).
 CAPABILITIES = ("read", "write", "external_send", "destructive")
+# Irreversible capabilities: a node holding one must depend directly on a confirmation or
+# dry-run node when the program requires confirmation.
+IRREVERSIBLE = frozenset({"external_send", "destructive"})
+CONFIRM_OPS = frozenset({"meta.confirm", "tool.dry_run"})
 
 
 @dataclass(frozen=True)
@@ -222,6 +226,12 @@ def _ladder(node: Node, executors: Sequence[Executor], max_rungs: int,
         )
     key = node.op if node.difficulty is None else f"{node.op}#{node.difficulty}"
     items = (calibration or {}).get(key)
+    if items:
+        # Records are all-or-none per op: pricing some ladders on recorded spend and others on
+        # bounds would bias the choice toward the executors that happen to have records.
+        missing = sorted(e.name for e in cands if e.name not in items[0])
+        if missing:
+            raise CompileError(f"calibration for {key!r} has no records for executors {missing}")
     best: tuple[float, list[str], list[Executor], float, str] | None = None
     top_acc = 0.0
     for size in range(1, min(max_rungs, len(cands)) + 1):
@@ -299,6 +309,7 @@ def compile_schedule(
             # The estimate priced every call at full prompt; credit the cached prefix.
             exp_tokens -= reach * (e.call_tokens(n.input_cap) - e.call_tokens(n.input_cap, discount))
             worst += e.call_tokens(n.input_cap, discount)
+        exp_tokens = max(0.0, exp_tokens)  # recorded spend can sit below the bound the discount assumes
         end = start + node_lat[n.id]
         lane_free[lane], lane_group[lane] = end, n.prefix_group
         finish[n.id] = end
@@ -350,13 +361,14 @@ class Program:
     recompile_allowance: int = 0  # how many recompiles may happen at runtime
     recompile_budget: int = 0  # worst-case tokens reserved per recompile
     capability_ceiling: frozenset[str] = frozenset({"read"})
+    require_confirmation: bool = True  # irreversible nodes need a confirm / dry-run dependency
 
 
 @dataclass(frozen=True)
 class ProgramSchedule:
     main: Schedule
     variants: Mapping[str, Schedule]
-    worst_case_tokens: int  # main + most expensive variant chain + recompile reserve
+    worst_case_tokens: int  # main + every variant (each runs at most once) + recompile reserve
     hash: str
 
 
@@ -371,6 +383,15 @@ def compile_program(program: Program, executors: Sequence[Executor], *, token_bu
         unknown = n.capabilities - set(CAPABILITIES)
         if unknown:
             raise CompileError(f"node {n.id!r} has unknown capabilities {sorted(unknown)}")
+    if program.require_confirmation:
+        for graph in (program.main, *program.variants.values()):
+            ops = {n.id: n.op for n in graph}
+            for n in graph:
+                if n.capabilities & IRREVERSIBLE and not any(ops.get(d) in CONFIRM_OPS for d in n.deps):
+                    raise CompileError(
+                        f"node {n.id!r} is irreversible ({sorted(n.capabilities & IRREVERSIBLE)}) "
+                        f"but does not depend on a {sorted(CONFIRM_OPS)} node"
+                    )
     main_ids = {n.id for n in program.main}
     for g in program.guards:
         if g.node not in main_ids and not any(g.node in {n.id for n in v} for v in program.variants.values()):
@@ -383,9 +404,10 @@ def compile_program(program: Program, executors: Sequence[Executor], *, token_bu
     kw = dict(lanes=lanes, calibration=calibration, lock_hash=lock_hash, token_budget=10**18)
     main = compile_schedule(program.main, executors, **kw)
     variants = {vid: compile_schedule(nodes, executors, **kw) for vid, nodes in sorted(program.variants.items())}
-    # Worst case: the main graph, plus the most expensive variant (variants replace the work
-    # that follows a failed guard; counting them on top is conservative), plus the reserve.
-    worst = (main.worst_case_tokens + max((v.worst_case_tokens for v in variants.values()), default=0)
+    # Worst case: the main graph, plus every variant, plus the recompile reserve. Guards may
+    # watch nodes inside variants, so one execution can chain through several variants; each
+    # runs at most once (GuardRuntime), which makes their sum a bound and the maximum not one.
+    worst = (main.worst_case_tokens + sum(v.worst_case_tokens for v in variants.values())
              + program.recompile_allowance * program.recompile_budget)
     if worst > token_budget:
         raise CompileError(f"program worst-case tokens {worst} exceed the budget {token_budget}")

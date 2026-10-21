@@ -1,0 +1,1041 @@
+<title>GCAM Blueprint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;600&display=swap">
+<style>
+/* Layout: a drawing set. A title block, a sheet index, then numbered sheets; each sheet is one
+   wide drawing (scrolls inside its own frame on phones) plus a short spec column of prose. */
+:root{
+  --paper:#F3F6FA; --panel:#FFFFFF; --ink:#132235; --muted:#55667C; --rule:#C2CEDB; --grid:#E4EAF2;
+  --accent:#1B58D4; --accent-soft:#DCE6FA;
+  --ok:#1B7A4C; --ok-soft:#D8EFE2; --warn:#9C5B00; --warn-soft:#F6E6C6; --bad:#B0302A; --bad-soft:#F5DAD8;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0C1828; --panel:#11223A; --ink:#DCE7F4; --muted:#93A6BF; --rule:#2D4562; --grid:#152A45;
+    --accent:#7BA9FF; --accent-soft:#1A3360;
+    --ok:#5DC690; --ok-soft:#123826; --warn:#E3AB4E; --warn-soft:#3A2B10; --bad:#F2847C; --bad-soft:#41201E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C1828; --panel:#11223A; --ink:#DCE7F4; --muted:#93A6BF; --rule:#2D4562; --grid:#152A45;
+  --accent:#7BA9FF; --accent-soft:#1A3360;
+  --ok:#5DC690; --ok-soft:#123826; --warn:#E3AB4E; --warn-soft:#3A2B10; --bad:#F2847C; --bad-soft:#41201E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:32px 32px;
+  color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.55;
+}
+.wrap{max-width:1220px; margin:0 auto; padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); padding-block:32px 64px}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0}
+p{margin:0}
+.mono{font-family:var(--mono)}
+
+/* Title block */
+.titleblock{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); border:1.5px solid var(--ink); background:var(--panel)}
+.tb-main{padding:28px 28px 24px; display:flex; flex-direction:column; gap:14px; border-right:1.5px solid var(--ink); min-width:0}
+.eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+h1{font-size:clamp(34px,5vw,56px); font-weight:800; font-stretch:78%; line-height:1; letter-spacing:-.01em}
+h1 em{font-style:normal; color:var(--accent)}
+.lede{max-width:64ch; color:var(--ink)}
+.tb-cells{display:grid; grid-template-columns:auto minmax(0,1fr); font-size:14px; min-width:0}
+.tb-cells div{padding:9px 14px; border-bottom:1px solid var(--rule); min-width:0; overflow-wrap:anywhere}
+.tb-cells div:nth-child(odd){font-family:var(--mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); border-right:1px solid var(--rule); white-space:nowrap}
+.tb-cells div:nth-last-child(-n+2){border-bottom:none}
+
+/* At a glance */
+.glance{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; border:1.5px solid var(--ink); border-top:none; background:var(--panel)}
+.glance div{padding:14px 16px; border-right:1px solid var(--rule); display:flex; flex-direction:column; gap:4px; min-width:0}
+.glance div:last-child{border-right:none}
+.glance dt{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.glance dd{margin:0; font-family:var(--display); font-stretch:85%; font-weight:650; font-size:18px; line-height:1.25}
+
+/* Sheet index */
+.index{margin-top:28px; display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:6px 20px; list-style:none; padding:0; font-family:var(--display); font-stretch:88%; font-size:15.5px}
+.index a{display:flex; gap:10px; align-items:baseline; text-decoration:none; color:var(--ink); padding:5px 0; border-bottom:1px dashed var(--rule)}
+.index a:hover{color:var(--accent)}
+.index .n{font-family:var(--mono); font-size:12px; color:var(--muted); min-width:2.4em}
+
+/* Sheets */
+.sheet{margin-top:56px; scroll-margin-top:16px}
+.sheet-h{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 16px; border-bottom:1.5px solid var(--ink); padding-bottom:8px}
+.sheet-no{font-family:var(--mono); font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
+.sheet-h h2{font-size:clamp(24px,3vw,32px); font-weight:750; font-stretch:80%; flex:1 1 320px}
+.ref{font-family:var(--mono); font-size:12px; color:var(--muted)}
+.claim{margin-top:14px; max-width:72ch; font-size:18px}
+figure{margin:18px 0 0; background:var(--panel); border:1px solid var(--rule)}
+.fig{overflow-x:auto; padding:10px}
+.fig svg{display:block; width:100%; min-width:900px; height:auto}
+.fig.narrow svg{min-width:640px; max-width:980px; margin:0 auto}
+figcaption{padding:10px 16px 12px; border-top:1px solid var(--rule); font-size:14.5px; color:var(--muted); max-width:none}
+.cols{margin-top:18px; display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px 32px}
+.cols > div{min-width:0}
+.cols h3{font-size:16px; font-weight:700; font-stretch:88%; letter-spacing:.02em; margin-bottom:6px}
+.cols p + p{margin-top:8px}
+.cols ul{margin:0; padding-left:1.1em}
+.cols li + li{margin-top:4px}
+.tbl{overflow-x:auto; margin-top:18px; border:1px solid var(--rule); background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:640px}
+th,td{text-align:left; vertical-align:top; padding:8px 12px; border-bottom:1px solid var(--rule)}
+th{font-family:var(--mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:500; background:var(--paper)}
+td code, p code, li code{font-family:var(--mono); font-size:.86em}
+tr:last-child td{border-bottom:none}
+.num{font-variant-numeric:tabular-nums; font-family:var(--mono); font-size:13px; white-space:nowrap}
+.pill{display:inline-block; font-family:var(--mono); font-size:11px; letter-spacing:.04em; padding:1px 8px; border-radius:10px; border:1px solid; white-space:nowrap}
+.pill.done{color:var(--ok); background:var(--ok-soft)}
+.pill.run{color:var(--accent); background:var(--accent-soft)}
+.pill.queued{color:var(--warn); background:var(--warn-soft)}
+.pill.plan{color:var(--muted); background:var(--paper)}
+.foot{margin-top:56px; padding-top:14px; border-top:1.5px solid var(--ink); font-size:14px; color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 24px; justify-content:space-between}
+
+/* Diagram vocabulary (inline SVG, themed by tokens) */
+.dg text{font-family:var(--display); font-stretch:84%; font-size:12.5px; fill:var(--ink)}
+.dg .h{font-weight:700; font-size:13.5px}
+.dg .s{font-size:11.5px; fill:var(--muted)}
+.dg .cap{font-family:var(--mono); font-stretch:100%; font-size:10.5px; letter-spacing:.08em; font-weight:600; fill:var(--muted)}
+.dg .m{font-family:var(--mono); font-stretch:100%; font-size:11.5px}
+.dg .acc{fill:var(--accent)}
+.dg .okt{fill:var(--ok)} .dg .warnt{fill:var(--warn)} .dg .badt{fill:var(--bad)}
+.dg .bx{fill:var(--panel); stroke:var(--ink); stroke-width:1.2}
+.dg .soft{fill:var(--paper); stroke:var(--rule); stroke-width:1}
+.dg .hi{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.6}
+.dg .dash{fill:none; stroke:var(--muted); stroke-width:1.2; stroke-dasharray:5 4}
+.dg .dashbx{fill:var(--panel); stroke:var(--muted); stroke-width:1.2; stroke-dasharray:5 4}
+.dg .frame{fill:none; stroke:var(--rule); stroke-width:1.2}
+.dg .frame-acc{fill:none; stroke:var(--accent); stroke-width:1.5; stroke-dasharray:7 4}
+.dg .okb{fill:var(--ok-soft); stroke:var(--ok); stroke-width:1.2}
+.dg .warnb{fill:var(--warn-soft); stroke:var(--warn); stroke-width:1.2}
+.dg .badb{fill:var(--bad-soft); stroke:var(--bad); stroke-width:1.2}
+.dg .ln{fill:none; stroke:var(--ink); stroke-width:1.3}
+.dg .ln-acc{fill:none; stroke:var(--accent); stroke-width:1.7}
+.dg .ln-mut{fill:none; stroke:var(--muted); stroke-width:1.2; stroke-dasharray:4 3}
+.dg .ln-ok{fill:none; stroke:var(--ok); stroke-width:1.7}
+.dg .ln-warn{fill:none; stroke:var(--warn); stroke-width:1.7}
+.dg .ln-bad{fill:none; stroke:var(--bad); stroke-width:1.4; stroke-dasharray:5 3}
+.dg .gridln{stroke:var(--grid); stroke-width:1}
+.dg .axis{stroke:var(--ink); stroke-width:1.2}
+.dg .mk{fill:var(--ink)} .dg .mk-acc{fill:var(--accent)} .dg .mk-mut{fill:var(--muted)} .dg .mk-ok{fill:var(--ok)} .dg .mk-warn{fill:var(--warn)}
+.dg .cell{fill:var(--rule)}
+.dg .hot{fill:var(--muted)}
+.dg .goal{fill:var(--accent)}
+.dg .goaloff{fill:none; stroke:var(--rule); stroke-width:1}
+.dg .ring{fill:none; stroke:var(--accent); stroke-width:2}
+.dg .region{fill:var(--accent-soft); opacity:.55}
+
+@media (max-width:760px){
+  .titleblock{grid-template-columns:minmax(0,1fr)}
+  .tb-main{border-right:none; border-bottom:1.5px solid var(--ink)}
+  .glance{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .glance div:nth-child(2){border-right:none}
+  .glance div:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+  body{font-size:16px}
+  .claim{font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+
+<header class="titleblock">
+  <div class="tb-main">
+    <span class="eyebrow">Implementation blueprint · drawing set</span>
+    <h1>Goal-Compiled <em>Agentic MoE</em></h1>
+    <p class="lede">A goal compiler turns each request into a typed task graph and a static schedule, deciding every step's executor, token budget, escalation ladder, guards and worst-case cost before anything runs. An assembly of executors runs that schedule: compiled code, System-1 models, classic ML, a Qwen3.6-35B-A3B hub with goal-family capacity, and a Qwen3.8-27B spoke. Everything runs under a compiler-grade determinism contract.</p>
+  </div>
+  <div class="tb-cells">
+    <div>Project</div><div>GCAM</div>
+    <div>Plan</div><div>v6 · <span class="mono">docs/PLAN.md</span></div>
+    <div>Review</div><div>Round 5 (Fable 5.1) in progress</div>
+    <div>Date</div><div class="mono">2026-10-21</div>
+    <div>Hub</div><div>Qwen3.6-35B-A3B</div>
+    <div>Reference</div><div>Qwen3.8-27B</div>
+    <div>Repo</div><div class="mono">gauravdc27/model-compiler</div>
+    <div>Sheets</div><div class="mono">11</div>
+  </div>
+</header>
+<dl class="glance">
+  <div><dt>Quality target</dt><dd>Non-inferior to Qwen3.8-27B, per-benchmark margin δ_b</dd></div>
+  <div><dt>Cost target</dt><dd>Cost-of-pass ≤ 0.5× the 27B's</dd></div>
+  <div><dt>Escalation budget</dt><dd>≤ 15% of the 27B's token volume</dd></div>
+  <div><dt>Hub compute</dt><dd>~3B active of 35B · 256 experts, top-8 + 1 shared</dd></div>
+</dl>
+
+<nav aria-label="Sheet index">
+<ol class="index">
+  <li><a href="#s1"><span class="n">01</span>System overview</a></li>
+  <li><a href="#s2"><span class="n">02</span>Compiling a goal into a static schedule</a></li>
+  <li><a href="#s3"><span class="n">03</span>Escalation ladders on joint calibration</a></li>
+  <li><a href="#s4"><span class="n">04</span>Guards, variants and recompiles</a></li>
+  <li><a href="#s5"><span class="n">05</span>Inside the hub: one MoE layer</a></li>
+  <li><a href="#s6"><span class="n">06</span>Served artifact: A versus B</a></li>
+  <li><a href="#s7"><span class="n">07</span>Training program and stage edges</a></li>
+  <li><a href="#s8"><span class="n">08</span>Cost feasibility model</a></li>
+  <li><a href="#s9"><span class="n">09</span>Trust layer: replay and contracts</a></li>
+  <li><a href="#s10"><span class="n">10</span>Roadmap and gates</a></li>
+  <li><a href="#s11"><span class="n">11</span>What exists in the repo</a></li>
+</ol>
+</nav>
+
+<!-- ============================ SHEET 01 ============================ -->
+<section class="sheet" id="s1">
+  <div class="sheet-h"><span class="sheet-no">Sheet 01</span><h2>System overview</h2><span class="ref">Plan §I.0, §I.2</span></div>
+  <p class="claim">Decisions are made once, at compile time, from calibrated numbers. At run time the system only executes the schedule, checks guards, escalates on calibrated abstention and records everything.</p>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 1160 640" role="img" aria-label="System overview: a goal is compiled into a static schedule by a three-stage goal compiler priced by an executor registry; a recorded runtime dispatches each node to System-1 executors, the Qwen3.6-35B-A3B hub or the Qwen3.8-27B spoke, escalating only on abstention; a trust layer below supplies the lock hash and records every call.">
+  <defs>
+    <marker id="f1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f1-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-acc" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f1-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-warn" d="M0,0L10,5L0,10z"/></marker>
+  </defs>
+  <!-- goal -->
+  <rect class="bx" x="20" y="65" width="140" height="70" rx="4"/>
+  <text class="h" x="90" y="95" text-anchor="middle">Goal</text>
+  <text class="s" x="90" y="114" text-anchor="middle">natural language</text>
+  <line class="ln" x1="160" y1="100" x2="213" y2="100" marker-end="url(#f1-a)"/>
+  <!-- compiler -->
+  <rect class="frame-acc" x="200" y="20" width="300" height="340" rx="6"/>
+  <text class="cap acc" x="215" y="42">GOAL COMPILER · COMPILE TIME</text>
+  <rect class="bx" x="215" y="60" width="270" height="80" rx="4"/>
+  <text class="h" x="230" y="84">1 · Parse → Goal IR</text>
+  <text class="s" x="230" y="104">objective · deliverable · verifiers</text>
+  <text class="s" x="230" y="122">budgets · autonomy → capability ceiling</text>
+  <line class="ln" x1="350" y1="140" x2="350" y2="158" marker-end="url(#f1-a)"/>
+  <rect class="bx" x="215" y="160" width="270" height="80" rx="4"/>
+  <text class="h" x="230" y="184">2 · Plan → task DAG</text>
+  <text class="s" x="230" y="204">typed IR ops and their dependencies</text>
+  <text class="s" x="230" y="222">plan cache keyed by template hash</text>
+  <line class="ln" x1="350" y1="240" x2="350" y2="258" marker-end="url(#f1-a)"/>
+  <rect class="hi" x="215" y="260" width="270" height="80" rx="4"/>
+  <text class="h" x="230" y="284">3 · Schedule (static)</text>
+  <text class="s" x="230" y="304">ladder · budget · caps · lane · guards</text>
+  <text class="s" x="230" y="322">worst-case bound · schedule hash</text>
+  <!-- registry and training -->
+  <rect class="bx" x="200" y="390" width="300" height="70" rx="4"/>
+  <text class="h" x="215" y="413">Executor registry</text>
+  <text class="s" x="215" y="432">cost models + joint Outcome records, per lock</text>
+  <text class="s" x="215" y="449">contract D0 / D1 · version</text>
+  <line class="ln-acc" x1="350" y1="390" x2="350" y2="343" marker-end="url(#f1-b)"/>
+  <text class="s" x="360" y="372">prices every ladder</text>
+  <rect class="dashbx" x="20" y="390" width="140" height="70" rx="4"/>
+  <text class="h" x="32" y="413">Training T0–T6</text>
+  <text class="s" x="32" y="432">weights · heads ·</text>
+  <text class="s" x="32" y="449">calibration records</text>
+  <line class="ln" x1="160" y1="425" x2="198" y2="425" marker-end="url(#f1-a)"/>
+  <text class="s" x="179" y="417" text-anchor="middle">feeds</text>
+  <!-- compiler to runtime -->
+  <line class="ln-acc" x1="485" y1="300" x2="558" y2="300" marker-end="url(#f1-b)"/>
+  <text class="s" x="522" y="292" text-anchor="middle">program</text>
+  <text class="s" x="522" y="316" text-anchor="middle">+ hash</text>
+  <!-- runtime -->
+  <rect class="frame" x="560" y="20" width="230" height="440" rx="6"/>
+  <text class="cap" x="575" y="42">RUNTIME · DURABLE, RECORDED</text>
+  <rect class="soft" x="575" y="58" width="200" height="46" rx="3"/>
+  <text class="h" x="588" y="77">Lanes</text><text class="s" x="588" y="95">static order, critical path first</text>
+  <rect class="soft" x="575" y="114" width="200" height="46" rx="3"/>
+  <text class="h" x="588" y="133">Tool-output caps</text><text class="s" x="588" y="151">head + tail kept, hits on receipt</text>
+  <rect class="soft" x="575" y="170" width="200" height="46" rx="3"/>
+  <text class="h" x="588" y="189">Guards</text><text class="s" x="588" y="207">variant once · recompile ≤ allowance</text>
+  <rect class="soft" x="575" y="226" width="200" height="46" rx="3"/>
+  <text class="h" x="588" y="245">Verifiers</text><text class="s" x="588" y="263">tests · checks · judges · repair ≤ k</text>
+  <rect class="soft" x="575" y="282" width="200" height="46" rx="3"/>
+  <text class="h" x="588" y="301">Memory</text><text class="s" x="588" y="319">snapshot reads · idempotent writes</text>
+  <rect class="soft" x="575" y="338" width="200" height="46" rx="3"/>
+  <text class="h" x="588" y="357">Escalation</text><text class="s" x="588" y="375">only on calibrated abstention</text>
+  <rect class="soft" x="575" y="394" width="200" height="46" rx="3"/>
+  <text class="h" x="588" y="413">Receipts</text><text class="s" x="588" y="431">lock · IR · prompt · margins · caps</text>
+  <!-- runtime to tiers -->
+  <line class="ln" x1="792" y1="90" x2="848" y2="90" marker-start="url(#f1-a)" marker-end="url(#f1-a)"/>
+  <text class="s" x="820" y="82" text-anchor="middle">node</text><text class="s" x="820" y="106" text-anchor="middle">value</text>
+  <line class="ln" x1="792" y1="255" x2="848" y2="255" marker-start="url(#f1-a)" marker-end="url(#f1-a)"/>
+  <text class="s" x="820" y="247" text-anchor="middle">node</text><text class="s" x="820" y="271" text-anchor="middle">value</text>
+  <line class="ln" x1="792" y1="405" x2="848" y2="405" marker-start="url(#f1-a)" marker-end="url(#f1-a)"/>
+  <text class="s" x="820" y="397" text-anchor="middle">node</text><text class="s" x="820" y="421" text-anchor="middle">value</text>
+  <!-- tiers -->
+  <rect class="bx" x="850" y="20" width="290" height="140" rx="5"/>
+  <text class="cap" x="865" y="42">SYSTEM-1 · NO OR FEW TOKENS</text>
+  <text x="865" y="64">compiled code from IR slots (exact)</text>
+  <text x="865" y="83">classic ML: GBDT · TabPFN-3 · Chronos-2</text>
+  <text x="865" y="102">encoders: ModernBERT · GLiNER2</text>
+  <text x="865" y="121">decision heads on hub hidden states</text>
+  <text x="865" y="140">SLM tool caller (Qwen3-4B class)</text>
+  <rect class="hi" x="850" y="190" width="290" height="130" rx="5"/>
+  <text class="cap acc" x="865" y="212">HUB · SYSTEM-2</text>
+  <text class="h" x="865" y="233">Qwen3.6-35B-A3B</text>
+  <text x="865" y="252">~3B active · 40 layers · 256 experts</text>
+  <text x="865" y="271">hub-base + goal-family capacity</text>
+  <text x="865" y="290">thinking on/off · early exit</text>
+  <text x="865" y="309">D0 + statistical D2 until GDN audit</text>
+  <rect class="bx" x="850" y="350" width="290" height="110" rx="5"/>
+  <text class="cap" x="865" y="372">SPOKES</text>
+  <text class="h" x="865" y="393">Qwen3.8-27B</text>
+  <text x="865" y="412">teacher · judge · hardest-node escalation</text>
+  <text x="865" y="431">Skywork-Reward-V2-Qwen3-8B</text>
+  <text x="865" y="450">executable verifiers</text>
+  <line class="ln-warn" x1="1120" y1="160" x2="1120" y2="188" marker-end="url(#f1-c)"/>
+  <text class="s" x="1110" y="179" text-anchor="end">abstain → next rung</text>
+  <line class="ln-warn" x1="1120" y1="320" x2="1120" y2="348" marker-end="url(#f1-c)"/>
+  <text class="s" x="1110" y="339" text-anchor="end">abstain → 27B, within budget e</text>
+  <!-- trust band -->
+  <rect class="bx" x="20" y="500" width="1120" height="120" rx="6"/>
+  <text class="cap" x="35" y="524">TRUST LAYER · PART II DETERMINISM CONTRACT</text>
+  <rect class="soft" x="35" y="540" width="172" height="62" rx="3"/>
+  <text class="h" x="47" y="563">Lockfile</text><text class="s" x="47" y="583">weights · engine · kernels</text>
+  <rect class="soft" x="215" y="540" width="172" height="62" rx="3"/>
+  <text class="h" x="227" y="563">Canonical IR hash</text><text class="s" x="227" y="583">RFC 8785 · session state</text>
+  <rect class="soft" x="395" y="540" width="172" height="62" rx="3"/>
+  <text class="h" x="407" y="563">Result store</text><text class="s" x="407" y="583">D0 replay, divergence = error</text>
+  <rect class="soft" x="575" y="540" width="172" height="62" rx="3"/>
+  <text class="h" x="587" y="563">Contracts</text><text class="s" x="587" y="583">D0 / D1 per executor and node</text>
+  <rect class="soft" x="755" y="540" width="172" height="62" rx="3"/>
+  <text class="h" x="767" y="563">Routing traces</text><text class="s" x="767" y="583">40 × 8 routes per token</text>
+  <rect class="soft" x="935" y="540" width="190" height="62" rx="3"/>
+  <text class="h" x="947" y="563">Receipts</text><text class="s" x="947" y="583">every node, every call</text>
+  <line class="ln" x1="350" y1="498" x2="350" y2="462" marker-end="url(#f1-a)"/>
+  <text class="s" x="360" y="484">lock hash into schedule hash</text>
+  <line class="ln" x1="675" y1="460" x2="675" y2="498" marker-end="url(#f1-a)"/>
+  <text class="s" x="685" y="484">records every call</text>
+  <line class="ln" x1="995" y1="460" x2="995" y2="498" marker-end="url(#f1-a)"/>
+  <text class="s" x="1005" y="484">declared contract</text>
+</svg>
+    </div>
+    <figcaption>The compiler (dashed blue) is the only place where executors, budgets and escalation paths are chosen. The runtime never re-plans on its own: it follows the schedule, takes pre-compiled variants on guard failure, and abstains when its allowance runs out.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>Groq's lesson, transferred</h3><p>Groq removes runtime arbitration: the compiler decides where and when every operation runs, so latency and cost are known in advance. Agents have data-dependent output lengths, so cycle-exact timing does not transfer. The discipline does: whole-plan analysis, reserved resources, one plan as the source of truth, and explicit guards where data-dependence cannot be avoided.</p></div>
+    <div><h3>The user's five items</h3><ul>
+      <li>(i) Train discovered experts → hot-expert adapters per goal family (Sheet 05).</li>
+      <li>(ii) New layers and router → goal-gated experts with a compile-time goal bias (Sheet 05).</li>
+      <li>(iii) Specialists and ensembles → spokes, cascades, verifier-selected best-of-K.</li>
+      <li>(iv) System-One models → decision heads, encoders, SLMs and code that abstain upward.</li>
+      <li>(v) Classic ML/DL → GBDT, TabPFN, Chronos-2, kNN and rerankers as registered executors.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ============================ SHEET 02 ============================ -->
+<section class="sheet" id="s2">
+  <div class="sheet-h"><span class="sheet-no">Sheet 02</span><h2>Compiling a goal into a static schedule</h2><span class="ref">Plan §I.2.1 · <span class="mono">dmc/scheduler.py</span></span></div>
+  <p class="claim">Example goal: “fix the failing date-parsing test in this repository and open a pull request.” The compiler places eight nodes on two lanes, sizes every bar at its worst case, and attaches a guard and a pre-compiled variant before execution starts.</p>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 1160 330" role="img" aria-label="Gantt chart of a compiled schedule on two lanes: eight nodes with ladders whose escalation rungs are drawn dashed, cross-lane dependency arrows, and a guard on the test node that leads to a pre-compiled variant and then to one recompile.">
+  <defs>
+    <marker id="f2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f2-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-warn" d="M0,0L10,5L0,10z"/></marker>
+  </defs>
+  <text class="cap" x="150" y="30">COMPILED SCHEDULE · ILLUSTRATIVE NUMBERS</text>
+  <text class="h" x="20" y="103">Lane 1</text>
+  <text class="h" x="20" y="183">Lane 2</text>
+  <rect class="soft" x="150" y="70" width="690" height="56"/>
+  <rect class="soft" x="150" y="150" width="690" height="56"/>
+  <!-- lane 1 -->
+  <rect class="bx" x="150" y="78" width="46" height="40"/>
+  <text class="m" x="158" y="95">n1</text><text class="s" x="158" y="111">code</text>
+  <rect class="bx" x="196" y="78" width="46" height="40"/>
+  <text class="m" x="204" y="95">n3</text><text class="s" x="204" y="111">s1</text>
+  <rect class="dashbx" x="242" y="78" width="46" height="40"/>
+  <text class="s" x="250" y="103">hub</text>
+  <rect class="bx" x="334" y="78" width="138" height="40"/>
+  <text class="m" x="342" y="95">n4</text><text class="s" x="342" y="111">hub · think ≤ 3k</text>
+  <rect class="dashbx" x="472" y="78" width="138" height="40"/>
+  <text class="s" x="480" y="103">27B (on abstention)</text>
+  <rect class="bx" x="610" y="78" width="92" height="40"/>
+  <text class="m" x="618" y="95">n5</text><text class="s" x="618" y="111">hub · call</text>
+  <rect class="bx" x="702" y="78" width="46" height="40"/>
+  <text class="m" x="710" y="95">n6</text><text class="s" x="710" y="111">code</text>
+  <rect class="bx" x="794" y="78" width="46" height="40"/>
+  <text class="m" x="802" y="95">n8</text><text class="s" x="802" y="111">code</text>
+  <!-- lane 2 -->
+  <rect class="bx" x="196" y="158" width="46" height="40"/>
+  <text class="m" x="204" y="175">n2</text><text class="s" x="204" y="191">kNN</text>
+  <rect class="dashbx" x="242" y="158" width="92" height="40"/>
+  <text class="s" x="250" y="183">hub</text>
+  <rect class="bx" x="702" y="158" width="92" height="40"/>
+  <text class="m" x="710" y="175">n7</text><text class="s" x="710" y="191">hub · create</text>
+  <!-- cross-lane dependencies -->
+  <line class="ln" x1="200" y1="118" x2="200" y2="156" marker-end="url(#f2-a)"/>
+  <line class="ln" x1="338" y1="158" x2="338" y2="120" marker-end="url(#f2-a)"/>
+  <line class="ln" x1="706" y1="118" x2="706" y2="156" marker-end="url(#f2-a)"/>
+  <line class="ln" x1="798" y1="158" x2="798" y2="120" marker-end="url(#f2-a)"/>
+  <!-- guard -->
+  <path class="warnb" d="M748,58 L756,66 L748,74 L740,66 Z"/>
+  <text class="s" x="748" y="50" text-anchor="middle">guard: tests_pass</text>
+  <line class="ln-warn" x1="756" y1="66" x2="858" y2="66" marker-end="url(#f2-w)"/>
+  <text class="s warnt" x="806" y="60" text-anchor="middle">fail</text>
+  <rect class="dashbx" x="860" y="36" width="280" height="74" rx="4"/>
+  <text class="h" x="872" y="58">Variant v1 (pre-compiled)</text>
+  <text class="s" x="872" y="77">re-plan with 27B → edit → test</text>
+  <text class="s" x="872" y="95">own bound: 14,500 tokens</text>
+  <line class="ln-warn" x1="1000" y1="110" x2="1000" y2="132" marker-end="url(#f2-w)"/>
+  <text class="s warnt" x="1008" y="125">fails again</text>
+  <rect class="dashbx" x="860" y="134" width="280" height="56" rx="4"/>
+  <text class="h" x="872" y="156">Recompile (allowance 1)</text>
+  <text class="s" x="872" y="175">then an Abstain receipt, never a loop</text>
+  <!-- axis -->
+  <line class="axis" x1="150" y1="226" x2="840" y2="226"/>
+  <g class="gridln">
+    <line x1="150" y1="226" x2="150" y2="232"/><line x1="196" y1="226" x2="196" y2="230"/><line x1="242" y1="226" x2="242" y2="230"/><line x1="288" y1="226" x2="288" y2="230"/><line x1="334" y1="226" x2="334" y2="230"/>
+    <line x1="380" y1="226" x2="380" y2="232"/><line x1="426" y1="226" x2="426" y2="230"/><line x1="472" y1="226" x2="472" y2="230"/><line x1="518" y1="226" x2="518" y2="230"/><line x1="564" y1="226" x2="564" y2="230"/>
+    <line x1="610" y1="226" x2="610" y2="232"/><line x1="656" y1="226" x2="656" y2="230"/><line x1="702" y1="226" x2="702" y2="230"/><line x1="748" y1="226" x2="748" y2="230"/><line x1="794" y1="226" x2="794" y2="230"/><line x1="840" y1="226" x2="840" y2="232"/>
+  </g>
+  <line class="axis" x1="150" y1="226" x2="150" y2="232"/><line class="axis" x1="380" y1="226" x2="380" y2="232"/><line class="axis" x1="610" y1="226" x2="610" y2="232"/><line class="axis" x1="840" y1="226" x2="840" y2="232"/>
+  <text class="m" x="150" y="248" text-anchor="middle">0</text><text class="m" x="380" y="248" text-anchor="middle">5</text><text class="m" x="610" y="248" text-anchor="middle">10</text><text class="m" x="840" y="248" text-anchor="middle">15</text>
+  <text class="s" x="495" y="270" text-anchor="middle">worst-case latency units (every rung of every ladder runs)</text>
+  <!-- legend -->
+  <rect class="bx" x="150" y="292" width="22" height="14"/><text class="s" x="180" y="304">first rung</text>
+  <rect class="dashbx" x="270" y="292" width="22" height="14"/><text class="s" x="300" y="304">escalation rung, runs only on abstention</text>
+  <line class="ln" x1="560" y1="306" x2="560" y2="290" marker-end="url(#f2-a)"/><text class="s" x="572" y="304">dependency across lanes</text>
+  <path class="warnb" d="M750,291 L757,298 L750,305 L743,298 Z"/><text class="s" x="766" y="304">guard on a typed output</text>
+</svg>
+    </div>
+    <figcaption>Bars are sized at the worst case, so the schedule's finish time and token bound hold even if every ladder escalates. Expected cost is lower and comes from joint calibration (Sheet 03).</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <thead><tr><th>Node</th><th>Op</th><th>Ladder</th><th>Input cap</th><th>Worst-case tokens</th><th>Capability</th></tr></thead>
+    <tbody>
+      <tr><td class="num">n1</td><td>read issue</td><td>code</td><td class="num">—</td><td class="num">0</td><td>read</td></tr>
+      <tr><td class="num">n2</td><td>locate files</td><td>embedding kNN → hub</td><td class="num">2,000</td><td class="num">3,000</td><td>read</td></tr>
+      <tr><td class="num">n3</td><td>classify the failure</td><td>System-1 head → hub Decide</td><td class="num">2,000</td><td class="num">4,600</td><td>read</td></tr>
+      <tr><td class="num">n4</td><td>plan the fix</td><td>hub thinking (≤ 3k) → Qwen3.8-27B</td><td class="num">4,000</td><td class="num">16,000</td><td>read</td></tr>
+      <tr><td class="num">n5</td><td>edit code</td><td>hub Call, grammar-constrained</td><td class="num">4,000</td><td class="num">5,500</td><td>write</td></tr>
+      <tr><td class="num">n6</td><td>run tests</td><td>code · guard <code>tests_pass</code></td><td class="num">—</td><td class="num">0</td><td>read</td></tr>
+      <tr><td class="num">n7</td><td>write PR text</td><td>hub Create</td><td class="num">2,000</td><td class="num">2,800</td><td>read</td></tr>
+      <tr><td class="num">n8</td><td>open the PR</td><td>code, after a confirmation node</td><td class="num">—</td><td class="num">0</td><td>external_send</td></tr>
+      <tr><td></td><td><strong>Main graph</strong></td><td></td><td></td><td class="num"><strong>31,900</strong></td><td>ceiling: read · write · external_send</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============================ SHEET 03 ============================ -->
+<section class="sheet" id="s3">
+  <div class="sheet-h"><span class="sheet-no">Sheet 03</span><h2>Escalation ladders priced on joint calibration</h2><span class="ref">Plan §I.2.1, §I.2.2 · <span class="mono">Outcome</span>, <span class="mono">_estimate_joint</span></span></div>
+  <p class="claim">A cascade passes its hardest items upward. Multiplying each rung's average accuracy ignores that, so the scheduler replays every candidate ladder item by item on a shared calibration split.</p>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 1160 330" role="img" aria-label="Ten calibration items: System-1 answers the five easy items correctly and abstains on the five hard ones; the hub is right on 9 of 10 overall but only 4 of 5 hard items; the ladder therefore scores 0.90, not the 0.95 an independent estimate predicts, and costs 100 tokens per item, not 50.">
+  <defs>
+    <marker id="f3-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-warn" d="M0,0L10,5L0,10z"/></marker>
+  </defs>
+  <text class="cap" x="40" y="40">LADDER</text>
+  <rect class="bx" x="40" y="60" width="170" height="50" rx="4"/>
+  <text class="h" x="54" y="81">s1 · System-1</text><text class="s" x="54" y="99">answers or abstains</text>
+  <line class="ln-warn" x1="125" y1="110" x2="125" y2="158" marker-end="url(#f3-a)"/>
+  <text class="s warnt" x="135" y="138">abstain</text>
+  <rect class="bx" x="40" y="160" width="170" height="50" rx="4"/>
+  <text class="h" x="54" y="181">hub</text><text class="s" x="54" y="199">always answers</text>
+  <!-- brackets -->
+  <line class="ln" x1="312" y1="40" x2="548" y2="40"/><line class="ln" x1="312" y1="40" x2="312" y2="46"/><line class="ln" x1="548" y1="40" x2="548" y2="46"/>
+  <text class="s" x="430" y="32" text-anchor="middle">easy items</text>
+  <line class="ln" x1="562" y1="40" x2="798" y2="40"/><line class="ln" x1="562" y1="40" x2="562" y2="46"/><line class="ln" x1="798" y1="40" x2="798" y2="46"/>
+  <text class="s" x="680" y="32" text-anchor="middle">hard items</text>
+  <text class="m" x="330" y="62" text-anchor="middle">1</text><text class="m" x="380" y="62" text-anchor="middle">2</text><text class="m" x="430" y="62" text-anchor="middle">3</text><text class="m" x="480" y="62" text-anchor="middle">4</text><text class="m" x="530" y="62" text-anchor="middle">5</text>
+  <text class="m" x="580" y="62" text-anchor="middle">6</text><text class="m" x="630" y="62" text-anchor="middle">7</text><text class="m" x="680" y="62" text-anchor="middle">8</text><text class="m" x="730" y="62" text-anchor="middle">9</text><text class="m" x="780" y="62" text-anchor="middle">10</text>
+  <!-- row labels -->
+  <text class="h" x="290" y="93" text-anchor="end">s1</text>
+  <text class="h" x="290" y="153" text-anchor="end">hub</text>
+  <text class="s" x="290" y="186" text-anchor="end">hub tokens</text>
+  <text class="h" x="290" y="223" text-anchor="end">ladder</text>
+  <text class="s" x="290" y="256" text-anchor="end">tokens</text>
+  <!-- s1 row -->
+  <g>
+    <rect class="okb" x="312" y="74" width="36" height="32" rx="3"/><rect class="okb" x="362" y="74" width="36" height="32" rx="3"/><rect class="okb" x="412" y="74" width="36" height="32" rx="3"/><rect class="okb" x="462" y="74" width="36" height="32" rx="3"/><rect class="okb" x="512" y="74" width="36" height="32" rx="3"/>
+    <rect class="warnb" x="562" y="74" width="36" height="32" rx="3"/><rect class="warnb" x="612" y="74" width="36" height="32" rx="3"/><rect class="warnb" x="662" y="74" width="36" height="32" rx="3"/><rect class="warnb" x="712" y="74" width="36" height="32" rx="3"/><rect class="warnb" x="762" y="74" width="36" height="32" rx="3"/>
+    <text class="h okt" x="330" y="95" text-anchor="middle">✓</text><text class="h okt" x="380" y="95" text-anchor="middle">✓</text><text class="h okt" x="430" y="95" text-anchor="middle">✓</text><text class="h okt" x="480" y="95" text-anchor="middle">✓</text><text class="h okt" x="530" y="95" text-anchor="middle">✓</text>
+    <text class="h warnt" x="580" y="95" text-anchor="middle">–</text><text class="h warnt" x="630" y="95" text-anchor="middle">–</text><text class="h warnt" x="680" y="95" text-anchor="middle">–</text><text class="h warnt" x="730" y="95" text-anchor="middle">–</text><text class="h warnt" x="780" y="95" text-anchor="middle">–</text>
+  </g>
+  <!-- hub row -->
+  <g>
+    <rect class="okb" x="312" y="134" width="36" height="32" rx="3"/><rect class="okb" x="362" y="134" width="36" height="32" rx="3"/><rect class="okb" x="412" y="134" width="36" height="32" rx="3"/><rect class="okb" x="462" y="134" width="36" height="32" rx="3"/><rect class="okb" x="512" y="134" width="36" height="32" rx="3"/>
+    <rect class="okb" x="562" y="134" width="36" height="32" rx="3"/><rect class="okb" x="612" y="134" width="36" height="32" rx="3"/><rect class="okb" x="662" y="134" width="36" height="32" rx="3"/><rect class="okb" x="712" y="134" width="36" height="32" rx="3"/><rect class="badb" x="762" y="134" width="36" height="32" rx="3"/>
+    <text class="h okt" x="330" y="155" text-anchor="middle">✓</text><text class="h okt" x="380" y="155" text-anchor="middle">✓</text><text class="h okt" x="430" y="155" text-anchor="middle">✓</text><text class="h okt" x="480" y="155" text-anchor="middle">✓</text><text class="h okt" x="530" y="155" text-anchor="middle">✓</text>
+    <text class="h okt" x="580" y="155" text-anchor="middle">✓</text><text class="h okt" x="630" y="155" text-anchor="middle">✓</text><text class="h okt" x="680" y="155" text-anchor="middle">✓</text><text class="h okt" x="730" y="155" text-anchor="middle">✓</text><text class="h badt" x="780" y="155" text-anchor="middle">✗</text>
+    <text class="m" x="330" y="186" text-anchor="middle">100</text><text class="m" x="380" y="186" text-anchor="middle">100</text><text class="m" x="430" y="186" text-anchor="middle">100</text><text class="m" x="480" y="186" text-anchor="middle">100</text><text class="m" x="530" y="186" text-anchor="middle">100</text>
+    <text class="m" x="580" y="186" text-anchor="middle">200</text><text class="m" x="630" y="186" text-anchor="middle">200</text><text class="m" x="680" y="186" text-anchor="middle">200</text><text class="m" x="730" y="186" text-anchor="middle">200</text><text class="m" x="780" y="186" text-anchor="middle">200</text>
+  </g>
+  <!-- ladder row -->
+  <g>
+    <rect class="okb" x="312" y="204" width="36" height="32" rx="3"/><rect class="okb" x="362" y="204" width="36" height="32" rx="3"/><rect class="okb" x="412" y="204" width="36" height="32" rx="3"/><rect class="okb" x="462" y="204" width="36" height="32" rx="3"/><rect class="okb" x="512" y="204" width="36" height="32" rx="3"/>
+    <rect class="okb" x="562" y="204" width="36" height="32" rx="3"/><rect class="okb" x="612" y="204" width="36" height="32" rx="3"/><rect class="okb" x="662" y="204" width="36" height="32" rx="3"/><rect class="okb" x="712" y="204" width="36" height="32" rx="3"/><rect class="badb" x="762" y="204" width="36" height="32" rx="3"/>
+    <text class="h okt" x="330" y="225" text-anchor="middle">✓</text><text class="h okt" x="380" y="225" text-anchor="middle">✓</text><text class="h okt" x="430" y="225" text-anchor="middle">✓</text><text class="h okt" x="480" y="225" text-anchor="middle">✓</text><text class="h okt" x="530" y="225" text-anchor="middle">✓</text>
+    <text class="h okt" x="580" y="225" text-anchor="middle">✓</text><text class="h okt" x="630" y="225" text-anchor="middle">✓</text><text class="h okt" x="680" y="225" text-anchor="middle">✓</text><text class="h okt" x="730" y="225" text-anchor="middle">✓</text><text class="h badt" x="780" y="225" text-anchor="middle">✗</text>
+    <text class="m" x="330" y="256" text-anchor="middle">0</text><text class="m" x="380" y="256" text-anchor="middle">0</text><text class="m" x="430" y="256" text-anchor="middle">0</text><text class="m" x="480" y="256" text-anchor="middle">0</text><text class="m" x="530" y="256" text-anchor="middle">0</text>
+    <text class="m" x="580" y="256" text-anchor="middle">200</text><text class="m" x="630" y="256" text-anchor="middle">200</text><text class="m" x="680" y="256" text-anchor="middle">200</text><text class="m" x="730" y="256" text-anchor="middle">200</text><text class="m" x="780" y="256" text-anchor="middle">200</text>
+  </g>
+  <!-- estimate cards -->
+  <rect class="soft" x="840" y="50" width="300" height="110" rx="4"/>
+  <text class="cap" x="855" y="72">INDEPENDENT ESTIMATE</text>
+  <text class="m" x="855" y="96">accuracy 0.5×1.0 + 0.5×0.9 = 0.95</text>
+  <text class="m" x="855" y="118">tokens   0.5 × 100 = 50</text>
+  <text class="s" x="855" y="142">uses the hub's average over all items</text>
+  <rect class="hi" x="840" y="175" width="300" height="110" rx="4"/>
+  <text class="cap acc" x="855" y="197">JOINT ESTIMATE · REPLAY</text>
+  <text class="m" x="855" y="221">accuracy 9 / 10 = 0.90</text>
+  <text class="m" x="855" y="243">tokens   5 × 200 / 10 = 100</text>
+  <text class="s" x="855" y="267">a 0.93 bar is refused: CompileError</text>
+  <!-- legend -->
+  <rect class="okb" x="312" y="290" width="14" height="14" rx="2"/><text class="s" x="332" y="302">correct</text>
+  <rect class="warnb" x="400" y="290" width="14" height="14" rx="2"/><text class="s" x="420" y="302">abstains, escalates</text>
+  <rect class="badb" x="540" y="290" width="14" height="14" rx="2"/><text class="s" x="560" y="302">wrong</text>
+</svg>
+    </div>
+    <figcaption>This is the scheduler's own unit test (<span class="mono">test_joint_calibration_accounts_for_correlated_errors</span>). The independent estimate over-predicts accuracy by 5 points and under-predicts tokens by half; the joint estimate is exact on the calibration items.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>Executor registration contract</h3><ul>
+      <li>Input schema compiled from IR slots (feature schema for classic ML).</li>
+      <li>Output is a typed IR value plus a conformally calibrated probability. No executor returns free text into the graph.</li>
+      <li>Cost model: coverage, accuracy, forced accuracy, token bounds, input reads, latency, version, plus per-item <code>Outcome</code> records.</li>
+      <li>Contract D0 or D1, a lock, and a minimum calibration size per (op, difficulty) bucket.</li>
+    </ul></div>
+    <div><h3>Bounds versus expectations</h3><p>Executor token fields are compiled bounds: fixed prompt size, decode budget, and how many times the node's capped input is read (0 for code, 2 for two-order label scoring). Expected tokens come from what calls actually spent on calibration items.</p><p>Pilot 07 tests whether the joint prediction transfers to a held-out split. If it does not, bars are compared against the Wilson lower bound instead of the point estimate.</p></div>
+  </div>
+</section>
+
+<!-- ============================ SHEET 04 ============================ -->
+<section class="sheet" id="s4">
+  <div class="sheet-h"><span class="sheet-no">Sheet 04</span><h2>Guards, variants and recompiles</h2><span class="ref">Plan §I.2.1 · <span class="mono">Guard</span>, <span class="mono">Program</span>, <span class="mono">GuardRuntime</span></span></div>
+  <p class="claim">Data-dependent branches are handled the way a JIT handles deoptimization. Likely alternatives are compiled in advance, guards check typed outputs, and every path out of the plan is counted against the bound or ends in a defined failure.</p>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 1160 330" role="img" aria-label="State machine of guard handling: a node runs, its guard is checked; on pass execution continues; on failure the guard's target is either a pre-compiled variant, run at most once, or a recompile while allowance remains; anything else is an Abstain receipt. A stacked bar shows the worst-case bound as main graph plus every variant plus the recompile allowance, under the budget.">
+  <defs>
+    <marker id="f4-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f4-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-warn" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f4-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-ok" d="M0,0L10,5L0,10z"/></marker>
+  </defs>
+  <rect class="bx" x="20" y="40" width="180" height="56" rx="4"/>
+  <text class="h" x="34" y="63">Run next node</text><text class="s" x="34" y="82">as compiled</text>
+  <rect class="bx" x="300" y="40" width="190" height="56" rx="4"/>
+  <text class="h" x="314" y="63">Check guard</text><text class="s" x="314" y="82">typed predicate over output</text>
+  <rect class="okb" x="600" y="40" width="190" height="56" rx="4"/>
+  <text class="h" x="614" y="63">Continue</text><text class="s" x="614" y="82">or finish: result + receipt</text>
+  <rect class="bx" x="300" y="150" width="190" height="56" rx="4"/>
+  <text class="h" x="314" y="173">on_fail target</text><text class="s" x="314" y="192">variant id or recompile</text>
+  <rect class="warnb" x="20" y="150" width="180" height="56" rx="4"/>
+  <text class="h" x="34" y="173">Run variant v_i</text><text class="s" x="34" y="192">pre-compiled, own bound</text>
+  <rect class="badb" x="600" y="150" width="190" height="56" rx="4"/>
+  <text class="h" x="614" y="173">Abstain receipt (D⊥)</text><text class="s" x="614" y="192">defined failure, no loop</text>
+  <rect class="warnb" x="300" y="260" width="190" height="56" rx="4"/>
+  <text class="h" x="314" y="283">Recompile</text><text class="s" x="314" y="302">typed failure + remaining budget</text>
+  <line class="ln" x1="200" y1="68" x2="298" y2="68" marker-end="url(#f4-a)"/>
+  <text class="s" x="249" y="60" text-anchor="middle">output</text>
+  <line class="ln-ok" x1="490" y1="68" x2="598" y2="68" marker-end="url(#f4-o)"/>
+  <text class="s okt" x="544" y="60" text-anchor="middle">pass</text>
+  <path class="ln" d="M695,40 V20 H110 V38" marker-end="url(#f4-a)"/>
+  <text class="s" x="402" y="15" text-anchor="middle">next node</text>
+  <line class="ln-warn" x1="395" y1="96" x2="395" y2="148" marker-end="url(#f4-w)"/>
+  <text class="s warnt" x="405" y="126">fail</text>
+  <line class="ln-warn" x1="300" y1="178" x2="202" y2="178" marker-end="url(#f4-w)"/>
+  <text class="s" x="251" y="170" text-anchor="middle">first use</text>
+  <line class="ln" x1="110" y1="150" x2="110" y2="98" marker-end="url(#f4-a)"/>
+  <text class="s" x="120" y="128">resume</text>
+  <line class="ln-warn" x1="490" y1="178" x2="598" y2="178" marker-end="url(#f4-w)"/>
+  <text class="s" x="544" y="170" text-anchor="middle">exhausted</text>
+  <line class="ln-warn" x1="395" y1="206" x2="395" y2="258" marker-end="url(#f4-w)"/>
+  <text class="s" x="405" y="236">allowance left</text>
+  <path class="ln" d="M300,288 H10 V68 H18" marker-end="url(#f4-a)"/>
+  <text class="s" x="155" y="281" text-anchor="middle">new program, bound re-checked</text>
+  <!-- bound -->
+  <text class="cap" x="840" y="52">WORST-CASE BOUND · SHEET 02 EXAMPLE</text>
+  <rect class="bx" x="840" y="110" width="149" height="34"/>
+  <rect class="warnb" x="989" y="110" width="68" height="34"/>
+  <rect class="badb" x="1057" y="110" width="37" height="34"/>
+  <line class="axis" x1="1120" y1="96" x2="1120" y2="156" stroke-dasharray="4 3"/>
+  <text class="s" x="1120" y="88" text-anchor="end">budget 60,000</text>
+  <rect class="bx" x="840" y="176" width="12" height="12"/><text class="m" x="860" y="187">main graph        31,900</text>
+  <rect class="warnb" x="840" y="198" width="12" height="12"/><text class="m" x="860" y="209">all variants (v1)  14,500</text>
+  <rect class="badb" x="840" y="220" width="12" height="12"/><text class="m" x="860" y="231">recompile 1×8,000  8,000</text>
+  <text class="m h" x="860" y="257">bound             54,400</text>
+  <text class="s" x="840" y="286">CompileError if the bound exceeds the budget,</text>
+  <text class="s" x="840" y="303">or if any node in any variant needs a</text>
+  <text class="s" x="840" y="320">capability above the program's ceiling.</text>
+</svg>
+    </div>
+    <figcaption>Each variant runs at most once and recompiles stop at the allowance. A guard inside one variant can hand off to another, so the bound counts every variant, not only the largest. Irreversible nodes (external_send, destructive) compile only behind a confirmation or dry-run node. Capabilities are fixed per branch at compile time, so a failed guard cannot steer execution into a branch with more authority than the goal was compiled with. This is the defence against branch-steering attacks on static plans.</figcaption>
+  </figure>
+</section>
+
+<!-- ============================ SHEET 05 ============================ -->
+<section class="sheet" id="s5">
+  <div class="sheet-h"><span class="sheet-no">Sheet 05</span><h2>Inside the hub: one MoE layer with goal capacity</h2><span class="ref">Plan §I.2.3 · <span class="mono">dmc/expansion.py</span>, <span class="mono">dmc/expert_lora.py</span></span></div>
+  <p class="claim">The goal enters the hub as a bias on the router, set by the compiler before the request runs. For the goal's family it opens trained goal experts. For every other family the bias is −∞, so the layer computes exactly what the base layer computes.</p>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 1160 470" role="img" aria-label="One MoE layer of the hub: the token state feeds the frozen base router, which gives 256 logits, and trained goal rows plus a compiler-set goal bias, which give k logits; a stable top-8 selection picks experts from 256 frozen base experts, some of them hot experts adapted for the family, and from the family's goal experts; other families' goal experts are never selected; the weighted sum plus the always-on shared expert goes to the next layer.">
+  <defs>
+    <marker id="f5-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f5-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-acc" d="M0,0L10,5L0,10z"/></marker>
+    <pattern id="f5-cell" x="720" y="70" width="14" height="14" patternUnits="userSpaceOnUse"><rect class="cell" width="11" height="11"/></pattern>
+  </defs>
+  <text class="cap" x="20" y="40">ONE MoE LAYER · REPEATED IN ALL 40 LAYERS</text>
+  <rect class="bx" x="20" y="195" width="120" height="60" rx="4"/>
+  <text class="h" x="80" y="220" text-anchor="middle">token state h</text>
+  <text class="s" x="80" y="240" text-anchor="middle">from GDN or attention</text>
+  <path class="ln" d="M140,215 H165 V132 H188" marker-end="url(#f5-a)"/>
+  <path class="ln" d="M140,235 H165 V322 H188" marker-end="url(#f5-a)"/>
+  <text class="s" x="170" y="185">h</text><text class="s" x="170" y="277">h</text>
+  <rect class="bx" x="190" y="100" width="240" height="64" rx="4"/>
+  <text class="h" x="204" y="124">Base router (frozen)</text>
+  <text class="s" x="204" y="144">FP32 GEMM → 256 logits</text>
+  <rect class="hi" x="190" y="290" width="240" height="64" rx="4"/>
+  <text class="h" x="204" y="314">Goal rows (trained)</text>
+  <text class="s" x="204" y="334">w_new · h + b_goal → k logits</text>
+  <rect class="dashbx" x="190" y="395" width="240" height="50" rx="4"/>
+  <text class="h" x="204" y="416">Goal compiler</text>
+  <text class="s" x="204" y="434">sets the goal for the whole request</text>
+  <line class="ln-acc" x1="310" y1="395" x2="310" y2="357" marker-end="url(#f5-b)"/>
+  <text class="s acc" x="320" y="380">b_goal (−∞ for other families)</text>
+  <path class="ln" d="M430,132 H565 V193" marker-end="url(#f5-a)"/>
+  <text class="s" x="497" y="124" text-anchor="middle">256 logits</text>
+  <path class="ln-acc" d="M430,322 H565 V257" marker-end="url(#f5-b)"/>
+  <text class="s acc" x="497" y="314" text-anchor="middle">k logits</text>
+  <rect class="bx" x="470" y="195" width="190" height="62" rx="4"/>
+  <text class="h" x="484" y="217">Select top-8</text>
+  <text class="s" x="484" y="234">stable sort, lowest index wins</text>
+  <text class="s" x="484" y="250">softmax over the 8 picks</text>
+  <line class="ln" x1="660" y1="226" x2="706" y2="226" marker-end="url(#f5-a)"/>
+  <text class="s" x="683" y="218" text-anchor="middle">top-8</text>
+  <!-- experts group -->
+  <rect class="frame" x="708" y="44" width="380" height="326" rx="6"/>
+  <text class="cap" x="720" y="62">256 BASE EXPERTS (FROZEN)</text>
+  <rect x="720" y="70" width="224" height="224" fill="url(#f5-cell)"/>
+  <g class="hot">
+    <rect x="748" y="84" width="11" height="11"/><rect x="790" y="84" width="11" height="11"/><rect x="846" y="98" width="11" height="11"/><rect x="888" y="112" width="11" height="11"/>
+    <rect x="734" y="140" width="11" height="11"/><rect x="818" y="154" width="11" height="11"/><rect x="916" y="154" width="11" height="11"/><rect x="762" y="196" width="11" height="11"/>
+    <rect x="860" y="196" width="11" height="11"/><rect x="804" y="224" width="11" height="11"/><rect x="902" y="238" width="11" height="11"/><rect x="720" y="252" width="11" height="11"/>
+    <rect x="832" y="266" width="11" height="11"/><rect x="874" y="280" width="11" height="11"/>
+  </g>
+  <g class="ring">
+    <rect x="788" y="82" width="15" height="15"/><rect x="844" y="96" width="15" height="15"/><rect x="816" y="152" width="15" height="15"/>
+    <rect x="760" y="194" width="15" height="15"/><rect x="900" y="236" width="15" height="15"/><rect x="830" y="264" width="15" height="15"/>
+  </g>
+  <g class="goal">
+    <rect x="960" y="70" width="11" height="11"/><rect x="960" y="84" width="11" height="11"/><rect x="960" y="98" width="11" height="11"/><rect x="960" y="112" width="11" height="11"/>
+    <rect x="960" y="126" width="11" height="11"/><rect x="960" y="140" width="11" height="11"/><rect x="960" y="154" width="11" height="11"/><rect x="960" y="168" width="11" height="11"/>
+  </g>
+  <rect class="ring" x="958" y="82" width="15" height="15"/><rect class="ring" x="958" y="124" width="15" height="15"/>
+  <text class="h acc" x="982" y="80">goal experts</text>
+  <text class="s" x="982" y="97">for family f</text>
+  <text class="s" x="982" y="114">(item ii)</text>
+  <g class="goaloff">
+    <rect x="960" y="210" width="11" height="11"/><rect x="960" y="224" width="11" height="11"/><rect x="960" y="238" width="11" height="11"/><rect x="960" y="252" width="11" height="11"/>
+    <rect x="960" y="266" width="11" height="11"/><rect x="960" y="280" width="11" height="11"/>
+  </g>
+  <text class="h" x="982" y="220">other families</text>
+  <text class="s" x="982" y="237">b_goal = −∞,</text>
+  <text class="s" x="982" y="254">never selected</text>
+  <rect class="soft" x="720" y="318" width="224" height="36" rx="3"/>
+  <text class="h" x="832" y="341" text-anchor="middle">shared expert · always on</text>
+  <line class="ln" x1="898" y1="370" x2="898" y2="392" marker-end="url(#f5-a)"/>
+  <text class="s" x="908" y="386">8 weighted picks + shared</text>
+  <circle class="bx" cx="898" cy="410" r="16"/>
+  <text class="h" x="898" y="415" text-anchor="middle">Σ</text>
+  <line class="ln" x1="914" y1="410" x2="1000" y2="410" marker-end="url(#f5-a)"/>
+  <text class="s" x="1008" y="414">next layer</text>
+  <!-- legend -->
+  <rect class="cell" x="470" y="400" width="11" height="11"/><text class="s" x="488" y="410">base expert</text>
+  <rect class="hot" x="470" y="420" width="11" height="11"/><text class="s" x="488" y="430">hot expert for f (item i)</text>
+  <rect class="ring" x="468" y="438" width="15" height="15"/><text class="s" x="488" y="450">picked for this token</text>
+</svg>
+    </div>
+    <figcaption>Routed variant shown: goal experts compete inside the top-8, so active compute does not change. In this token, two goal experts displaced two base experts. The additive variant instead adds gated goal experts on top of the 8 picks, at about +11% MoE-FFN compute per added expert.</figcaption>
+  </figure>
+  <div class="cols">
+    <div><h3>Item (i): train the discovered experts</h3><p>A routing atlas on each family's traffic, measured on hub-base, finds the hot experts by selection counts (A3B rule: 80% of overall mass ∪ 50% per slice; about 97 of 256 per layer for voice). They get a rank-16 LoRA whose B matrix starts at zero, so attaching it changes nothing until training moves it. Ablations: experts-only, and ESFT-tight sets of 5–15% of experts.</p></div>
+    <div><h3>Item (ii): new experts and router</h3><p>New experts are warm-started as copies of the family's hottest expert, with router rows copied from the parent. Noise (σ = 0.05·std) goes on the copy only, so the parent is never perturbed. Only the new experts, their rows and the goal biases train. A router-only review pass on less than 1% replay protects retention (MoE-LPR: 96.6% with it, about 87% without).</p></div>
+    <div><h3>Guarantee, and how it is tested</h3><p>With the goal off, the wrapped block returns <code>base(h)</code> itself, so the result is bit-identical by construction (<span class="mono">tests/test_expansion.py</span>). Pilot 06 compares routed and additive experts against a matched-rank LoRA arm, a router-only arm and a random-parent arm, and also measures accuracy when the goal is wrong.</p></div>
+  </div>
+</section>
+
+<!-- ============================ SHEET 06 ============================ -->
+<section class="sheet" id="s6">
+  <div class="sheet-h"><span class="sheet-no">Sheet 06</span><h2>Served artifact: A versus B</h2><span class="ref">Plan §I.2.3 · R26</span></div>
+  <p class="claim">Item (i) merges adapters into weights, while item (ii) gates experts by goal. The plan serves per-family checkpoints first (A). It moves to one goal-gated checkpoint (B) only if B passes a comparison written down in advance.</p>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 1160 440" role="img" aria-label="Two serving options. A: one 8-GPU node holds six per-family merged checkpoints, hub-base and the 27B spoke; a plan step pinned to the agentic checkpoint hands off to a math step on another checkpoint, which must re-prefill because caches do not cross models. B: one checkpoint with 256 frozen base experts and 48 goal experts per layer serves both steps; the goal bias changes per request and the prefix can be reused once the prefix-cache gate passes.">
+  <defs>
+    <marker id="f6-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f6-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-warn" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f6-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-ok" d="M0,0L10,5L0,10z"/></marker>
+  </defs>
+  <!-- A -->
+  <rect class="frame" x="20" y="20" width="550" height="400" rx="6"/>
+  <text class="h" x="36" y="46">A · Per-family checkpoints</text>
+  <text class="s" x="36" y="64">served from G1 · no engine work in G1</text>
+  <rect class="frame" x="36" y="80" width="518" height="210" rx="4"/>
+  <text class="cap" x="48" y="98">ONE 8 × H200 NODE · 141 GB PER GPU</text>
+  <rect class="bx" x="48" y="110" width="115" height="80" rx="3"/><text class="h" x="60" y="134">C_decide</text><text class="s" x="60" y="152">~36 GB FP8</text>
+  <rect class="bx" x="174" y="110" width="115" height="80" rx="3"/><text class="h" x="186" y="134">C_create</text><text class="s" x="186" y="152">~36 GB FP8</text>
+  <rect class="bx" x="300" y="110" width="115" height="80" rx="3"/><text class="h" x="312" y="134">hub-base</text><text class="s" x="312" y="152">~36 GB FP8</text>
+  <rect class="bx" x="426" y="110" width="115" height="80" rx="3"/><text class="h" x="438" y="134">Qwen3.8-27B</text><text class="s" x="438" y="152">~54 GB bf16</text>
+  <rect class="hi" x="48" y="200" width="115" height="80" rx="3"/><text class="h" x="60" y="224">C_agent</text><text class="s" x="60" y="242">~36 GB FP8</text>
+  <rect class="bx" x="174" y="200" width="115" height="80" rx="3"/><text class="h" x="186" y="224">C_code</text><text class="s" x="186" y="242">~36 GB FP8</text>
+  <rect class="hi" x="300" y="200" width="115" height="80" rx="3"/><text class="h" x="312" y="224">C_math</text><text class="s" x="312" y="242">~36 GB FP8</text>
+  <rect class="bx" x="426" y="200" width="115" height="80" rx="3"/><text class="h" x="438" y="224">C_research</text><text class="s" x="438" y="242">~36 GB FP8</text>
+  <rect class="bx" x="48" y="330" width="115" height="44" rx="3"/><text class="h" x="60" y="349">plan step</text><text class="s" x="60" y="366">agentic-tool</text>
+  <rect class="bx" x="300" y="330" width="115" height="44" rx="3"/><text class="h" x="312" y="349">compute step</text><text class="s" x="312" y="366">reason-math</text>
+  <line class="ln-acc" x1="105" y1="330" x2="105" y2="283"/>
+  <line class="ln-acc" x1="357" y1="330" x2="357" y2="283"/>
+  <text class="s acc" x="113" y="312">pinned to replica</text>
+  <text class="s acc" x="365" y="312">pinned to replica</text>
+  <line class="ln-warn" x1="163" y1="352" x2="298" y2="352" marker-end="url(#f6-w)"/>
+  <text class="s warnt" x="230" y="345" text-anchor="middle">full re-prefill</text>
+  <text class="s warnt" x="230" y="368" text-anchor="middle">(cache stays behind)</text>
+  <text class="s" x="36" y="404">each C_f has its own executor entry, lock, calibration and atlas</text>
+  <!-- B -->
+  <rect class="frame" x="590" y="20" width="550" height="400" rx="6"/>
+  <text class="h" x="606" y="46">B · One goal-gated checkpoint</text>
+  <text class="s" x="606" y="64">target · adopted at G2 only on the pre-registered rule</text>
+  <rect class="frame" x="606" y="80" width="518" height="210" rx="4"/>
+  <text class="cap" x="618" y="98">ONE CHECKPOINT · REPLICATED, EP 8</text>
+  <text class="s" x="618" y="122">experts per layer</text>
+  <rect class="soft" x="618" y="130" width="404" height="36"/>
+  <text class="h" x="820" y="153" text-anchor="middle">256 base experts (hub-base, frozen)</text>
+  <rect class="goal" x="1022" y="130" width="78" height="36"/>
+  <g class="gridln"><line x1="1035" y1="130" x2="1035" y2="166"/><line x1="1048" y1="130" x2="1048" y2="166"/><line x1="1061" y1="130" x2="1061" y2="166"/><line x1="1074" y1="130" x2="1074" y2="166"/><line x1="1087" y1="130" x2="1087" y2="166"/></g>
+  <text class="s acc" x="1061" y="184" text-anchor="middle">6 families × 8</text>
+  <text x="618" y="206">304 experts per layer = 8 × 38, divides EP 8</text>
+  <text x="618" y="226">router: base rows + goal rows, b_goal per request</text>
+  <text class="acc" x="618" y="246">goal off → bit-identical to hub-base, in serving</text>
+  <text x="618" y="266">~6B extra parameters (~6 GB FP8)</text>
+  <rect class="bx" x="640" y="330" width="115" height="44" rx="3"/><text class="h" x="652" y="349">plan step</text><text class="s" x="652" y="366">agentic-tool</text>
+  <rect class="bx" x="900" y="330" width="115" height="44" rx="3"/><text class="h" x="912" y="349">compute step</text><text class="s" x="912" y="366">reason-math</text>
+  <line class="ln-acc" x1="697" y1="330" x2="697" y2="293"/>
+  <line class="ln-acc" x1="957" y1="330" x2="957" y2="293"/>
+  <text class="s acc" x="705" y="314">b_goal: agentic-tool</text>
+  <text class="s acc" x="965" y="314">b_goal: reason-math</text>
+  <line class="ln-ok" x1="755" y1="352" x2="898" y2="352" marker-end="url(#f6-o)"/>
+  <text class="s okt" x="826" y="345" text-anchor="middle">prefix reusable</text>
+  <text class="s okt" x="826" y="368" text-anchor="middle">(after gate G0-3)</text>
+  <text class="s" x="606" y="404">needs engine items E1–E4: goal bias, 256 + k experts, EP balance, R3 masks</text>
+</svg>
+    </div>
+    <figcaption>The edge between the two task nodes is the difference. In A it crosses checkpoints and re-prefills. In B it stays inside one model and only the goal bias changes. Prefix reuse on the Gated-DeltaNet hybrid is disabled in production today, so neither option takes credit for it until gate G0-3 passes.</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>A · per-family checkpoints</th><th>B · one goal-gated checkpoint</th></tr></thead>
+    <tbody>
+      <tr><td>Item (i)</td><td>Hot-expert LoRA merged into each family checkpoint</td><td>Expressed as item (ii): discovered experts trained as goal-gated copies, never in place</td></tr>
+      <tr><td>Goal off</td><td>Node is not routed to that checkpoint</td><td>Bit-identical to hub-base inside the serving engine</td></tr>
+      <tr><td>Engine work</td><td>None in G1; static bias and 256 + k experts (E2) once goal experts join in G2</td><td>E1 per-request goal bias · E2 256 + k experts · E3 EP load balance · E4 R3 routing-replay masks</td></tr>
+      <tr><td>Memory</td><td>~36 GB FP8 per family; up to six families per node</td><td>~6 GB FP8 extra at k = 48</td></tr>
+      <tr><td>Decision</td><td colspan="2">Adopt B at the end of G2 if, on each of the first three families, B is non-inferior to A (δ_b on the family suite), off-family outputs equal hub-base bit for bit in serving, and E1–E4 pass the conformance matrix. Multi-LoRA serving (option C) is rejected.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============================ SHEET 07 ============================ -->
+<section class="sheet" id="s7">
+  <div class="sheet-h"><span class="sheet-no">Sheet 07</span><h2>Training program and stage edges</h2><span class="ref">Plan §I.4</span></div>
+  <p class="claim">Training changes what the router sees, even with the router frozen. Every stage that reads expert usage or hub states therefore runs after the stage that last changed them.</p>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 1160 430" role="img" aria-label="Training pipeline: base, T0 atlas, T1 capability transfer, hub-base, re-atlas, T2 goal experts; then T3 agentic RL, re-atlas, T4 decision DPO, T5 token efficiency, T6 System-1 distillation and calibration, release. T6 reruns after any hub change. A separate agentic spike on the base in G0 to G1 feeds the switch criteria.">
+  <defs>
+    <marker id="f7-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f7-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-mut" d="M0,0L10,5L0,10z"/></marker>
+  </defs>
+  <!-- inputs top -->
+  <rect class="soft" x="220" y="10" width="150" height="34" rx="3"/><text class="s" x="295" y="32" text-anchor="middle">goal-family traffic</text>
+  <rect class="soft" x="410" y="10" width="150" height="34" rx="3"/><text class="s" x="485" y="32" text-anchor="middle">Qwen3.8-27B teacher</text>
+  <line class="ln" x1="295" y1="44" x2="295" y2="68" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="485" y1="44" x2="485" y2="68" marker-end="url(#f7-a)"/>
+  <!-- row 1 -->
+  <rect class="bx" x="30" y="70" width="150" height="80" rx="4"/>
+  <text class="h" x="42" y="94">Qwen3.6-35B-A3B</text><text class="s" x="42" y="114">base · ~3B active</text><text class="s" x="42" y="132">256 experts / layer</text>
+  <rect class="bx" x="220" y="70" width="150" height="80" rx="4"/>
+  <text class="h" x="232" y="94">T0 · Atlas</text><text class="s" x="232" y="114">hot experts / family</text><text class="s" x="232" y="132">selection counts</text>
+  <rect class="bx" x="410" y="70" width="150" height="80" rx="4"/>
+  <text class="h" x="422" y="94">T1 · Transfer</text><text class="s" x="422" y="114">SFT + top-20 KD</text><text class="s" x="422" y="132">→ OPD, full logits</text>
+  <rect class="hi" x="600" y="70" width="150" height="80" rx="4"/>
+  <text class="h" x="612" y="94">hub-base</text><text class="s" x="612" y="114">T1 merged, bf16 → FP8</text><text class="s" x="612" y="132">survival check</text>
+  <rect class="bx" x="790" y="70" width="150" height="80" rx="4"/>
+  <text class="h" x="802" y="94">Re-atlas</text><text class="s" x="802" y="114">on hub-base (ND1)</text><text class="s" x="802" y="132">warm starts chosen</text>
+  <rect class="bx" x="980" y="70" width="150" height="80" rx="4"/>
+  <text class="h" x="992" y="94">T2 · Goal experts</text><text class="s" x="992" y="114">per family, vs LoRA</text><text class="s" x="992" y="132">identity off-goal</text>
+  <line class="ln" x1="180" y1="110" x2="218" y2="110" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="370" y1="110" x2="408" y2="110" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="560" y1="110" x2="598" y2="110" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="750" y1="110" x2="788" y2="110" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="940" y1="110" x2="978" y2="110" marker-end="url(#f7-a)"/>
+  <path class="ln" d="M1055,150 V195 H105 V238" marker-end="url(#f7-a)"/>
+  <text class="s" x="580" y="189" text-anchor="middle">then</text>
+  <!-- row 2 -->
+  <rect class="bx" x="30" y="240" width="150" height="80" rx="4"/>
+  <text class="h" x="42" y="264">T3 · Agentic RL</text><text class="s" x="42" y="284">GSPO / CISPO + R3</text><text class="s" x="42" y="302">SWE · terminal · MCP</text>
+  <rect class="bx" x="220" y="240" width="150" height="80" rx="4"/>
+  <text class="h" x="232" y="264">Re-atlas</text><text class="s" x="232" y="284">RL moves experts;</text><text class="s" x="232" y="302">recheck T2 shares</text>
+  <rect class="bx" x="410" y="240" width="150" height="80" rx="4"/>
+  <text class="h" x="422" y="264">T4 · Decision DPO</text><text class="s" x="422" y="284">two-judge labels</text><text class="s" x="422" y="302">decision tokens ×4</text>
+  <rect class="bx" x="600" y="240" width="150" height="80" rx="4"/>
+  <text class="h" x="612" y="264">T5 · Efficiency</text><text class="s" x="612" y="284">length RL, compaction</text><text class="s" x="612" y="302">hard-set guards</text>
+  <rect class="bx" x="790" y="240" width="150" height="80" rx="4"/>
+  <text class="h" x="802" y="264">T6 · System-1</text><text class="s" x="802" y="284">heads · encoders · ML</text><text class="s" x="802" y="302">joint calibration</text>
+  <rect class="hi" x="980" y="240" width="150" height="80" rx="4"/>
+  <text class="h" x="992" y="264">Release</text><text class="s" x="992" y="284">hub lock vN</text><text class="s" x="992" y="302">schedules recompiled</text>
+  <line class="ln" x1="180" y1="280" x2="218" y2="280" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="370" y1="280" x2="408" y2="280" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="560" y1="280" x2="598" y2="280" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="750" y1="280" x2="788" y2="280" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="940" y1="280" x2="978" y2="280" marker-end="url(#f7-a)"/>
+  <path class="ln-mut" d="M1055,320 V345 H865 V323" marker-end="url(#f7-m)"/>
+  <text class="s" x="960" y="364" text-anchor="middle">any hub change → rerun T6, recompile schedules</text>
+  <!-- bottom: environments + spike -->
+  <rect class="soft" x="30" y="370" width="150" height="44" rx="3"/>
+  <text class="s" x="105" y="389" text-anchor="middle">environments</text><text class="s" x="105" y="405" text-anchor="middle">SWE · terminal · tools</text>
+  <line class="ln" x1="105" y1="370" x2="105" y2="323" marker-end="url(#f7-a)"/>
+  <line class="ln" x1="180" y1="392" x2="218" y2="392" marker-end="url(#f7-a)"/>
+  <rect class="dashbx" x="220" y="370" width="420" height="44" rx="3"/>
+  <text class="h" x="232" y="389">Agentic spike, G0–G1</text>
+  <text class="s" x="232" y="405">~100 terminal-RL steps on the base, R3 on → switch criteria (Sheet 10)</text>
+</svg>
+    </div>
+    <figcaption>Arrows mean “must finish before”. The spike (dashed) runs early on the untrained base because it tests the plan's riskiest assumption: that RL moves agentic quality at ~3B active parameters.</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <thead><tr><th>Stage</th><th>Recipe and guardrails</th><th>Compute</th></tr></thead>
+    <tbody>
+      <tr><td>T0 Atlas</td><td>Routing atlas per goal family; selection counts, not router affinity (A3B: affinity entropy 0.98, selection concentrated); super-expert profile</td><td class="num">&lt; 50 GPU-h</td></tr>
+      <tr><td>T1 Transfer</td><td>SFT with top-20 KD (w = 0.3) on 27B traces, then on-policy distillation with full logits over the shared 248,320-token vocabulary; hot-expert LoRA, cached prefix + 512-token gradient tail, lr 1e-4; merge, FP8, survival check</td><td class="num">1–3K H100-h</td></tr>
+      <tr><td>Spike</td><td>~100 terminal-RL steps with R3 (AgentWorld moved a 35B-A3B Terminal 32.8 → 47.0). Gate: ≥ +4 points with CI lower bound &gt; 0, no reasoning loss beyond δ_b</td><td class="num">1 node × ~1 week</td></tr>
+      <tr><td>T2 Goal experts</td><td>Per family: gain against a matched-parameter LoRA arm, off-goal identity, traffic share, drift and wrong-goal accuracy</td><td class="num">10–100 GPU-h / family</td></tr>
+      <tr><td>T3 Agentic RL</td><td>GSPO/CISPO sequence-level objectives, R3 routing replay, exact token handoff; SWE, terminal, tool simulators, browsing</td><td class="num">Tier 1 ≤ ~25K · Tier 0 ≤ 10K GPU-h</td></tr>
+      <tr><td>T4 Decision DPO</td><td>Two independent judges must agree; margin only on decision tokens (weight 4, β 0.5) plus anchors</td><td class="num">&lt; 100 GPU-h / round</td></tr>
+      <tr><td>T5 Efficiency</td><td>Difficulty-aware length RL, learned thinking on/off, CompactionRL, early-exit probes; hard-set non-inferiority guards</td><td class="num">1–2K H100-h</td></tr>
+      <tr><td>T6 System-1</td><td>Heads, encoders, SLMs and GBDTs from hub/27B labels; conformal thresholds; joint <code>Outcome</code> records for every executor</td><td class="num">CPU – small GPU</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============================ SHEET 08 ============================ -->
+<section class="sheet" id="s8">
+  <div class="sheet-h"><span class="sheet-no">Sheet 08</span><h2>Cost feasibility model</h2><span class="ref">Plan §I.1.1</span></div>
+  <p class="claim">At accuracy parity, cost-of-pass relative to the 27B = r·τ_h + e. The hub's per-token cost r is measured in G0. τ_h is hub verbosity relative to the 27B, and e is the escalation budget. The targets are read off this chart, not asserted.</p>
+  <figure>
+    <div class="fig narrow">
+<svg class="dg" viewBox="0 0 960 430" role="img" aria-label="Line chart of cost-of-pass ratio against escalation budget e from 0 to 0.4, for three scenarios. With the Artificial Analysis cost basis and equal verbosity the ratio is 0.33 at no escalation and 0.48 at e = 0.15, under the 0.5 target. With 20% more verbosity on agentic work it is 0.55 at e = 0.15. With the A3B cost basis it is 0.32 at e = 0.15.">
+  <rect class="region" x="90" y="170" width="600" height="200"/>
+  <g class="gridln">
+    <line x1="90" y1="290" x2="690" y2="290"/><line x1="90" y1="210" x2="690" y2="210"/><line x1="90" y1="130" x2="690" y2="130"/><line x1="90" y1="50" x2="690" y2="50"/>
+    <line x1="240" y1="50" x2="240" y2="370"/><line x1="390" y1="50" x2="390" y2="370"/><line x1="540" y1="50" x2="540" y2="370"/><line x1="690" y1="50" x2="690" y2="370"/>
+  </g>
+  <line class="axis" x1="90" y1="370" x2="690" y2="370"/>
+  <line class="axis" x1="90" y1="50" x2="90" y2="370"/>
+  <text class="m" x="90" y="390" text-anchor="middle">0</text><text class="m" x="240" y="390" text-anchor="middle">0.1</text><text class="m" x="390" y="390" text-anchor="middle">0.2</text><text class="m" x="540" y="390" text-anchor="middle">0.3</text><text class="m" x="690" y="390" text-anchor="middle">0.4</text>
+  <text class="m" x="82" y="374" text-anchor="end">0</text><text class="m" x="82" y="294" text-anchor="end">0.2</text><text class="m" x="82" y="214" text-anchor="end">0.4</text><text class="m" x="82" y="134" text-anchor="end">0.6</text><text class="m" x="82" y="54" text-anchor="end">0.8</text>
+  <text class="s" x="390" y="418" text-anchor="middle">escalation budget e (27B tokens on escalated nodes ÷ 27B tokens per task)</text>
+  <text class="s" x="90" y="34">cost-of-pass relative to Qwen3.8-27B, at parity</text>
+  <!-- targets -->
+  <line class="ln-acc" x1="90" y1="170" x2="690" y2="170"/>
+  <text class="s acc" x="98" y="162">target ≤ 0.5×</text>
+  <line class="ln-acc" x1="90" y1="236.7" x2="690" y2="236.7" stroke-dasharray="6 4"/>
+  <text class="s acc" x="98" y="254">stretch ≤ 0.33×</text>
+  <line class="ln-mut" x1="315" y1="50" x2="315" y2="370"/>
+  <text class="s" x="321" y="362">e = 0.15 budget</text>
+  <line class="ln-warn" x1="540" y1="50" x2="540" y2="370" stroke-dasharray="5 4"/>
+  <text class="s warnt" x="546" y="362">e = 0.30 switch</text>
+  <!-- lines -->
+  <line class="ln" x1="90" y1="210" x2="690" y2="50" stroke-width="2"/>
+  <line class="ln" x1="90" y1="236.7" x2="690" y2="76.7" stroke-width="2.4"/>
+  <line class="ln" x1="90" y1="303.3" x2="690" y2="143.3" stroke-width="2" stroke-dasharray="7 4"/>
+  <text x="700" y="54">AA basis, τ_h 1.2 (agentic)</text>
+  <text class="h" x="700" y="81">AA basis, τ_h 1.0</text>
+  <text x="700" y="147">A3B basis, τ_h 1.0</text>
+  <!-- points at e = 0.15 -->
+  <circle class="badb" cx="315" cy="150" r="5"/><text class="m" x="304" y="144" text-anchor="end">0.55</text>
+  <circle class="okb" cx="315" cy="176.7" r="5"/><text class="m" x="324" y="194">0.48</text>
+  <circle class="okb" cx="315" cy="243.3" r="5"/><text class="m" x="324" y="262">0.32</text>
+  <circle class="bx" cx="90" cy="236.7" r="4"/>
+</svg>
+    </div>
+    <figcaption>Shaded: meets the 0.5× target. Priors for r are 1/3 (Artificial Analysis throughput, 134 vs 44 tokens/s) and 1/6 (A3B GPU time per turn, 0.075 vs 0.449 s). With 20% more agentic verbosity, the 0.5× target needs e ≤ 0.10. If G0 measures r &gt; 0.4, the target is re-derived from the same formula by a dated amendment before G1. Prefix-cache savings are not credited.</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <thead><tr><th>Requirement</th><th>Value</th><th>Measured as</th></tr></thead>
+    <tbody>
+      <tr><td>Reasoning parity</td><td>Lower 95% CI of (GCAM − 27B) ≥ −δ_b, with δ_b = max(1.5 points, one item, 2.8·SE_b of the 27B against itself)</td><td>avg@16, paired item bootstrap; AIME 2024–2026 pooled (90 items)</td></tr>
+      <tr><td>Agentic parity</td><td>Same δ_b rule, floor 2 points; SWE-bench Pro, Terminal-Bench 2.x, τ³-bench pass^4, BrowseComp, goal-suite v0</td><td>pass^k and pass@1; 27B-vs-itself null control</td></tr>
+      <tr><td>Cost</td><td>Compiled system ≤ 0.5× cost-of-pass with e ≤ 0.15; raw hub ≤ 1.0× tokens on reasoning at parity</td><td>Measured r; input, cached and output tokens</td></tr>
+      <tr><td>Latency</td><td>Compiled system p50 ≤ 0.6×</td><td>Wall clock on the same node</td></tr>
+      <tr><td>Predictability</td><td>Bound holds by construction (caps + allowance); realized mean within ±15% over ≥ 200 tasks</td><td>Program bounds; joint-calibration audit with cap-hit rate</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============================ SHEET 09 ============================ -->
+<section class="sheet" id="s9">
+  <div class="sheet-h"><span class="sheet-no">Sheet 09</span><h2>Trust layer: replay and contracts</h2><span class="ref">Plan Part II · R1–R28</span></div>
+  <p class="claim">The same canonical input, session state and lock always produce the same bytes. A first execution runs only on an executor whose contract meets what the node requires, and it is recorded so later requests replay it.</p>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 1160 270" role="img" aria-label="Request path through the trust layer: a node and its typed IR are canonicalized and hashed with the lock, session state, profile version and seed; if the key is in the result store the recorded bytes are replayed; otherwise the node runs on an executor meeting its contract, is verified, and is stored with a receipt for the next request.">
+  <defs>
+    <marker id="f9-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker>
+    <marker id="f9-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-ok" d="M0,0L10,5L0,10z"/></marker>
+  </defs>
+  <rect class="bx" x="20" y="40" width="150" height="60" rx="4"/>
+  <text class="h" x="34" y="65">Node + typed IR</text><text class="s" x="34" y="84">from the schedule</text>
+  <rect class="bx" x="200" y="40" width="170" height="60" rx="4"/>
+  <text class="h" x="214" y="65">Canonicalize</text><text class="s" x="214" y="84">RFC 8785 JSON · NFC text</text>
+  <rect class="hi" x="400" y="40" width="250" height="60" rx="4"/>
+  <text class="h" x="414" y="65">Key = H(lock, IR + session,</text><text class="h" x="414" y="84">profile version, seed)</text>
+  <rect class="bx" x="680" y="40" width="130" height="60" rx="4"/>
+  <text class="h" x="694" y="65">In result store?</text><text class="s" x="694" y="84">exact key match</text>
+  <rect class="okb" x="850" y="40" width="290" height="60" rx="4"/>
+  <text class="h" x="864" y="65">Replay recorded bytes · D0</text><text class="s" x="864" y="84">a differing recompute raises an error</text>
+  <line class="ln" x1="170" y1="70" x2="198" y2="70" marker-end="url(#f9-a)"/>
+  <line class="ln" x1="370" y1="70" x2="398" y2="70" marker-end="url(#f9-a)"/>
+  <line class="ln" x1="650" y1="70" x2="678" y2="70" marker-end="url(#f9-a)"/>
+  <line class="ln-ok" x1="810" y1="70" x2="848" y2="70" marker-end="url(#f9-o)"/>
+  <text class="s okt" x="829" y="62" text-anchor="middle">yes</text>
+  <line class="ln" x1="745" y1="100" x2="745" y2="168" marker-end="url(#f9-a)"/>
+  <text class="s" x="755" y="138">no</text>
+  <rect class="bx" x="520" y="170" width="290" height="60" rx="4"/>
+  <text class="h" x="534" y="195">Execute on an executor whose</text><text class="h" x="534" y="214">contract meets the node's (D1 / D0)</text>
+  <rect class="bx" x="840" y="170" width="140" height="60" rx="4"/>
+  <text class="h" x="854" y="195">Verify</text><text class="s" x="854" y="214">schema, oracle, repair ≤ k</text>
+  <rect class="bx" x="1000" y="170" width="140" height="60" rx="4"/>
+  <text class="h" x="1014" y="195">Store record</text><text class="s" x="1014" y="214">+ receipt</text>
+  <line class="ln" x1="810" y1="200" x2="838" y2="200" marker-end="url(#f9-a)"/>
+  <line class="ln" x1="980" y1="200" x2="998" y2="200" marker-end="url(#f9-a)"/>
+  <line class="ln-ok" x1="1070" y1="170" x2="1070" y2="102" marker-end="url(#f9-o)"/>
+  <text class="s okt" x="1078" y="140">next request</text>
+  <text class="s" x="20" y="200">D1 lane: batch-invariant kernels ·</text>
+  <text class="s" x="20" y="217">FP32 router GEMM, lowest-index ties ·</text>
+  <text class="s" x="20" y="234">fixed topology · counter-based RNG</text>
+</svg>
+    </div>
+    <figcaption>Replay is exact by construction. Bitwise recompute (D1) needs certified kernels. Until the hub's Gated-DeltaNet kernels pass a batch-invariance audit, nodes that require D1 are scheduled onto code, System-1 heads or dense students.</figcaption>
+  </figure>
+  <div class="cols">
+    <div class="tbl" style="margin-top:0"><table>
+      <thead><tr><th>Level</th><th>Promise</th></tr></thead>
+      <tbody>
+        <tr><td class="num">D0</td><td>Same canonical IR + session state + lock → byte-identical response (replay)</td></tr>
+        <tr><td class="num">D1</td><td>Byte-identical recompute under any load, batch mix, chunking or cache state</td></tr>
+        <tr><td class="num">D2</td><td>Decision fields agree across certified stacks at a stated coverage (statistical)</td></tr>
+        <tr><td class="num">D3</td><td>Meaning-preserving paraphrases → same IR → same output (statistical)</td></tr>
+        <tr><td class="num">D4</td><td>Output satisfies its schema and, where one exists, its executable oracle</td></tr>
+        <tr><td class="num">D⊥</td><td>Bad or ambiguous input → CompileError, Clarify or Abstain, never a silent guess</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tbl" style="margin-top:0"><table>
+      <thead><tr><th>Executor</th><th>Contract today</th></tr></thead>
+      <tbody>
+        <tr><td>Compiled code</td><td>D1 (exact)</td></tr>
+        <tr><td>System-1 heads, encoders, classic ML</td><td>D1 on their certified stack</td></tr>
+        <tr><td>Dense students</td><td>D1 candidates, certified per lock</td></tr>
+        <tr><td>Hub (Qwen3.6-35B-A3B)</td><td>D0 + statistical D2 until the GDN audit passes</td></tr>
+        <tr><td>Qwen3.8-27B spoke</td><td>D0 (record and replay) until its GDN audit passes</td></tr>
+        <tr><td>Hosted or closed models</td><td>D0 only, flagged on the receipt</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ============================ SHEET 10 ============================ -->
+<section class="sheet" id="s10">
+  <div class="sheet-h"><span class="sheet-no">Sheet 10</span><h2>Roadmap and gates</h2><span class="ref">Plan §I.6, §I.4 allocation tiers</span></div>
+  <p class="claim">The riskiest assumptions are tested first. Measurements that the later gates depend on (δ_b, the cost basis r, the prefix-cache gate, thinking control, MTP on GDN) all land in G0.</p>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 1160 300" role="img" aria-label="Roadmap over 36 weeks: G0 weeks 0 to 3, G1 weeks 2 to 8 with the agentic spike in weeks 2 to 5, G2 weeks 6 to 14, G3 weeks 10 to 24 extending to 30 on one training node, G4 weeks 20 to 30 extending to 36. Each phase ends at a gate.">
+  <g class="gridln">
+    <line x1="260" y1="30" x2="260" y2="262"/><line x1="403.3" y1="30" x2="403.3" y2="262"/><line x1="546.7" y1="30" x2="546.7" y2="262"/><line x1="690" y1="30" x2="690" y2="262"/><line x1="833.3" y1="30" x2="833.3" y2="262"/><line x1="976.7" y1="30" x2="976.7" y2="262"/><line x1="1120" y1="30" x2="1120" y2="262"/>
+  </g>
+  <text class="h" x="20" y="54">G0 Baselines, de-risking</text>
+  <text class="h" x="20" y="94">G1 Transfer + compiler v1</text>
+  <text class="s" x="34" y="122">agentic spike</text>
+  <text class="h" x="20" y="164">G2 Goal capacity + decisions</text>
+  <text class="h" x="20" y="204">G3 Agentic RL</text>
+  <text class="h" x="20" y="244">G4 Integration + certification</text>
+  <rect class="hi" x="260" y="40" width="71.7" height="20" rx="2"/>
+  <rect class="hi" x="307.8" y="80" width="143.3" height="20" rx="2"/>
+  <rect class="dashbx" x="307.8" y="112" width="71.7" height="14" rx="2"/>
+  <rect class="hi" x="403.3" y="150" width="191.1" height="20" rx="2"/>
+  <rect class="hi" x="498.9" y="190" width="334.4" height="20" rx="2"/>
+  <rect class="dashbx" x="833.3" y="194" width="143.3" height="12" rx="2"/>
+  <rect class="hi" x="737.8" y="230" width="238.9" height="20" rx="2"/>
+  <rect class="dashbx" x="976.7" y="234" width="143.3" height="12" rx="2"/>
+  <!-- gates -->
+  <path class="bx" d="M331.7,42 L339.7,50 L331.7,58 L323.7,50 Z"/>
+  <text class="s" x="346" y="54">δ_b · r · gates G0-3 to G0-7</text>
+  <path class="bx" d="M451.1,82 L459.1,90 L451.1,98 L443.1,90 Z"/>
+  <text class="s" x="466" y="94">spike gate · base-switch decision</text>
+  <path class="bx" d="M594.4,152 L602.4,160 L594.4,168 L586.4,160 Z"/>
+  <text class="s" x="609" y="164">A/B served-artifact decision</text>
+  <path class="bx" d="M833.3,192 L841.3,200 L833.3,208 L825.3,200 Z"/>
+  <text class="s" x="986" y="204">agentic parity, e ≤ 0.15</text>
+  <path class="bx" d="M976.7,232 L984.7,240 L976.7,248 L968.7,240 Z"/>
+  <text class="s" x="742" y="226">all requirements met, or gap reported</text>
+  <line class="axis" x1="260" y1="262" x2="1120" y2="262"/>
+  <text class="m" x="260" y="280" text-anchor="middle">wk 0</text><text class="m" x="403.3" y="280" text-anchor="middle">6</text><text class="m" x="546.7" y="280" text-anchor="middle">12</text><text class="m" x="690" y="280" text-anchor="middle">18</text><text class="m" x="833.3" y="280" text-anchor="middle">24</text><text class="m" x="976.7" y="280" text-anchor="middle">30</text><text class="m" x="1120" y="280" text-anchor="middle">36</text>
+  <rect class="dashbx" x="20" y="268" width="22" height="12" rx="2"/><text class="s" x="50" y="279">Tier 0 (one training node) extension</text>
+</svg>
+    </div>
+    <figcaption>Tier 1 is two 8×H200 training nodes from week 2 to week 24, plus an evaluation node. Tier 0 is a single training node. With Tier 0, T3 runs as AgentWorld-scale RL runs capped at 10K GPU-hours, and G3 and G4 each end six weeks later. The system-level gates do not move.</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <thead><tr><th>G0 gate</th><th>What is measured</th><th>If it fails</th></tr></thead>
+    <tbody>
+      <tr><td class="num">G0-1</td><td>δ_b per benchmark from the 27B against itself (avg@16)</td><td>Benchmark leaves the gate or is pooled</td></tr>
+      <tr><td class="num">G0-2</td><td>Hub cost per token r on our node, input and output separately</td><td>Cost target re-derived by dated amendment</td></tr>
+      <tr><td class="num">G0-3</td><td>Prefix caching on the Gated-DeltaNet hybrid; cached, uncached and repeat probe beyond 8.6k-token prefixes</td><td>No KV-reuse credit; prefix groups stay a placement preference</td></tr>
+      <tr><td class="num">G0-4</td><td>Accuracy versus thinking budget under hard truncation; template and KV effect of per-turn thinking toggles</td><td>Compiler keeps thinking on/off + early exit only</td></tr>
+      <tr><td class="num">G0-5</td><td>MTP acceptance and speedup on GDN (state rollback)</td><td>MTP stays off</td></tr>
+      <tr><td class="num">G0-6</td><td>Batch-invariance audit of the hub's GDN kernels</td><td>Hub stays D0 + D2; D1 nodes use other executors</td></tr>
+      <tr><td class="num">G0-7</td><td>Goal-suite v0: ≥ 100 goals with executable verifiers or two-judge rubrics, 20% held out</td><td>G1 cannot report goal-suite numbers</td></tr>
+    </tbody>
+  </table></div>
+  <p class="claim" style="font-size:16px">Base-switch criteria, fixed now: move the hub to Qwen3.8-Flash-Next if the spike's gain has an upper 95% bound below +4 points, or if agentic parity needs an escalation share above 0.30 on G1 calibration data. At that share, 1/3 × 1.2 + 0.30 = 0.70, which misses the cost target.</p>
+</section>
+
+<!-- ============================ SHEET 11 ============================ -->
+<section class="sheet" id="s11">
+  <div class="sheet-h"><span class="sheet-no">Sheet 11</span><h2>What exists in the repo</h2><span class="ref">Plan Part III, Part IV</span></div>
+  <p class="claim">The compile-time machinery and the hub extensions exist as tested Python, with 80 tests in the suite. The CPU pilots run on granite-3.1-1b-a400m and are pre-registered before they run.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Module</th><th>What it does</th><th>Sheets</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>dmc/scheduler.py</code></td><td>Joint-calibration ladders, compiled caps and input reads, executor-keyed prefixes, worst-case bounds, lock-sensitive schedule hash, guards/variants/recompiles, capability ceiling, <code>cap_input</code></td><td>02 03 04</td><td><span class="pill done">implemented</span></td></tr>
+      <tr><td><code>dmc/expansion.py</code></td><td>Goal-gated experts, routed and additive, parent-row init, goal-off identity</td><td>05</td><td><span class="pill done">implemented</span></td></tr>
+      <tr><td><code>dmc/expert_lora.py</code></td><td>Hot-expert LoRA on fused expert weights, identity at init</td><td>05</td><td><span class="pill done">implemented</span></td></tr>
+      <tr><td><code>dmc/routing.py</code></td><td>FP32 router GEMM, lowest-index tie-break, token-verified route tracing and pinning, fragile-routing share</td><td>09</td><td><span class="pill done">implemented</span></td></tr>
+      <tr><td><code>dmc/ir.py</code> · <code>compiler.py</code> · <code>canonical.py</code> · <code>store.py</code> · <code>lockfile.py</code></td><td>Typed IR (12 ops), pipeline and dispatch, canonical hashing, content-addressed replay and receipts, toolchain lock</td><td>01 09</td><td><span class="pill done">implemented</span></td></tr>
+      <tr><td><code>dmc/runtime.py</code> · <code>http_backend.py</code> · <code>profiles/decide.py</code></td><td>Deterministic CPU backend, GPU backend over HTTP, order-averaged case-marginalized label scoring</td><td>09</td><td><span class="pill done">implemented</span></td></tr>
+      <tr><td><code>experiments/gpu/</code></td><td>Engine-conformance script and runbook for GPU Phase 0</td><td>09 10</td><td><span class="pill plan">not run yet</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Pilot</th><th>Question</th><th>Status</th><th>Result so far</th></tr></thead>
+    <tbody>
+      <tr><td>01 Router atlas</td><td>How fragile is MoE routing?</td><td><span class="pill done">done</span></td><td>7.8% of routing decisions have margin &lt; 0.01; margin predicts flips (AUC 0.87)</td></tr>
+      <tr><td>02 CPU conformance</td><td>What survives a numerics change?</td><td><span class="pill done">done</span></td><td>FP32 vs BF16: greedy text identical in 68% of prompts, scored decisions agree on 96.7%</td></tr>
+      <tr><td>05 Proxy calibration</td><td>Is the CPU thread-count proxy realistic?</td><td><span class="pill done">done</span></td><td>Stress regime (mean KL 13.7× the published cross-engine value): CPU pilots can remove levers, not set production thresholds</td></tr>
+      <tr><td>03 Route pinning</td><td>Does replaying recorded routes beat fresh execution across stacks?</td><td><span class="pill run">running</span></td><td>—</td></tr>
+      <tr><td>06 Goal-gated experts</td><td>Do new experts beat matched LoRA, with identity off-goal?</td><td><span class="pill queued">queued</span></td><td>—</td></tr>
+      <tr><td>07 System-1 cascade</td><td>Does the joint schedule predict realized accuracy and tokens?</td><td><span class="pill queued">queued</span></td><td>—</td></tr>
+      <tr><td>04 Margin regularization</td><td>Can training widen router margins?</td><td><span class="pill queued">queued</span></td><td>—</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer class="foot">
+  <span>GCAM implementation blueprint · plan v6 · 2026-10-21</span>
+  <span>Source of truth: <span class="mono">docs/PLAN.md</span> on branch <span class="mono">claude/magical-allen-eickyt</span></span>
+</footer>
+
+</div>
