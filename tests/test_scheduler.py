@@ -81,3 +81,69 @@ def test_nodes_requiring_bitwise_determinism_only_use_d1_executors():
     assert strict.ladder == ("s1.head", "dense.student")
     with pytest.raises(CompileError, match="contract D1"):
         compile_schedule([Node("a", "analyze.reason", requires_contract="D1")], [hub_d0, THINK], token_budget=10**6)
+
+
+def test_joint_calibration_accounts_for_correlated_errors():
+    from dmc.scheduler import Outcome
+
+    # S1 answers half the items correctly; the other half (hard) it abstains on. The hub is 90%
+    # accurate marginally but only 80% on the hard half: independence would over-predict.
+    s1 = Executor("s1", "system1", frozenset({"op"}), 0, 0, 1, {"op": 1.0}, coverage=0.5)
+    hub = Executor("hub", "system2", frozenset({"op"}), 100, 0, 1, {"op": 0.9})
+    items = []
+    for i in range(10):
+        easy = i < 5
+        items.append({
+            "s1": Outcome(answered=easy, correct=easy, correct_forced=easy, tokens=0),
+            "hub": Outcome(answered=True, correct=easy or i < 9, correct_forced=easy or i < 9, tokens=100),
+        })
+    node = Node("a", "op", required_accuracy=0.85)
+    ind = compile_schedule([node], [s1, hub], token_budget=10**6).assignments[0]
+    joint = compile_schedule([node], [s1, hub], token_budget=10**6, calibration={"op": items}).assignments[0]
+    assert ind.estimate == "independent" and joint.estimate == "joint"
+    assert ind.ladder == joint.ladder == ("s1", "hub")
+    assert ind.expected_accuracy == pytest.approx(0.95)  # 0.5*1.0 + 0.5*0.9
+    assert joint.expected_accuracy == pytest.approx(0.9)  # 5 easy + 4 of 5 hard
+    with pytest.raises(CompileError):
+        compile_schedule([Node("a", "op", required_accuracy=0.93)], [s1, hub], token_budget=10**6,
+                         calibration={"op": items})
+
+
+def test_tool_output_cap_counts_against_worst_case_and_lock_hash_changes_schedule():
+    a = compile_schedule([Node("a", "decide.classify", required_accuracy=0.9, input_cap=1000)], [HUB],
+                         token_budget=10**6)
+    assert a.worst_case_tokens == 600 + 1000 + 40
+    b = compile_schedule([Node("a", "decide.classify", required_accuracy=0.9, input_cap=1000)], [HUB],
+                         token_budget=10**6, lock_hash="sha256:other")
+    assert a.hash != b.hash
+
+
+def test_prefix_discount_does_not_cross_executors():
+    g = [Node(f"q{i}", "decide.classify", required_accuracy=0.96, prefix_group="doc", prefix_tokens=500)
+         for i in range(2)]
+    sch = compile_schedule(g, [S1, HUB], token_budget=10**6, lanes=1)
+    # Ladder s1 -> hub: s1 consumes no prompt, so only the hub rung pays the prefix, once.
+    worst = [a.worst_case_tokens for a in sch.assignments]
+    assert worst == [640, 140]
+
+
+def test_program_bounds_guards_variants_and_capabilities():
+    from dmc.scheduler import Guard, GuardRuntime, Program, compile_program
+
+    main = (Node("run", "analyze.data"), Node("check", "decide.classify", deps=("run",), required_accuracy=0.9))
+    fix = (Node("repair", "analyze.reason", required_accuracy=0.9),)
+    prog = Program(main, {"fix": fix}, (Guard("g", "check", "tests_pass", "fix"),
+                                        Guard("g2", "check", "nonempty_result", "recompile")),
+                   recompile_allowance=1, recompile_budget=500)
+    ps = compile_program(prog, ALL, token_budget=10**6)
+    assert ps.worst_case_tokens == ps.main.worst_case_tokens + ps.variants["fix"].worst_case_tokens + 500
+    rt = GuardRuntime(prog)
+    assert rt.on_failure("g") == "fix" and rt.on_failure("g") == "abstain"  # no silent loops
+    assert rt.on_failure("g2") == "recompile" and rt.on_failure("g2") == "abstain"
+    with pytest.raises(CompileError, match="exceed the budget"):
+        compile_program(prog, ALL, token_budget=ps.worst_case_tokens - 1)
+    risky = Program((Node("send", "analyze.data", capabilities=frozenset({"external_send"})),))
+    with pytest.raises(CompileError, match="beyond the ceiling"):
+        compile_program(risky, ALL, token_budget=10**6)
+    with pytest.raises(CompileError, match="allowance is 0"):
+        compile_program(Program(main, guards=(Guard("g", "check", "p", "recompile"),)), ALL, token_budget=10**6)
