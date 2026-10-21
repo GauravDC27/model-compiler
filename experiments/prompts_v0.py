@@ -143,3 +143,26 @@ FAMILIES: dict[str, list[list[str]]] = {
 }
 
 DECIDE_LABELS = ("yes", "no")
+
+
+def labels_for(text: str) -> tuple[str, ...]:
+    """Closed label set implied by a decide/judge prompt."""
+    if "1 to 5" in text or "1-5" in text or "1 = wrong" in text:
+        return ("1", "2", "3", "4", "5")
+    if "A or B" in text:
+        return ("A", "B")
+    return ("yes", "no")
+
+
+def decision_ops():
+    """Decide-profile IR ops for every decide and judge prompt (30 decisions)."""
+    from dmc.ir import Context, DecideClassify
+
+    ctx = Context(now="2026-10-21T00:00:00Z", locale="en-US", timezone="UTC")
+    return [
+        DecideClassify(context=ctx, ambiguities=(), question=text, labels=labels_for(text),
+                       policy=None, evidence=())
+        for fam in ("decide", "judge")
+        for paras in FAMILIES[fam]
+        for text in paras
+    ]

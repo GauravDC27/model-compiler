@@ -24,32 +24,12 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "experiments"))
 
 from dmc import conformance  # noqa: E402
-from dmc.ir import Context, DecideClassify  # noqa: E402
 from dmc.profiles.decide import DecideProfile  # noqa: E402
 from dmc.runtime import HFBackend  # noqa: E402
-from prompts_v0 import FAMILIES  # noqa: E402
+from prompts_v0 import FAMILIES, decision_ops  # noqa: E402
 
 MODEL = "ibm-granite/granite-3.1-1b-a400m-instruct"
 SYSTEM = "You are a helpful assistant."
-CTX = Context(now="2026-10-21T00:00:00Z", locale="en-US", timezone="UTC")
-
-
-def labels_for(text: str) -> tuple[str, ...]:
-    if "1 to 5" in text or "1-5" in text or "1 = wrong" in text:
-        return ("1", "2", "3", "4", "5")
-    if "A or B" in text:
-        return ("A", "B")
-    return ("yes", "no")
-
-
-def decision_ops() -> list[DecideClassify]:
-    return [
-        DecideClassify(context=CTX, ambiguities=(), question=text, labels=labels_for(text),
-                       policy=None, evidence=())
-        for fam in ("decide", "judge")
-        for paras in FAMILIES[fam]
-        for text in paras
-    ]
 
 
 def main() -> None:
