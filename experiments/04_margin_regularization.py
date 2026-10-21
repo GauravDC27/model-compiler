@@ -1,5 +1,5 @@
 """Router margin-regularization pilot. Pre-registration: 04_margin_regularization_prereg.md
-(amendment 1)."""
+(amendments 1 and 2)."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ MODEL = "ibm-granite/granite-3.1-1b-a400m-instruct"
 SYSTEM = "You are a helpful assistant."
 SMOKE = bool(os.environ.get("DMC_SMOKE"))  # tiny end-to-end run to catch crashes
 LR, STEPS, BATCH, SEQ = 2e-4, (2 if SMOKE else 80), 4, 128
-GRID = [(g, lam) for g in (0.05, 0.1, 0.2) for lam in (1.0, 5.0)][: 1 if SMOKE else None]
+GRID = [(g, lam) for g in (0.05, 0.2) for lam in (1.0, 5.0)][: 1 if SMOKE else None]
 
 
 def chunks(tok, split: str, n: int, seed: int) -> list[torch.Tensor]:
@@ -48,9 +48,10 @@ def routers(model):
 
 
 def eval_inputs(b16, held):
+    """Held-out chunks + 45 probe prompts (first 3 paraphrase groups of each family)."""
     inputs = [x[None] for x in held]
     for fam in FAMILIES.values():
-        for paras in fam:
+        for paras in fam[:3]:
             for text in paras:
                 inputs.append(torch.tensor([b16._ids(b16.render_chat(SYSTEM, text))]))
     return inputs
@@ -95,7 +96,7 @@ def evaluate(b32, b16, held, inputs, ops, oracle_answers) -> dict:
     ent = -(p * p.clamp_min(1e-30).log()).sum(dim=1) / math.log(usage.shape[1])
     with harden_routers(m32):
         labels = [DecideProfile(b32, abstain_margin=0.0).run(op).label for op in ops]
-    parity_ops = ops[30:90]  # first 60 oracle decisions (secondary metric; bounded for CPU time)
+    parity_ops = ops[30:60]  # first 30 oracle decisions (secondary metric; bounded for CPU time)
     torch.set_num_threads(4)
     with harden_routers(m16):
         labels16_4 = [DecideProfile(b16, abstain_margin=0.0).run(op).label for op in parity_ops]
@@ -174,13 +175,14 @@ def passes(arm: dict, control: dict, base: dict) -> dict:
 
 def main() -> None:
     t0 = time.time()
-    b32 = HFBackend(MODEL, dtype="float32")
-    b16 = HFBackend(MODEL, dtype="bfloat16")
+    # R7 is applied explicitly (harden_routers) where the pre-registration requires it.
+    b32 = HFBackend(MODEL, dtype="float32", harden=False)
+    b16 = HFBackend(MODEL, dtype="bfloat16", harden=False)
     tok = b32.tok
     train_chunks = chunks(tok, "train", STEPS * BATCH, seed=0)
     held = chunks(tok, "validation", 2 if SMOKE else 16, seed=1)
     inputs = eval_inputs(b16, held)[: 4 if SMOKE else None]
-    oracle = generate(1 if SMOKE else 7, seed=5)
+    oracle = generate(1 if SMOKE else 5, seed=5)
     ops = decision_ops() + [o.op() for o in oracle]
     answers = [o.answer for o in oracle]
     orig = [r.weight.detach().clone() for r in routers(b32.model)]

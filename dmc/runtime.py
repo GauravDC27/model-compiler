@@ -17,7 +17,11 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Sequence
+from datetime import datetime, timezone
 from typing import Protocol
+
+# Clock used to render templates for requests whose IR context carries no time (R12, R13a).
+FIXED_EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
 
 class Backend(Protocol):
@@ -27,9 +31,19 @@ class Backend(Protocol):
 
     def generate(self, prompt: str, max_new_tokens: int, seed: int | None = None) -> str: ...
 
-    def render_chat(self, system: str, user: str) -> str: ...
+    def render_chat(self, system: str, user: str, now: str | None = None) -> str: ...
 
     def lock_fields(self) -> dict[str, object]: ...
+
+
+def template_clock(now: str | None) -> dict[str, object]:
+    """Template kwargs that bind every date hook to the IR's ``Context.now`` (R13a).
+
+    Chat templates read the date through ``strftime_now()`` (granite, Qwen) or ``date_string``
+    (Llama-3.x). Both are overridden so no template can read the host clock.
+    """
+    dt = datetime.fromisoformat(now.replace("Z", "+00:00")) if now else FIXED_EPOCH
+    return {"strftime_now": lambda fmt: dt.strftime(fmt), "date_string": dt.strftime("%d %b %Y")}
 
 
 def position_seed(seed: int, position: int) -> int:
@@ -39,9 +53,17 @@ def position_seed(seed: int, position: int) -> int:
 
 
 class HFBackend:
-    """Hugging Face transformers on CPU, FP32, one request per forward pass."""
+    """Hugging Face transformers on CPU, one request per forward pass.
 
-    def __init__(self, model_id: str, *, dtype: str = "float32", threads: int | None = None):
+    ``harden=True`` (the default) applies R7 to every MoE router for the backend's lifetime:
+    FP32 router GEMM and lowest-index tie-break. Pass ``harden=False`` only to measure the
+    stock (R7-violating) behaviour.
+    """
+
+    def __init__(
+        self, model_id: str, *, dtype: str = "float32", threads: int | None = None,
+        harden: bool = True,
+    ):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -55,15 +77,24 @@ class HFBackend:
         self.model = AutoModelForCausalLM.from_pretrained(
             model_id, dtype=getattr(torch, dtype)
         ).eval()
+        self.router = "stock"
+        if harden:
+            from .routing import find_routers, harden_routers
 
-    def render_chat(self, system: str, user: str) -> str:
-        """Render with an explicit system message so the template reads no ambient state.
+            try:
+                find_routers(self.model)
+            except ValueError:
+                pass  # dense model: nothing to harden
+            else:
+                harden_routers(self.model).__enter__()  # permanent for this backend
+                self.router = "fp32-gemm,lowest-index"
 
-        Some chat templates inject the wall-clock date when no system message is given
-        (granite-3.1 does, via ``strftime_now``); an explicit system turn suppresses that.
-        """
+    def render_chat(self, system: str, user: str, now: str | None = None) -> str:
+        """Render with an explicit system turn and a template clock bound to ``now`` (R13a)."""
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-        return self.tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
+        return self.tok.apply_chat_template(
+            msgs, tokenize=False, add_generation_prompt=True, **template_clock(now)
+        )
 
     def _ids(self, text: str) -> list[int]:
         return self.tok(text, add_special_tokens=False).input_ids
@@ -122,6 +153,7 @@ class HFBackend:
             "torch_version": self._torch.__version__,
             "device": "cpu",
             "dtype": self.dtype,
+            "router": self.router,
             "threads": self._torch.get_num_threads(),
             "deterministic_algorithms": True,
             "batching": "none (fixed shape, one request per pass)",
@@ -142,7 +174,7 @@ class TableBackend:
     def generate(self, prompt: str, max_new_tokens: int, seed: int | None = None) -> str:
         return self.generations.get(prompt, "")
 
-    def render_chat(self, system: str, user: str) -> str:
+    def render_chat(self, system: str, user: str, now: str | None = None) -> str:
         return f"[system]{system}[user]{user}[assistant]"
 
     def lock_fields(self) -> dict[str, object]:

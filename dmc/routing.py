@@ -171,12 +171,16 @@ class RouteTracer(_Patch):
 
         return forward
 
-    def fragile_share(self, eps: float) -> float:
-        """Share of routing decisions whose margin is below ``eps``."""
+    def fragile_share(self, eps: float, skip: int = 0) -> float:
+        """Share of routing decisions whose margin is below ``eps``.
+
+        ``skip`` drops the first ``skip`` positions of every router call (e.g. a shared template
+        prefix), so the share reflects the request's own tokens.
+        """
         if not self.margins:
             raise ValueError("tracer was created without record_margins=True")
-        m = torch.cat(self.margins)
-        return float((m < eps).double().mean())
+        m = torch.cat([c[skip:] for c in self.margins])
+        return float((m < eps).double().mean()) if m.numel() else 0.0
 
     def trace(self) -> dict[str, torch.Tensor]:
         """Per-router (tokens, k) index tensors and the token ids, concatenated over calls."""

@@ -145,7 +145,8 @@ class Compiler:
         margins = {"decision": result.margin} if hasattr(result, "margin") else {}
         receipt = Receipt(
             key=key, lock_hash=self.lock_hash, ir_hash=program.hash,
-            session_state_hash=op.context.session_state_hash, profile=profile.name,
+            session_state_hash=op.context.session_state_hash,
+            rendered_prompt_hash=getattr(result, "rendered_prompt_hash", None), profile=profile.name,
             profile_version=profile.version, seed=seed, margins=margins,
             coverage_band=getattr(profile, "abstain_margin", None), verifier=verdict,
         )

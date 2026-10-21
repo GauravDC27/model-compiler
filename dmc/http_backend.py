@@ -22,7 +22,7 @@ class OpenAICompatBackend:
         base_url: str,
         model: str,
         *,
-        render: Callable[[str, str], str] | None = None,
+        render: Callable[[str, str, str | None], str] | None = None,
         timeout: float = 300.0,
         api_key: str | None = None,
     ) -> None:
@@ -44,10 +44,10 @@ class OpenAICompatBackend:
         with urllib.request.urlopen(req, timeout=self.timeout) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
-    def render_chat(self, system: str, user: str) -> str:
+    def render_chat(self, system: str, user: str, now: str | None = None) -> str:
         if self._render is None:
             raise ValueError("pass render= (e.g. a tokenizer chat-template function) to render chats")
-        return self._render(system, user)
+        return self._render(system, user, now)
 
     def score(self, prompt: str, continuations: Sequence[str]) -> list[float]:
         out = []

@@ -16,6 +16,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
+from ..canonical import content_hash
 from ..ir import DecideClassify
 from ..runtime import Backend
 
@@ -31,6 +32,7 @@ class DecisionResult(BaseModel):
     confidence: float
     margin: float  # log-odds between the best and second-best label
     scores: dict[str, float]
+    rendered_prompt_hash: str  # hash of the exact prompt bytes scored (all orderings), R13a
 
 
 def render_user(op: DecideClassify, labels: tuple[str, ...]) -> str:
@@ -45,8 +47,10 @@ def render_user(op: DecideClassify, labels: tuple[str, ...]) -> str:
 
 
 def surface_forms(label: str) -> tuple[str, ...]:
-    """Case variants a model may use to say the same label ("no", "No", "NO")."""
-    return tuple(dict.fromkeys((label, label.capitalize(), label.upper())))
+    """Surface variants a model may use to say the same label: case and a leading space
+    ("no", "No", "NO", " no", " No"); tokenizers usually give each its own token."""
+    cased = (label, label.capitalize(), label.upper())
+    return tuple(dict.fromkeys(cased + tuple(" " + c for c in cased[:2])))
 
 
 def _logsumexp(xs: list[float]) -> float:
@@ -71,12 +75,12 @@ class DecideProfile:
         *,
         temperature: float = 1.0,
         abstain_margin: float = 0.5,
-        marginalize_case: bool = False,
+        marginalize_case: bool = True,
     ):
         self.backend = backend
         self.temperature = temperature
         self.abstain_margin = abstain_margin
-        # Score a label as the total probability of its case variants, so a model that
+        # Score a label as the total probability of its surface variants (R17), so a model that
         # prefers "No" over "no" is not read as unsure (verbalizer sensitivity).
         self.marginalize_case = marginalize_case
 
@@ -101,8 +105,10 @@ class DecideProfile:
     def run(self, op: DecideClassify) -> DecisionResult:
         totals = {lab: 0.0 for lab in op.labels}
         orderings = label_orderings(op.labels)
+        prompts = []
         for order in orderings:
-            prompt = self.backend.render_chat(SYSTEM, render_user(op, order))
+            prompt = self.backend.render_chat(SYSTEM, render_user(op, order), op.context.now)
+            prompts.append(prompt)
             for lab, s in zip(order, self._label_scores(prompt, order)):
                 totals[lab] += s / len(orderings)
         # Deterministic ranking: score descending, then label text ascending on exact ties.
@@ -119,4 +125,5 @@ class DecideProfile:
             confidence=confidence,
             margin=margin,
             scores=totals,
+            rendered_prompt_hash=content_hash(prompts),
         )

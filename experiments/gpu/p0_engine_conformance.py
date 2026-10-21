@@ -33,11 +33,14 @@ C0 = 0.85
 def renderer(tokenizer_id: str):
     from transformers import AutoTokenizer
 
+    from dmc.runtime import template_clock
+
     tok = AutoTokenizer.from_pretrained(tokenizer_id)
 
-    def render(system: str, user: str) -> str:
+    def render(system: str, user: str, now: str | None = None) -> str:
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-        return tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
+        return tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True,
+                                       **template_clock(now))
 
     return render
 

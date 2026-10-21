@@ -23,3 +23,33 @@ Registered 2026-10-21, before any run of this design. Supersedes the v1 design o
 - H2: teacher-forced per-position agreement is higher with pinning.
 - H3: hardened routers lower the REF-vs-ALT routing-flip rate relative to stock routers.
 - H4: fragile-routing share adds parity at C₀ beyond decision margin alone (CI excludes 0). If false, ND2 is downgraded from a MUST to a diagnostic.
+
+---
+
+**Amendment 1, registered 2026-10-21, before any run** (round-3 review K1, K2, K3, K5, K6, K11
+and §3 cut guidance).
+- *Proxy calibration first:* `experiments/05_proxy_calibration.py` runs before this pilot and
+  writes `05_proxy_calibration.json`. **ε for the fragile-routing share = p95 of |Δ router logit|
+  REF vs ALT excluding the first position** (`eps_H4`); ε = 0.01 is a secondary. The proxy
+  regime is "faithful" if mean per-position KL(REF‖ALT) ≤ 10 × 1.5e-3, else "stress"; in the
+  stress regime results may remove levers or validate mechanisms but never set production C₀.
+- *Scorer:* the R17 scorer (case and leading-space surface forms marginalized; now the default).
+- *D2-fresh curves (K1):* primary curve ranks each stack's fresh decisions by **that stack's own
+  decision margin**; the REF-margin ranking is secondary. Pinned curves rank by REF's margin
+  (replay carries REF's receipt).
+- *H1, paired (K5):* among decisions where fresh ≠ REF, *repaired* = pinned = REF; *introduced* =
+  fresh = REF but pinned ≠ REF. H1 supported iff repaired > introduced with one-sided exact
+  sign-test p < 0.05; "uninformative" if fewer than 5 fresh flips.
+- *H4, three branches (K5), on the executing stack:* combined signal = ALT margin − α · ALT
+  fragile share. **Support** (ND2 stays a MUST) if the bootstrap CI lower bound > 0; **demote**
+  (ND2 becomes a diagnostic) if the CI upper bound < +0.5 points; otherwise **inconclusive**
+  (confirmatory test at hub scale with n ≥ 2,000). Secondary: content-only fragile share
+  (positions from the question onwards) and ε = 0.01. At n ≈ 300, H4 is exploratory.
+- *Failures (K6):* a `TraceMismatch`/`TraceOverrun` is caught per item, recorded in
+  `*_pinned_status`, and counted as a pinned disagreement; intermediate JSON is written after
+  each part.
+- *Baseline (K11):* REF's single-pass (teacher-forced) argmax vs its own incremental decode is
+  reported, so teacher-forced agreement numbers are interpretable.
+- *Cuts:* 15 oracle groups per family (270 oracle + 30 probe = 300 decisions); no free-running
+  pinned generation for STRESS. Unchanged: ALT pinned arm, probe decisions, Part 4, 1,000
+  bootstrap samples, all 25 generations.

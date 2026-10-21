@@ -44,3 +44,23 @@ on seed 1. Otherwise it is reported as failed and removed from P5 (plan §4.4).
 margin < 0.01; FP32-vs-BF16 (hardened) stress flip rate; Decide-profile parity between the two
 BF16 thread configurations on the first 60 oracle decisions; training curves (the logged "ce" is pure
 cross-entropy because the aux-loss coefficient is 0.0).
+
+---
+
+**Amendment 2, registered 2026-10-21, before any training run** (round-3 review K3, K14 and the
+cut guidance in `docs/reviews/round-3-fable-review.md` §3; motivated by CPU cost: this CPU has
+no native BF16, so BF16 forwards are emulated).
+- *Scorer:* every Decide-profile decision uses `DecideProfile(..., abstain_margin=0.0)` with the
+  R17 scorer, i.e. labels marginalized over case and leading-space surface forms
+  (`marginalize_case=True`, now the default).
+- *Grid:* γ ∈ {0.05, 0.2} × λ ∈ {1, 5} (4 arms) plus the λ = 0 control; all arms 80 steps.
+- *Evaluation inputs:* the 16 held-out chunks (unchanged) + 45 probe prompts (first 3 paraphrase
+  groups of each family). Oracle agreement set: `dmc.oracle.generate(5, seed=5)` (90 decisions).
+  Secondary BF16 thread parity: first 30 oracle decisions.
+- *Guard 5 wording:* the oracle-accuracy bound (≥ original − 2 points on 90 decisions, a
+  ~2-item tolerance) is a guard against large losses, not a test of "no capability loss"; a pass
+  is not reported as evidence of no capability cost.
+- Unchanged: λ = 0 control, seed-1 replication rule, the five guards, the sole primary metric.
+- *Proxy regime:* read from `experiments/results/05_proxy_calibration.json`. If ALT is in the
+  "stress" regime, a passing arm may only be reported as "mechanism works under a stress proxy";
+  the lever is kept for the hub-scale S5 replication, never adopted on CPU evidence alone.

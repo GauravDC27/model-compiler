@@ -130,3 +130,14 @@ def test_hardened_router_matches_stock_routes_in_fp32_and_breaks_ties_low(kind):
     for k, v in tied.trace().items():
         if k != TOKENS:
             assert torch.equal(v, torch.tensor([[0, 1]]).expand_as(v))
+
+
+def test_fragile_share_can_skip_a_shared_prefix():
+    model = tiny("granite")
+    with torch.no_grad(), RouteTracer(model, record_margins=True) as tr:
+        model(input_ids=torch.randint(0, 64, (1, 10)))
+    full = tr.fragile_share(1e9)
+    assert full == 1.0
+    assert tr.fragile_share(1e9, skip=4) == 1.0
+    assert tr.fragile_share(-1.0, skip=4) == 0.0
+    assert tr.fragile_share(1e9, skip=10) == 0.0  # nothing left after the prefix

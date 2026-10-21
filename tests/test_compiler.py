@@ -62,8 +62,8 @@ def test_case_marginalization_reads_capitalized_preference(tmp_path):
         # The model says "No" (capitalized) with high probability, lowercase forms are rare.
         b.scores.update({(prompt, "yes"): -4.0, (prompt, "no"): -4.2, (prompt, "No"): -0.1,
                          (prompt, "Yes"): -3.0})
-    plain = DecideProfile(b, abstain_margin=0.0).run(op)
-    marg = DecideProfile(b, abstain_margin=0.0, marginalize_case=True).run(op)
+    plain = DecideProfile(b, abstain_margin=0.0, marginalize_case=False).run(op)
+    marg = DecideProfile(b, abstain_margin=0.0).run(op)  # R17: marginalized by default
     assert plain.label == "yes"  # misled by lowercase-only scoring
     assert marg.label == "no"
 
@@ -90,3 +90,17 @@ def test_dispatch_table_routes_research_to_reason():
     from dmc.compiler import DISPATCH_TABLE
 
     assert DISPATCH_TABLE["research"] == DISPATCH_TABLE["analyze"] == "reason"
+
+
+def test_surface_forms_cover_case_and_leading_space():
+    from dmc.profiles.decide import surface_forms
+
+    assert surface_forms("no") == ("no", "No", "NO", " no", " No")
+    assert surface_forms("A") == ("A", " A")
+
+
+def test_receipt_carries_rendered_prompt_hash(tmp_path):
+    c = make(tmp_path, backend_for("Is 91 prime?", yes=-3.0, no=-0.1))
+    out = c.run("Is 91 prime? Answer yes or no.", CTX)
+    assert out.receipt.rendered_prompt_hash == out.result.rendered_prompt_hash
+    assert out.receipt.rendered_prompt_hash.startswith("sha256:")
