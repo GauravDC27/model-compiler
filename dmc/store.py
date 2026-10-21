@@ -38,6 +38,7 @@ class Receipt(BaseModel):
     pinned: str | None = None  # "full" | "partial" | "none" for re-executions
     sampling_mask: str | None = None  # summary of the truncation support used when sampling
     normalization: str | None = None  # Judge style-normalization mode
+    cap_hits: int = 0  # tool outputs truncated to their compiled cap (dmc.scheduler.cap_input)
 
 
 class Record(BaseModel):

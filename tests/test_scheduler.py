@@ -161,3 +161,16 @@ def test_input_reads_scale_the_capped_input():
                           {"decide.classify": 0.97}, input_reads=2)
     assert two_orders.call_tokens(1000) == 600 + 2 * 1000
     assert two_orders.call_tokens(1000, discount=500) == 600 + 2 * 1000 - 500
+
+
+def test_cap_input_keeps_head_and_tail_within_the_cap():
+    from dmc.scheduler import cap_input
+
+    ids = list(range(100))
+    out, hit = cap_input(ids, 10, [-1])
+    assert hit and len(out) == 10
+    assert out == [0, 1, 2, 3, 4, -1, 96, 97, 98, 99]
+    assert cap_input(ids, 10, [-1]) == (out, True)  # deterministic
+    assert cap_input(ids[:10], 10, [-1]) == (ids[:10], False)
+    with pytest.raises(ValueError):
+        cap_input(ids, 2, [-1, -2])

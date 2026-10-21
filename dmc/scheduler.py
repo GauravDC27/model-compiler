@@ -396,6 +396,22 @@ def compile_program(program: Program, executors: Sequence[Executor], *, token_bu
     return ProgramSchedule(main, variants, worst, h)
 
 
+def cap_input(ids: Sequence[int], cap: int, marker: Sequence[int]) -> tuple[list[int], bool]:
+    """Truncate a tool output to its compiled cap: keep the head and the tail around a marker.
+
+    A pure function of its arguments, so replay truncates identically. Returns the tokens to
+    feed and whether the cap was hit (recorded in ``Receipt.cap_hits``).
+    """
+    if len(ids) <= cap:
+        return list(ids), False
+    room = cap - len(marker)
+    if room < 2:
+        raise ValueError(f"cap {cap} leaves no room around a {len(marker)}-token marker")
+    head = room - room // 2
+    tail = room // 2
+    return list(ids[:head]) + list(marker) + list(ids[len(ids) - tail:]), True
+
+
 class GuardRuntime:
     """Runtime side of guards: decides what happens when a guard fails."""
 
