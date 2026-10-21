@@ -290,7 +290,7 @@ def build_html(sheets: list[tuple[str, str, str]], style: str, font_css: str, pa
     <div>
       <h3>Targets (fixed before measurement)</h3>
       <table class="kv"><tbody>
-        <tr><td>Reasoning</td><td>Lower 95% CI of (GCAM − 27B) ≥ −δ_b on GPQA-D, HLE, AIME 24–26, LCB v6, MMLU-Pro</td></tr>
+        <tr><td>Reasoning</td><td>Lower 95% CI of (GCAM − 27B) ≥ −δ_b on GPQA-D, HLE, AIME 24–26, LCB v6, MMLU-Pro (δ_b capped at 4; AIME and GPQA-D expected resolution-limited, so pooled into a composite)</td></tr>
         <tr><td>Agentic</td><td>Same rule, floor 2 points: SWE-bench Pro, Terminal-Bench 2.x, τ³-bench, BrowseComp, goal suite</td></tr>
         <tr><td>Cost</td><td>≤ 0.5× cost-of-pass (reasoning, goal suite), ≤ 0.6× (agentic), escalation e ≤ 0.15</td></tr>
         <tr><td>Latency</td><td>Mean ≤ 0.6×; p50 and p90 reported</td></tr>
@@ -321,7 +321,7 @@ def build_html(sheets: list[tuple[str, str, str]], style: str, font_css: str, pa
         ("Artifact A / B", "What is served. A: one merged checkpoint per goal family, pinned to its own GPU. B: one checkpoint whose goal-gated experts carry every family. A from G1; B only if it passes a comparison at G2."),
         ("avg@k", "Accuracy averaged over k samples per item; reduces sampling noise in paired comparisons."),
         ("b_goal", "Per-request router bias set by the compiler: opens a family's goal experts, −∞ for every other family."),
-        ("Cost-of-pass", "Cost per solved task. At accuracy parity its ratio to the 27B is r·τ_h + e."),
+        ("Cost-of-pass", "Cost per solved task. At accuracy parity its ratio to the 27B is r·τ_h + e + s (s: System-1 and code overhead)."),
         ("D0 … D4, D⊥", "Determinism levels: replay, bitwise recompute, cross-stack decision parity, paraphrase invariance, spec conformance, defined failure."),
         ("δ_b", "Non-inferiority margin for benchmark b: max(1.5 points, one item, 2.8 × paired SE of hub-base − 27B), capped at 4 points; benchmarks above the cap are pooled."),
         ("e", "Escalation budget: tokens the 27B spends on escalated steps ÷ the 27B's tokens per task. Planned ≤ 0.15."),
@@ -339,7 +339,7 @@ def build_html(sheets: list[tuple[str, str, str]], style: str, font_css: str, pa
         ("R3", "Routing replay: rollout routes reused in the RL update so MoE training stays stable."),
         ("System-1 / System-2", "Fast executors that answer without generating tokens, versus the hub and spokes that reason in tokens."),
         ("T0 … T6", "Training stages: atlas, transfer, goal experts, agentic RL, decision DPO, efficiency, System-1 distillation."),
-        ("τ_h", "Hub tokens per task ÷ the 27B's. Planned 1.0 on reasoning, 1.2 on agentic suites."),
+        ("τ_h", "Hub tokens per task ÷ the 27B's. Planned ≤ 1.05 on reasoning, 1.2 on agentic suites."),
     ]
     gloss = "".join(f"<dt>{html.escape(t)}</dt><dd>{html.escape(d)}</dd>" for t, d in glossary)
     app_b = f"""
@@ -388,7 +388,7 @@ EXTRA = {
     <tr><td>Planner</td><td>Goal IR → DAG of typed ops; plans cached by template hash</td><td>Hub Plan profile (G1)</td><td>D0</td></tr>
     <tr><td>Scheduler</td><td>Ladders, budgets, caps, lanes, guards, variants, bound, schedule hash</td><td><code>dmc/scheduler.py</code></td><td>Pure function of IR, lock and cost models</td></tr>
     <tr><td>Executor registry</td><td>Cost models and per-item calibration records per executor and lock</td><td>T6 output; <code>Executor</code>, <code>Outcome</code></td><td>Versioned per lock</td></tr>
-    <tr><td>Runtime</td><td>Runs the schedule, enforces caps, evaluates guards, records activities and receipts</td><td>Durable executor (P1, Temporal-class)</td><td>Records every call</td></tr>
+    <tr><td>Runtime</td><td>Runs the schedule, enforces caps, evaluates guards, records activities and receipts</td><td>Durable executor (P3, Temporal-class); P1 is the deterministic serving lane</td><td>Records every call</td></tr>
     <tr><td>System-1 tier</td><td>Code, classic ML, encoders, decision heads, SLM caller</td><td>T6</td><td>D1 on certified stacks</td></tr>
     <tr><td>Hub</td><td>Reasoning, planning, tool calls, creation, with goal-family capacity</td><td>Qwen3.6-35B-A3B after T1–T5</td><td>D0 + statistical D2 until the GDN audit</td></tr>
     <tr><td>Spokes</td><td>Teacher, judge and hardest-node escalation; reward model; verifiers</td><td>Qwen3.8-27B; Skywork-Reward-V2-Qwen3-8B</td><td>D0</td></tr>

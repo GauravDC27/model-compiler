@@ -134,13 +134,32 @@ class Capacity:
         moe = self.layers[i].block_sparse_moe
         return moe.base if isinstance(moe, expansion.GoalGatedMoE) else moe
 
-    def add_goal_experts(self, family: str, parents: dict[int, list[int]], *, n_new: int = 1, noise: float = 0.05,
-                         bias_init: float = 0.1, seed: int = 11) -> list[expansion.GoalGatedMoE]:
+    def add_goal_experts(self, family: str, parents: dict[int, list[int]], *, variant: str = "additive",
+                         n_new: int = 1, noise: float = 0.05, bias_init: float | None = None,
+                         seed: int = 11) -> list[expansion.GoalGatedMoE]:
+        """Goal-gated new experts for one family.
+
+        ``additive`` (v1 default): every token keeps its base top-8 and also passes through the new
+        expert, scaled by a learned sigmoid gate (router row + goal bias). The new expert starts as
+        a copy of the layer's hottest expert with its down-projection zeroed, so at step 0 the
+        model is exactly the base model. ``routed``: the new expert competes inside the top-8 and
+        starts as a noisy copy of its parent (UMoE-style). On this hub the routed copies lost their
+        traffic during training (share 0.74 → 0.30, 0.13 at the answer token), so v1 uses additive.
+        """
         if self.gated:
             raise ValueError("v1 supports goal-gated experts for one family")
         gen = torch.Generator().manual_seed(seed)
-        wrapped = expansion.expand(self.lm.model, sorted(parents), n_new, [family], "routed", parents,
-                                   noise=noise, router_init="parent", bias_init=bias_init, generator=gen)
+        if variant == "routed":
+            wrapped = expansion.expand(self.lm.model, sorted(parents), n_new, [family], "routed", parents,
+                                       noise=noise, router_init="parent",
+                                       bias_init=0.1 if bias_init is None else bias_init, generator=gen)
+        else:
+            wrapped = expansion.expand(self.lm.model, sorted(parents), n_new, [family], "additive", parents,
+                                       router_init="zero", bias_init=0.0 if bias_init is None else bias_init)
+            with torch.no_grad():
+                for w in wrapped:
+                    w.new.down.zero_()
+        self.variant = variant
         self.gated[family] = wrapped
         return wrapped
 

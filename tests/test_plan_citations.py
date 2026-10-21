@@ -1,14 +1,16 @@
-"""Every `dmc/...py` path and `dmc/...py::symbol` cited in docs/PLAN.md must exist (review G3)."""
+"""Every code, test, experiment and result path (and `path::symbol`) cited in the plan and its renderings
+must exist (reviews G3, round-7 Q5)."""
 
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CITE = re.compile(r"`?((?:dmc|tests|experiments)/[\w/]+\.(?:py|md|json))(?:::(\w+))?`?")
+CITE = re.compile(r"`?((?:dmc|gcam|tests|experiments)/[\w/.-]+?\.(?:py|md|json))(?:::(\w+))?`?")
+DOCS = ("docs/PLAN.md", "docs/blueprint.html", "docs/pdf/build_blueprint_pdf.py")
 
 
 def test_cited_files_and_symbols_exist():
-    text = (ROOT / "docs/PLAN.md").read_text(encoding="utf-8")
+    text = "\n".join((ROOT / d).read_text(encoding="utf-8") for d in DOCS)
     missing = []
     for path, symbol in set(CITE.findall(text)):
         f = ROOT / path
@@ -19,7 +21,7 @@ def test_cited_files_and_symbols_exist():
             src = f.read_text(encoding="utf-8")
             if not re.search(rf"^\s*(?:def|class)\s+{symbol}\b|^{symbol}\s*[:=]", src, re.M):
                 missing.append(f"{path}::{symbol}")
-    assert not missing, f"PLAN.md cites things that do not exist: {sorted(missing)}"
+    assert not missing, f"the docs cite things that do not exist: {sorted(missing)}"
 
 
 def test_cited_receipt_and_context_fields_exist():

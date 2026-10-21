@@ -33,6 +33,8 @@ from ..models import HUB_ID, LETTERS, LM, Capacity, artifacts_dir
 SMOKE = bool(os.environ.get("GCAM_SMOKE"))
 STEPS, BATCH = (2 if SMOKE else 90), 4  # ~0.9 s per forward on this 4-core CPU: 360 sequences per family
 LR = {"policy": 1e-3, "support": 3e-4}  # new experts train from a copy; LoRA from zero B needs a gentler rate
+VARIANT = os.environ.get("GCAM_VARIANT", "additive")
+ONLY = os.environ.get("GCAM_ONLY")  # "policy": retrain only the goal experts, keep the support LoRA
 SPECS = {
     "policy": {"op": "decide.claim_reason", "labels": tuple(sorted(CLAIM_OPTIONS)), "user": claim_user},
     "support": {"op": "tool.select", "labels": tuple(sorted(TOOL_OPTIONS)), "user": tool_user},
@@ -122,6 +124,20 @@ def train(lm: LM, params, exs, family: str, log_prefix: str) -> list[dict]:
     return log
 
 
+def new_share(lm: LM, wrapped, exs) -> dict:
+    """New-expert traffic share with the goal on: over all tokens and at the answer token."""
+    caps = []
+    hooks = [w.register_forward_pre_hook(lambda m, a: caps.append((m, a[0].detach()))) for w in wrapped]
+    with torch.no_grad(), lm.family("policy"):
+        for ids, _ in exs:
+            lm.model(input_ids=torch.tensor([ids]))
+        out = {"all_tokens": round(sum(m.new_expert_share(h) for m, h in caps) / len(caps), 3),
+               "answer_token": round(sum(m.new_expert_share(h[:, -1:]) for m, h in caps) / len(caps), 3)}
+    for h in hooks:
+        h.remove()
+    return out
+
+
 def identity_ok(lm: LM, probes, reference) -> bool:
     with lm.family(None), torch.no_grad():
         return all(torch.equal(lm.model(input_ids=x).logits, ref) for x, ref in zip(probes, reference))
@@ -150,25 +166,33 @@ def main() -> None:
     layers = list(range(lm.model.config.num_hidden_layers))
     use = {fam: usage(lm, exs[fam]) for fam in SPECS}
 
-    # item (ii): goal-gated experts for the policy family
+    # item (ii): goal-gated experts for the policy family (additive variant; see Capacity.add_goal_experts)
     parents = {i: [int(torch.argmax(use["policy"][i]))] for i in layers}
-    wrapped = cap.add_goal_experts("policy", parents)
+    wrapped = cap.add_goal_experts("policy", parents, variant=VARIANT)
     from dmc.expansion import trainable_parameters
     params = trainable_parameters(wrapped)
     n_ii = sum(p.numel() for p in params)
-    log_ii = train(lm, params, exs["policy"], "policy", "[policy]")
-    # item (i): hot-expert LoRA for the support family
     hot = {i: hot_set(use["support"][i]) for i in layers}
-    mods = cap.add_lora("support", hot, rank=4, alpha=8.0)
+    if ONLY == "policy":  # retrain the goal experts only; keep the trained support LoRA
+        mods = cap.add_lora("support", hot, rank=4, alpha=8.0)
+        cap.load("support", torch.load(artifacts_dir() / "capacity" / "support.pt"))
+        old = json.loads((artifacts_dir() / "capacity" / "manifest.json").read_text())
+    log_ii = train(lm, params, exs["policy"], "policy", "[policy]")
+    share = new_share(lm, wrapped, exs["policy"][:6])
+    # item (i): hot-expert LoRA for the support family
+    if ONLY != "policy":
+        mods = cap.add_lora("support", hot, rank=4, alpha=8.0)
     params = [p for m in mods for p in (m.a_gu, m.b_gu, m.a_d, m.b_d)]
     n_i = sum(p.numel() for p in params)
-    log_i = train(lm, params, exs["support"], "support", "[support]")
+    log_i = old["families"]["support"]["train_log"] if ONLY == "policy" else train(lm, params, exs["support"], "support",
+                                                                                  "[support]")
 
     fam_ex = LLMExecutor("hub", lm, family={"decide.claim_reason": "policy", "tool.select": "support"})
     cross_ex = LLMExecutor("hub", lm, family={"decide.claim_reason": "support", "tool.select": "policy"})
     out_dir = artifacts_dir() / ("capacity_smoke" if SMOKE else "capacity")
     out_dir.mkdir(parents=True, exist_ok=True)
-    for fam, kind, n, log, extra in (("policy", "goal_gated_experts", n_ii, log_ii, {"parents": parents}),
+    for fam, kind, n, log, extra in (("policy", "goal_gated_experts", n_ii, log_ii,
+                                      {"parents": parents, "variant": VARIANT, "new_expert_share": share}),
                                       ("support", "hot_expert_lora", n_i, log_i,
                                        {"hot_sizes": {i: len(v) for i, v in hot.items()}, "hot": hot, "rank": 4})):
         state = cap.state(fam)

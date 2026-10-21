@@ -103,7 +103,7 @@ class System:
         hub.capacity = cap
         manifest = json.loads((self.art / "capacity" / "manifest.json").read_text())
         parents = {int(k): v for k, v in manifest["families"]["policy"]["parents"].items()}
-        cap.add_goal_experts("policy", parents)
+        cap.add_goal_experts("policy", parents, variant=manifest["families"]["policy"].get("variant", "routed"))
         hot = {int(k): v for k, v in manifest["families"]["support"]["hot"].items()}
         cap.add_lora("support", hot, rank=manifest["families"]["support"]["rank"])
         for fam in ("policy", "support"):
