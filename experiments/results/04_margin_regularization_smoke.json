@@ -1,0 +1,101 @@
+{
+ "original": {
+  "primary_flip_rate_bf16_4v3": 0.039467592592592596,
+  "stress_flip_rate_fp32_vs_bf16": 0.04351851851851852,
+  "margin_below_0.01": 0.08472222222222223,
+  "heldout_ce": 2.4286420345306396,
+  "load_entropy_mean": 0.9441653020489128,
+  "labels": null,
+  "oracle_accuracy": 0.5,
+  "oracle_parity_bf16_4v3": 0.9444444444444444
+ },
+ "arms": {
+  "s0_g0.0_l0.0": {
+   "gamma": 0.0,
+   "lambda": 0.0,
+   "seed": 0,
+   "train_log": [
+    {
+     "step": 0,
+     "ce": 2.7524,
+     "hinge": 0.0
+    },
+    {
+     "step": 1,
+     "ce": 2.5638,
+     "hinge": 0.0
+    }
+   ],
+   "primary_flip_rate_bf16_4v3": 0.0375,
+   "stress_flip_rate_fp32_vs_bf16": 0.04351851851851852,
+   "margin_below_0.01": 0.08113425925925925,
+   "heldout_ce": 2.3352012634277344,
+   "load_entropy_mean": 0.9433240286841365,
+   "labels": null,
+   "oracle_accuracy": 0.5,
+   "oracle_parity_bf16_4v3": 1.0
+  },
+  "s0_g0.05_l1.0": {
+   "gamma": 0.05,
+   "lambda": 1.0,
+   "seed": 0,
+   "train_log": [
+    {
+     "step": 0,
+     "ce": 2.7524,
+     "hinge": 0.00908
+    },
+    {
+     "step": 1,
+     "ce": 2.5639,
+     "hinge": 0.00889
+    }
+   ],
+   "primary_flip_rate_bf16_4v3": 0.0369212962962963,
+   "stress_flip_rate_fp32_vs_bf16": 0.04652777777777778,
+   "margin_below_0.01": 0.08229166666666667,
+   "heldout_ce": 2.3375829458236694,
+   "load_entropy_mean": 0.9433155896469604,
+   "labels": null,
+   "oracle_accuracy": 0.5,
+   "oracle_parity_bf16_4v3": 0.9444444444444444,
+   "checks": {
+    "flip_halved_vs_control": false,
+    "ce_within_1pct": true,
+    "load_entropy_within_5pct": true,
+    "probe_agreement_ge_90": true,
+    "oracle_agreement_ge_95": false,
+    "oracle_accuracy_within_2pts": true,
+    "PASS": false
+   }
+  },
+  "s1_g0.0_l0.0": {
+   "gamma": 0.0,
+   "lambda": 0.0,
+   "seed": 1,
+   "train_log": [
+    {
+     "step": 0,
+     "ce": 2.8096,
+     "hinge": 0.0
+    },
+    {
+     "step": 1,
+     "ce": 2.5286,
+     "hinge": 0.0
+    }
+   ],
+   "primary_flip_rate_bf16_4v3": 0.033449074074074076,
+   "stress_flip_rate_fp32_vs_bf16": 0.053125,
+   "margin_below_0.01": 0.07939814814814815,
+   "heldout_ce": 2.345725655555725,
+   "load_entropy_mean": 0.9436402613645422,
+   "labels": null,
+   "oracle_accuracy": 0.4444444444444444,
+   "oracle_parity_bf16_4v3": 0.9444444444444444
+  }
+ },
+ "survivors": [],
+ "LEVER_SURVIVES": false,
+ "elapsed_s": 1175.5
+}
