@@ -53,3 +53,9 @@ and §3 cut guidance).
 - *Cuts:* 15 oracle groups per family (270 oracle + 30 probe = 300 decisions); no free-running
   pinned generation for STRESS. Unchanged: ALT pinned arm, probe decisions, Part 4, 1,000
   bootstrap samples, all 25 generations.
+- *Implementation note (2026-10-21, before the full run; no change to any quantity being
+  estimated):* `HFBackend.score` now computes the prompt once and reads every single-token
+  continuation from that pass (multi-token continuations still get a full pass). The scored
+  probabilities are the same conditional probabilities; only the kernel call pattern changes,
+  identically on every stack. Calibration result: ALT is in the **stress** regime (mean
+  per-position KL 0.0205 = 13.7 × 1.5e-3), ε_H4 = 0.0331.

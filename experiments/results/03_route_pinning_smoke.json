@@ -1,0 +1,41 @@
+{
+ "model": "ibm-granite/granite-3.1-1b-a400m-instruct",
+ "stacks": {
+  "REF": [
+   "bf16",
+   4
+  ],
+  "ALT": [
+   "bf16",
+   3
+  ],
+  "STRESS": [
+   "fp32",
+   4
+  ]
+ },
+ "C0": 0.85,
+ "eps_H4": 0.033109483122825606,
+ "eps_secondary": 0.01,
+ "proxy_regime": "stress",
+ "R7_routing_flip_REF_vs_ALT": {
+  "stock": {
+   "rate": 0.0545,
+   "k": 136,
+   "n": 2496,
+   "ci95": [
+    0.0462,
+    0.0641
+   ]
+  },
+  "hardened": {
+   "rate": 0.0505,
+   "k": 126,
+   "n": 2496,
+   "ci95": [
+    0.0426,
+    0.0598
+   ]
+  }
+ }
+}

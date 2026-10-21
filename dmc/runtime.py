@@ -100,17 +100,26 @@ class HFBackend:
         return self.tok(text, add_special_tokens=False).input_ids
 
     def score(self, prompt: str, continuations: Sequence[str]) -> list[float]:
+        """Log P(continuation | prompt). One forward pass over the prompt scores every
+        single-token continuation; each multi-token continuation adds one full pass."""
         torch = self._torch
         base = self._ids(prompt)
-        out = []
+        targets = []
         for cont in continuations:
             # Tokenize jointly so the boundary matches what generation would produce.
             ids = self._ids(prompt + cont)
             if ids[: len(base)] != base:
                 ids = base + self._ids(cont)
-            target = ids[len(base):]
+            targets.append(ids[len(base):])
+        with torch.no_grad():
+            last = self.model(input_ids=torch.tensor([base])).logits[0, -1].float().log_softmax(-1)
+        out = []
+        for target in targets:
+            if len(target) == 1:
+                out.append(float(last[target[0]]))
+                continue
             with torch.no_grad():
-                logits = self.model(input_ids=torch.tensor([ids])).logits[0].float()
+                logits = self.model(input_ids=torch.tensor([base + target])).logits[0].float()
             logp = logits.log_softmax(-1)
             out.append(float(sum(logp[len(base) - 1 + i, t] for i, t in enumerate(target))))
         return out
