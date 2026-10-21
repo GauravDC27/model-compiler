@@ -155,8 +155,8 @@ tr:last-child td{border-bottom:none}
   </div>
   <div class="tb-cells">
     <div>Project</div><div>GCAM</div>
-    <div>Plan</div><div>v6 · <span class="mono">docs/PLAN.md</span></div>
-    <div>Review</div><div>Round 5 (Fable 5.1) in progress</div>
+    <div>Plan</div><div>v6.1 · <span class="mono">docs/PLAN.md</span></div>
+    <div>Review</div><div>Round 5 approved with changes; round 6 in progress</div>
     <div>Date</div><div class="mono">2026-10-21</div>
     <div>Hub</div><div>Qwen3.6-35B-A3B</div>
     <div>Reference</div><div>Qwen3.8-27B</div>
@@ -166,7 +166,7 @@ tr:last-child td{border-bottom:none}
 </header>
 <dl class="glance">
   <div><dt>Quality target</dt><dd>Non-inferior to Qwen3.8-27B, per-benchmark margin δ_b</dd></div>
-  <div><dt>Cost target</dt><dd>Cost-of-pass ≤ 0.5× the 27B's</dd></div>
+  <div><dt>Cost target</dt><dd>Cost-of-pass ≤ 0.5× (reasoning) · ≤ 0.6× (agentic)</dd></div>
   <div><dt>Escalation budget</dt><dd>≤ 15% of the 27B's token volume</dd></div>
   <div><dt>Hub compute</dt><dd>~3B active of 35B · 256 experts, top-8 + 1 shared</dd></div>
 </dl>
@@ -803,18 +803,18 @@ tr:last-child td{border-bottom:none}
   <text class="s" x="232" y="405">~100 terminal-RL steps on the base, R3 on → switch criteria (Sheet 10)</text>
 </svg>
     </div>
-    <figcaption>Arrows mean “must finish before”. The spike (dashed) runs early on the untrained base because it tests the plan's riskiest assumption: that RL moves agentic quality at ~3B active parameters.</figcaption>
+    <figcaption>Arrows mean “must finish before”. T4 and T5 may run a first version on hub-base before T3 to test their recipes, but only the versions re-run after T3 ship. The spike (dashed) runs early on the untrained base because it tests the plan's riskiest assumption: that RL moves agentic quality at ~3B active parameters.</figcaption>
   </figure>
   <div class="tbl"><table>
     <thead><tr><th>Stage</th><th>Recipe and guardrails</th><th>Compute</th></tr></thead>
     <tbody>
       <tr><td>T0 Atlas</td><td>Routing atlas per goal family; selection counts, not router affinity (A3B: affinity entropy 0.98, selection concentrated); super-expert profile</td><td class="num">&lt; 50 GPU-h</td></tr>
       <tr><td>T1 Transfer</td><td>SFT with top-20 KD (w = 0.3) on 27B traces, then on-policy distillation with full logits over the shared 248,320-token vocabulary; hot-expert LoRA, cached prefix + 512-token gradient tail, lr 1e-4; merge, FP8, survival check</td><td class="num">1–3K H100-h</td></tr>
-      <tr><td>Spike</td><td>~100 terminal-RL steps with R3 (AgentWorld moved a 35B-A3B Terminal 32.8 → 47.0). Gate: ≥ +4 points with CI lower bound &gt; 0, no reasoning loss beyond δ_b</td><td class="num">1 node × ~1 week</td></tr>
+      <tr><td>Spike</td><td>~100 terminal-RL steps with R3 on public terminal tasks (AgentWorld moved a 35B-A3B Terminal 32.8 → 47.0). Evaluated on ≥ 300 held-out terminal tasks, k = 4, so that +4 points is resolvable. Pass: gain ≥ +4 with CI lower bound &gt; 0. Switch signal: CI upper bound &lt; +4. Otherwise inconclusive.</td><td class="num">1 node × ~1 week</td></tr>
       <tr><td>T2 Goal experts</td><td>Per family: gain against a matched-parameter LoRA arm, off-goal identity, traffic share, drift and wrong-goal accuracy</td><td class="num">10–100 GPU-h / family</td></tr>
       <tr><td>T3 Agentic RL</td><td>GSPO/CISPO sequence-level objectives, R3 routing replay, exact token handoff; SWE, terminal, tool simulators, browsing</td><td class="num">Tier 1 ≤ ~25K · Tier 0 ≤ 10K GPU-h</td></tr>
-      <tr><td>T4 Decision DPO</td><td>Two independent judges must agree; margin only on decision tokens (weight 4, β 0.5) plus anchors</td><td class="num">&lt; 100 GPU-h / round</td></tr>
-      <tr><td>T5 Efficiency</td><td>Difficulty-aware length RL, learned thinking on/off, CompactionRL, early-exit probes; hard-set non-inferiority guards</td><td class="num">1–2K H100-h</td></tr>
+      <tr><td>T4 Decision DPO</td><td>v1 on hub-base, re-run after T3. Two independent judges must agree; margin only on decision tokens (weight 4, β 0.5) plus anchors</td><td class="num">&lt; 100 GPU-h / round</td></tr>
+      <tr><td>T5 Efficiency</td><td>v1 on hub-base, re-run after T3. Difficulty-aware length RL, learned thinking on/off, CompactionRL, early-exit probes; hard-set non-inferiority guards</td><td class="num">1–2K H100-h</td></tr>
       <tr><td>T6 System-1</td><td>Heads, encoders, SLMs and GBDTs from hub/27B labels; conformal thresholds; joint <code>Outcome</code> records for every executor</td><td class="num">CPU – small GPU</td></tr>
     </tbody>
   </table></div>
@@ -826,7 +826,7 @@ tr:last-child td{border-bottom:none}
   <p class="claim">At accuracy parity, cost-of-pass relative to the 27B = r·τ_h + e. The hub's per-token cost r is measured in G0. τ_h is hub verbosity relative to the 27B, and e is the escalation budget. The targets are read off this chart, not asserted.</p>
   <figure>
     <div class="fig narrow">
-<svg class="dg" viewBox="0 0 960 430" role="img" aria-label="Line chart of cost-of-pass ratio against escalation budget e from 0 to 0.4, for three scenarios. With the Artificial Analysis cost basis and equal verbosity the ratio is 0.33 at no escalation and 0.48 at e = 0.15, under the 0.5 target. With 20% more verbosity on agentic work it is 0.55 at e = 0.15. With the A3B cost basis it is 0.32 at e = 0.15.">
+<svg class="dg" viewBox="0 0 960 430" role="img" aria-label="Line chart of cost-of-pass ratio against escalation budget e from 0 to 0.4, for three scenarios. With the Artificial Analysis cost basis and equal verbosity the ratio is 0.33 at no escalation and 0.48 at e = 0.15, under the 0.5 target for reasoning suites. With 20% more verbosity on agentic work it is 0.55 at e = 0.15, under the 0.6 agentic target, which it crosses at e = 0.20, the switch threshold. With the A3B cost basis it is 0.32 at e = 0.15.">
   <rect class="region" x="90" y="170" width="600" height="200"/>
   <g class="gridln">
     <line x1="90" y1="290" x2="690" y2="290"/><line x1="90" y1="210" x2="690" y2="210"/><line x1="90" y1="130" x2="690" y2="130"/><line x1="90" y1="50" x2="690" y2="50"/>
@@ -840,13 +840,15 @@ tr:last-child td{border-bottom:none}
   <text class="s" x="90" y="34">cost-of-pass relative to Qwen3.8-27B, at parity</text>
   <!-- targets -->
   <line class="ln-acc" x1="90" y1="170" x2="690" y2="170"/>
-  <text class="s acc" x="98" y="162">target ≤ 0.5×</text>
+  <text class="s acc" x="480" y="162">reasoning ≤ 0.5×</text>
+  <line class="ln-acc" x1="90" y1="130" x2="690" y2="130" stroke-width="1.2"/>
+  <text class="s acc" x="98" y="122">agentic ≤ 0.6×</text>
   <line class="ln-acc" x1="90" y1="236.7" x2="690" y2="236.7" stroke-dasharray="6 4"/>
   <text class="s acc" x="98" y="254">stretch ≤ 0.33×</text>
   <line class="ln-mut" x1="315" y1="50" x2="315" y2="370"/>
-  <text class="s" x="321" y="362">e = 0.15 budget</text>
-  <line class="ln-warn" x1="540" y1="50" x2="540" y2="370" stroke-dasharray="5 4"/>
-  <text class="s warnt" x="546" y="362">e = 0.30 switch</text>
+  <text class="s" x="321" y="346">e = 0.15 budget</text>
+  <line class="ln-warn" x1="390" y1="50" x2="390" y2="370" stroke-dasharray="5 4"/>
+  <text class="s warnt" x="396" y="362">e = 0.20 switch</text>
   <!-- lines -->
   <line class="ln" x1="90" y1="210" x2="690" y2="50" stroke-width="2"/>
   <line class="ln" x1="90" y1="236.7" x2="690" y2="76.7" stroke-width="2.4"/>
@@ -855,22 +857,22 @@ tr:last-child td{border-bottom:none}
   <text class="h" x="700" y="81">AA basis, τ_h 1.0</text>
   <text x="700" y="147">A3B basis, τ_h 1.0</text>
   <!-- points at e = 0.15 -->
-  <circle class="badb" cx="315" cy="150" r="5"/><text class="m" x="304" y="144" text-anchor="end">0.55</text>
+  <circle class="okb" cx="315" cy="150" r="5"/><text class="m" x="304" y="144" text-anchor="end">0.55</text>
   <circle class="okb" cx="315" cy="176.7" r="5"/><text class="m" x="324" y="194">0.48</text>
   <circle class="okb" cx="315" cy="243.3" r="5"/><text class="m" x="324" y="262">0.32</text>
   <circle class="bx" cx="90" cy="236.7" r="4"/>
 </svg>
     </div>
-    <figcaption>Shaded: meets the 0.5× target. Priors for r are 1/3 (Artificial Analysis throughput, 134 vs 44 tokens/s) and 1/6 (A3B GPU time per turn, 0.075 vs 0.449 s). With 20% more agentic verbosity, the 0.5× target needs e ≤ 0.10. If G0 measures r &gt; 0.4, the target is re-derived from the same formula by a dated amendment before G1. Prefix-cache savings are not credited.</figcaption>
+    <figcaption>Shaded: meets the 0.5× reasoning target. Priors for r are 1/3 (Artificial Analysis throughput, 134 vs 44 tokens/s) and 1/6 (A3B GPU time per turn, 0.075 vs 0.449 s). Agentic suites plan for 20% more hub tokens, so their target is 0.6×. That line crosses 0.6 exactly at e = 0.20, which is where the base-switch criterion sits; between 0.15 and 0.20 the hub stays and the miss is reported. If G0 measures r &gt; 0.4, the targets are re-derived from the same formula by a dated amendment before G1. Prefix-cache savings are not credited.</figcaption>
   </figure>
   <div class="tbl"><table>
     <thead><tr><th>Requirement</th><th>Value</th><th>Measured as</th></tr></thead>
     <tbody>
-      <tr><td>Reasoning parity</td><td>Lower 95% CI of (GCAM − 27B) ≥ −δ_b, with δ_b = max(1.5 points, one item, 2.8·SE_b of the 27B against itself)</td><td>avg@16, paired item bootstrap; AIME 2024–2026 pooled (90 items)</td></tr>
+      <tr><td>Reasoning parity</td><td>Lower 95% CI of (GCAM − 27B) ≥ −δ_b, with δ_b = max(1.5 points, one item, 2.8·SE_b), where SE_b is the paired SE of (hub-base − 27B), fixed at G1</td><td>avg@16, paired item bootstrap; AIME 2024–2026 pooled (90 items)</td></tr>
       <tr><td>Agentic parity</td><td>Same δ_b rule, floor 2 points; SWE-bench Pro, Terminal-Bench 2.x, τ³-bench pass^4, BrowseComp, goal-suite v0</td><td>pass^k and pass@1; 27B-vs-itself null control</td></tr>
-      <tr><td>Cost</td><td>Compiled system ≤ 0.5× cost-of-pass with e ≤ 0.15; raw hub ≤ 1.0× tokens on reasoning at parity</td><td>Measured r; input, cached and output tokens</td></tr>
-      <tr><td>Latency</td><td>Compiled system p50 ≤ 0.6×</td><td>Wall clock on the same node</td></tr>
-      <tr><td>Predictability</td><td>Bound holds by construction (caps + allowance); realized mean within ±15% over ≥ 200 tasks</td><td>Program bounds; joint-calibration audit with cap-hit rate</td></tr>
+      <tr><td>Cost</td><td>Compiled system with e ≤ 0.15: ≤ 0.5× cost-of-pass on reasoning suites and the goal suite, ≤ 0.6× on agentic suites; raw hub ≤ 1.0× tokens on reasoning at parity</td><td>Measured r; input, cached and output tokens; fleet-level cost under Artifact A</td></tr>
+      <tr><td>Latency</td><td>Compiled system mean ≤ 0.6×; p50 and p90 reported</td><td>Wall clock on the same node</td></tr>
+      <tr><td>Predictability</td><td>Bound holds by construction (main + every variant + recompile reserve, with capped tool outputs); realized mean within ±15% over ≥ 200 distinct tasks</td><td>Program bounds; joint-calibration audit with cap-hit rate</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -949,7 +951,7 @@ tr:last-child td{border-bottom:none}
 <!-- ============================ SHEET 10 ============================ -->
 <section class="sheet" id="s10">
   <div class="sheet-h"><span class="sheet-no">Sheet 10</span><h2>Roadmap and gates</h2><span class="ref">Plan §I.6, §I.4 allocation tiers</span></div>
-  <p class="claim">The riskiest assumptions are tested first. Measurements that the later gates depend on (δ_b, the cost basis r, the prefix-cache gate, thinking control, MTP on GDN) all land in G0.</p>
+  <p class="claim">The riskiest assumptions are tested first. Measurements that the later gates depend on (δ_b, the cost basis r, the prefix-cache gate, thinking control, MTP on GDN) all land in G0. The roadmap follows the stage edges of Sheet 07: hub-base is re-atlased inside G1 before any family checkpoint is built.</p>
   <figure>
     <div class="fig">
 <svg class="dg" viewBox="0 0 1160 300" role="img" aria-label="Roadmap over 36 weeks: G0 weeks 0 to 3, G1 weeks 2 to 8 with the agentic spike in weeks 2 to 5, G2 weeks 6 to 14, G3 weeks 10 to 24 extending to 30 on one training node, G4 weeks 20 to 30 extending to 36. Each phase ends at a gate.">
@@ -991,26 +993,26 @@ tr:last-child td{border-bottom:none}
   <div class="tbl"><table>
     <thead><tr><th>G0 gate</th><th>What is measured</th><th>If it fails</th></tr></thead>
     <tbody>
-      <tr><td class="num">G0-1</td><td>δ_b per benchmark from the 27B against itself (avg@16)</td><td>Benchmark leaves the gate or is pooled</td></tr>
+      <tr><td class="num">G0-1</td><td>δ_b per benchmark: provisional from the paired SE of (base − 27B) at avg@16, fixed at G1 from hub-base</td><td>Benchmark leaves the gate or is pooled</td></tr>
       <tr><td class="num">G0-2</td><td>Hub cost per token r on our node, input and output separately</td><td>Cost target re-derived by dated amendment</td></tr>
       <tr><td class="num">G0-3</td><td>Prefix caching on the Gated-DeltaNet hybrid; cached, uncached and repeat probe beyond 8.6k-token prefixes</td><td>No KV-reuse credit; prefix groups stay a placement preference</td></tr>
       <tr><td class="num">G0-4</td><td>Accuracy versus thinking budget under hard truncation; template and KV effect of per-turn thinking toggles</td><td>Compiler keeps thinking on/off + early exit only</td></tr>
       <tr><td class="num">G0-5</td><td>MTP acceptance and speedup on GDN (state rollback)</td><td>MTP stays off</td></tr>
       <tr><td class="num">G0-6</td><td>Batch-invariance audit of the hub's GDN kernels</td><td>Hub stays D0 + D2; D1 nodes use other executors</td></tr>
-      <tr><td class="num">G0-7</td><td>Goal-suite v0: ≥ 100 goals with executable verifiers or two-judge rubrics, 20% held out</td><td>G1 cannot report goal-suite numbers</td></tr>
+      <tr><td class="num">G0-7</td><td>Goal-suite v0: first 100 goals with executable verifiers or two-judge rubrics; ≥ 250 by week 6 (≥ 200 development, 20% held out)</td><td>G1 cannot report goal-suite numbers</td></tr>
     </tbody>
   </table></div>
-  <p class="claim" style="font-size:16px">Base-switch criteria, fixed now: move the hub to Qwen3.8-Flash-Next if the spike's gain has an upper 95% bound below +4 points, or if agentic parity needs an escalation share above 0.30 on G1 calibration data. At that share, 1/3 × 1.2 + 0.30 = 0.70, which misses the cost target.</p>
+  <p class="claim" style="font-size:16px">Base-switch criteria, fixed now: move the hub to Qwen3.8-Flash-Next if the spike's gain has an upper 95% bound below +4 points, or if agentic parity needs an escalation share above 0.20 on G1 calibration data. Above that share, 1/3 × 1.2 + e exceeds the 0.6× agentic target. An inconclusive spike leaves the decision to the escalation share alone.</p>
 </section>
 
 <!-- ============================ SHEET 11 ============================ -->
 <section class="sheet" id="s11">
   <div class="sheet-h"><span class="sheet-no">Sheet 11</span><h2>What exists in the repo</h2><span class="ref">Plan Part III, Part IV</span></div>
-  <p class="claim">The compile-time machinery and the hub extensions exist as tested Python, with 80 tests in the suite. The CPU pilots run on granite-3.1-1b-a400m and are pre-registered before they run.</p>
+  <p class="claim">The compile-time machinery and the hub extensions exist as tested Python, with 83 tests in the suite. The CPU pilots run on granite-3.1-1b-a400m and are pre-registered before they run.</p>
   <div class="tbl"><table>
     <thead><tr><th>Module</th><th>What it does</th><th>Sheets</th><th>Status</th></tr></thead>
     <tbody>
-      <tr><td><code>dmc/scheduler.py</code></td><td>Joint-calibration ladders, compiled caps and input reads, executor-keyed prefixes, worst-case bounds, lock-sensitive schedule hash, guards/variants/recompiles, capability ceiling, <code>cap_input</code></td><td>02 03 04</td><td><span class="pill done">implemented</span></td></tr>
+      <tr><td><code>dmc/scheduler.py</code></td><td>Joint-calibration ladders, compiled caps and input reads, executor-keyed prefixes, worst-case bounds, lock-sensitive schedule hash, guards/variants/recompiles with an every-variant bound, capability ceiling, confirmation dependency for irreversible nodes, <code>cap_input</code> (runtime wiring pending)</td><td>02 03 04</td><td><span class="pill done">implemented</span></td></tr>
       <tr><td><code>dmc/expansion.py</code></td><td>Goal-gated experts, routed and additive, parent-row init, goal-off identity</td><td>05</td><td><span class="pill done">implemented</span></td></tr>
       <tr><td><code>dmc/expert_lora.py</code></td><td>Hot-expert LoRA on fused expert weights, identity at init</td><td>05</td><td><span class="pill done">implemented</span></td></tr>
       <tr><td><code>dmc/routing.py</code></td><td>FP32 router GEMM, lowest-index tie-break, token-verified route tracing and pinning, fragile-routing share</td><td>09</td><td><span class="pill done">implemented</span></td></tr>
