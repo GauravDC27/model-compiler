@@ -384,6 +384,12 @@ def compile_program(program: Program, executors: Sequence[Executor], *, token_bu
         unknown = n.capabilities - set(CAPABILITIES)
         if unknown:
             raise CompileError(f"node {n.id!r} has unknown capabilities {sorted(unknown)}")
+    seen: set[str] = set()
+    for graph in (program.main, *program.variants.values()):
+        ids = {n.id for n in graph}
+        if ids & seen:
+            raise CompileError(f"node ids {sorted(ids & seen)} appear in more than one graph of the program")
+        seen |= ids
     if program.require_confirmation:
         # A confirmation gates only if refusing it has a compiled consequence: a guard on the
         # confirm node that abstains, or falls back to a variant with no irreversible node.

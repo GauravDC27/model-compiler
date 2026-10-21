@@ -38,7 +38,217 @@
    ]
   }
  },
- "decision_rows_partial": [
+ "decision_parity": {
+  "ALT": {
+   "fresh": {
+    "rate": 0.9333,
+    "k": 280,
+    "n": 300,
+    "ci95": [
+     0.8993,
+     0.9564
+    ]
+   },
+   "pinned": {
+    "rate": 0.96,
+    "k": 288,
+    "n": 300,
+    "ci95": [
+     0.9314,
+     0.977
+    ]
+   },
+   "pinned_failures": 0,
+   "H1_repaired": 16,
+   "H1_introduced": 8,
+   "H1_p_one_sided": 0.07579481601715088,
+   "H1": "not supported",
+   "fresh_at_C0_own_margin": {
+    "rate": 0.9882,
+    "k": 252,
+    "n": 255,
+    "ci95": [
+     0.966,
+     0.996
+    ]
+   },
+   "fresh_at_C0_ref_margin": {
+    "rate": 0.9725,
+    "k": 248,
+    "n": 255,
+    "ci95": [
+     0.9444,
+     0.9866
+    ]
+   },
+   "pinned_at_C0_ref_margin": {
+    "rate": 0.9961,
+    "k": 254,
+    "n": 255,
+    "ci95": [
+     0.9781,
+     0.9993
+    ]
+   },
+   "curve_fresh_own_margin": {
+    "1.0": 0.9333,
+    "0.95": 0.9544,
+    "0.9": 0.9704,
+    "0.85": 0.9882,
+    "0.8": 0.9958,
+    "0.7": 1.0,
+    "0.6": 1.0,
+    "0.5": 1.0
+   },
+   "curve_pinned_ref_margin": {
+    "1.0": 0.96,
+    "0.95": 0.9789,
+    "0.9": 0.9963,
+    "0.85": 0.9961,
+    "0.8": 1.0,
+    "0.7": 1.0,
+    "0.6": 1.0,
+    "0.5": 1.0
+   }
+  },
+  "STRESS": {
+   "fresh": {
+    "rate": 0.9467,
+    "k": 284,
+    "n": 300,
+    "ci95": [
+     0.9151,
+     0.9669
+    ]
+   },
+   "pinned": {
+    "rate": 0.9667,
+    "k": 290,
+    "n": 300,
+    "ci95": [
+     0.9397,
+     0.9818
+    ]
+   },
+   "pinned_failures": 0,
+   "H1_repaired": 13,
+   "H1_introduced": 7,
+   "H1_p_one_sided": 0.13158798217773438,
+   "H1": "not supported",
+   "fresh_at_C0_own_margin": {
+    "rate": 0.9882,
+    "k": 252,
+    "n": 255,
+    "ci95": [
+     0.966,
+     0.996
+    ]
+   },
+   "fresh_at_C0_ref_margin": {
+    "rate": 0.9843,
+    "k": 251,
+    "n": 255,
+    "ci95": [
+     0.9604,
+     0.9939
+    ]
+   },
+   "pinned_at_C0_ref_margin": {
+    "rate": 1.0,
+    "k": 255,
+    "n": 255,
+    "ci95": [
+     0.9852,
+     1.0
+    ]
+   },
+   "curve_fresh_own_margin": {
+    "1.0": 0.9467,
+    "0.95": 0.9614,
+    "0.9": 0.9741,
+    "0.85": 0.9882,
+    "0.8": 0.9917,
+    "0.7": 0.9905,
+    "0.6": 1.0,
+    "0.5": 1.0
+   },
+   "curve_pinned_ref_margin": {
+    "1.0": 0.9667,
+    "0.95": 0.9789,
+    "0.9": 0.9963,
+    "0.85": 1.0,
+    "0.8": 1.0,
+    "0.7": 1.0,
+    "0.6": 1.0,
+    "0.5": 1.0
+   }
+  }
+ },
+ "quality_REF": {
+  "oracle_accuracy": {
+   "rate": 0.537,
+   "k": 145,
+   "n": 270,
+   "ci95": [
+    0.4775,
+    0.5956
+   ]
+  },
+  "oracle_accuracy_at_C0": {
+   "rate": 0.5174,
+   "k": 119,
+   "n": 230,
+   "ci95": [
+    0.4531,
+    0.5812
+   ]
+  },
+  "PIR": 0.2222222222222222,
+  "CCR": 0.13333333333333333,
+  "share_yes_predicted": 0.4703703703703704
+ },
+ "ND2_incremental": {
+  "primary_all_positions": {
+   "alpha": 5,
+   "parity_margin_only_B": 0.9844,
+   "parity_combined_B": 0.9844,
+   "delta": 0.0,
+   "delta_ci95": [
+    -0.007800000000000029,
+    0.023399999999999976
+   ],
+   "alt_flips_in_B": 13,
+   "H4": "inconclusive at this n (confirmatory test at hub scale, n >= 2000)"
+  },
+  "secondary_content_only": {
+   "alpha": 2,
+   "parity_margin_only_B": 0.9844,
+   "parity_combined_B": 0.9844,
+   "delta": 0.0,
+   "delta_ci95": [
+    -0.007800000000000029,
+    0.015700000000000047
+   ],
+   "alt_flips_in_B": 13,
+   "H4": "inconclusive at this n (confirmatory test at hub scale, n >= 2000)"
+  },
+  "secondary_eps_0.01": {
+   "alpha": 5,
+   "parity_margin_only_B": 0.9844,
+   "parity_combined_B": 0.9844,
+   "delta": 0.0,
+   "delta_ci95": [
+    -0.015599999999999947,
+    0.007800000000000029
+   ],
+   "alt_flips_in_B": 13,
+   "H4": "inconclusive at this n (confirmatory test at hub scale, n >= 2000)"
+  },
+  "auc_ALT_fragile_predicts_flip": 0.5600892857142857,
+  "auc_ALT_neg_margin_predicts_flip": 0.9505357142857143
+ },
+ "n_decisions": 300,
+ "decision_rows": [
   {
    "group": "compare:0",
    "answer": "yes",
@@ -60,7 +270,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.3176035989601491
   },
   {
    "group": "compare:0",
@@ -83,7 +294,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.03549803383246086
   },
   {
    "group": "compare:0",
@@ -106,7 +318,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.5131592490544947
   },
   {
    "group": "compare:1",
@@ -129,7 +342,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.2669072873931985
   },
   {
    "group": "compare:1",
@@ -152,7 +366,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.03735909660083303
   },
   {
    "group": "compare:1",
@@ -175,7 +390,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.03383344465111249
   },
   {
    "group": "compare:2",
@@ -198,7 +414,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.522140488455291
   },
   {
    "group": "compare:2",
@@ -221,7 +438,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.880095182392658
   },
   {
    "group": "compare:2",
@@ -244,7 +462,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.168445164453336
   },
   {
    "group": "compare:3",
@@ -267,7 +486,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.21219308711868534
   },
   {
    "group": "compare:3",
@@ -290,7 +510,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.29106089165384996
   },
   {
    "group": "compare:3",
@@ -313,7 +534,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.11442855162324478
   },
   {
    "group": "compare:4",
@@ -336,7 +558,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.13013514547607
   },
   {
    "group": "compare:4",
@@ -359,7 +582,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.636621207706967
   },
   {
    "group": "compare:4",
@@ -382,7 +606,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.363235691162624
   },
   {
    "group": "compare:5",
@@ -405,7 +630,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.265568448096689
   },
   {
    "group": "compare:5",
@@ -428,7 +654,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.355797649612882
   },
   {
    "group": "compare:5",
@@ -451,7 +678,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.021694076330571
   },
   {
    "group": "compare:6",
@@ -474,7 +702,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.706233282543427
   },
   {
    "group": "compare:6",
@@ -497,7 +726,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.597434525285763
   },
   {
    "group": "compare:6",
@@ -520,7 +750,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.179245038707357
   },
   {
    "group": "compare:7",
@@ -543,7 +774,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 1.078744928067547
   },
   {
    "group": "compare:7",
@@ -566,7 +798,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.41495996906063776
   },
   {
    "group": "compare:7",
@@ -589,7 +822,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.2282158900652459
   },
   {
    "group": "compare:8",
@@ -612,7 +846,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.44066173373084605
   },
   {
    "group": "compare:8",
@@ -635,7 +870,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.08196115087425676
   },
   {
    "group": "compare:8",
@@ -658,7 +894,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.04717501968482385
   },
   {
    "group": "compare:9",
@@ -681,7 +918,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 1.0315499455838784
   },
   {
    "group": "compare:9",
@@ -704,7 +942,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.25552848882828316
   },
   {
    "group": "compare:9",
@@ -727,7 +966,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.11220987127412141
   },
   {
    "group": "compare:10",
@@ -750,7 +990,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.22276848352189627
   },
   {
    "group": "compare:10",
@@ -773,7 +1014,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.017877910758778093
   },
   {
    "group": "compare:10",
@@ -796,7 +1038,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.3013501197301738
   },
   {
    "group": "compare:11",
@@ -819,7 +1062,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.3587919064770659
   },
   {
    "group": "compare:11",
@@ -842,7 +1086,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.11084696499128471
   },
   {
    "group": "compare:11",
@@ -865,7 +1110,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.01658286016547994
   },
   {
    "group": "compare:12",
@@ -888,7 +1134,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.717505024919643
   },
   {
    "group": "compare:12",
@@ -911,7 +1158,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.700220627245535
   },
   {
    "group": "compare:12",
@@ -934,7 +1182,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.147780636802937
   },
   {
    "group": "compare:13",
@@ -957,7 +1206,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -6.590630727879653
   },
   {
    "group": "compare:13",
@@ -980,7 +1230,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.884375734825272
   },
   {
    "group": "compare:13",
@@ -1003,7 +1254,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -6.969259187443745
   },
   {
    "group": "compare:14",
@@ -1026,7 +1278,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.563242907374331
   },
   {
    "group": "compare:14",
@@ -1049,7 +1302,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.213873141193609
   },
   {
    "group": "compare:14",
@@ -1072,7 +1326,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.288621252381196
   },
   {
    "group": "even:0",
@@ -1095,7 +1350,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.010093800321195723
   },
   {
    "group": "even:0",
@@ -1118,7 +1374,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.21263889568369487
   },
   {
    "group": "even:0",
@@ -1141,7 +1398,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.4098433826906782
   },
   {
    "group": "even:1",
@@ -1164,7 +1422,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.133484417000902
   },
   {
    "group": "even:1",
@@ -1187,7 +1446,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.084501941082559
   },
   {
    "group": "even:1",
@@ -1210,7 +1470,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.17342709933042
   },
   {
    "group": "even:2",
@@ -1233,7 +1494,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.13357023712767424
   },
   {
    "group": "even:2",
@@ -1256,7 +1518,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.436012231248184
   },
   {
    "group": "even:2",
@@ -1279,7 +1542,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.14727774714454112
   },
   {
    "group": "even:3",
@@ -1302,7 +1566,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -9.479618552336325
   },
   {
    "group": "even:3",
@@ -1325,7 +1590,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.286288090248984
   },
   {
    "group": "even:3",
@@ -1348,7 +1614,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.7680186478000826
   },
   {
    "group": "even:4",
@@ -1371,7 +1638,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.578972906458797
   },
   {
    "group": "even:4",
@@ -1394,7 +1662,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.015575820238361
   },
   {
    "group": "even:4",
@@ -1417,7 +1686,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.993291345796825
   },
   {
    "group": "even:5",
@@ -1440,7 +1710,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.549269183337291
   },
   {
    "group": "even:5",
@@ -1463,7 +1734,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.714349045832515
   },
   {
    "group": "even:5",
@@ -1486,7 +1758,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.107040744633172
   },
   {
    "group": "even:6",
@@ -1509,7 +1782,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.030589650698591986
   },
   {
    "group": "even:6",
@@ -1532,7 +1806,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.10234360296015821
   },
   {
    "group": "even:6",
@@ -1555,7 +1830,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.11491785739189797
   },
   {
    "group": "even:7",
@@ -1578,7 +1854,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.15589921998439538
   },
   {
    "group": "even:7",
@@ -1601,7 +1878,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.43039180872753297
   },
   {
    "group": "even:7",
@@ -1624,7 +1902,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.2105434451536592
   },
   {
    "group": "even:8",
@@ -1647,7 +1926,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.01812513374466973
   },
   {
    "group": "even:8",
@@ -1670,7 +1950,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.20265160660990855
   },
   {
    "group": "even:8",
@@ -1693,7 +1974,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.2795364648022466
   },
   {
    "group": "even:9",
@@ -1716,7 +1998,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.3453586252134363
   },
   {
    "group": "even:9",
@@ -1739,7 +2022,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.6645406611984046
   },
   {
    "group": "even:9",
@@ -1762,7 +2046,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.15543222450808436
   },
   {
    "group": "even:10",
@@ -1785,7 +2070,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.23767716211350143
   },
   {
    "group": "even:10",
@@ -1808,7 +2094,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.13956630280693372
   },
   {
    "group": "even:10",
@@ -1831,7 +2118,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.16692687441701654
   },
   {
    "group": "even:11",
@@ -1854,7 +2142,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.3484030495480412
   },
   {
    "group": "even:11",
@@ -1877,7 +2166,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.3784444092132443
   },
   {
    "group": "even:11",
@@ -1900,7 +2190,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.3698384556312036
   },
   {
    "group": "even:12",
@@ -1923,7 +2214,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.127615095312324
   },
   {
    "group": "even:12",
@@ -1946,7 +2238,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.286938855923259
   },
   {
    "group": "even:12",
@@ -1969,7 +2262,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.158182596397516
   },
   {
    "group": "even:13",
@@ -1992,7 +2286,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.17241082901016
   },
   {
    "group": "even:13",
@@ -2015,7 +2310,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.630569786378022
   },
   {
    "group": "even:13",
@@ -2038,7 +2334,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -9.405856809749139
   },
   {
    "group": "even:14",
@@ -2061,7 +2358,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.189220050580328
   },
   {
    "group": "even:14",
@@ -2084,7 +2382,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.169644263658169
   },
   {
    "group": "even:14",
@@ -2107,7 +2406,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.839332364304905
   },
   {
    "group": "refund:0",
@@ -2130,7 +2430,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.5177152898218564
   },
   {
    "group": "refund:0",
@@ -2153,7 +2454,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.02109759140394918
   },
   {
    "group": "refund:0",
@@ -2176,7 +2478,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.2464479103695777
   },
   {
    "group": "refund:1",
@@ -2199,7 +2502,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.4956414371189131
   },
   {
    "group": "refund:1",
@@ -2222,7 +2526,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.06804852725670185
   },
   {
    "group": "refund:1",
@@ -2245,7 +2550,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.21680295033506258
   },
   {
    "group": "refund:2",
@@ -2268,7 +2574,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.8641856987389775
   },
   {
    "group": "refund:2",
@@ -2291,7 +2598,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.19313217970074958
   },
   {
    "group": "refund:2",
@@ -2314,7 +2622,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.12722500628730693
   },
   {
    "group": "refund:3",
@@ -2337,7 +2646,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.27984194874615154
   },
   {
    "group": "refund:3",
@@ -2360,7 +2670,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.15906572242922384
   },
   {
    "group": "refund:3",
@@ -2383,7 +2694,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.25008230108390983
   },
   {
    "group": "refund:4",
@@ -2406,7 +2718,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -6.389476978514964
   },
   {
    "group": "refund:4",
@@ -2429,7 +2742,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.011623870876313
   },
   {
    "group": "refund:4",
@@ -2452,7 +2766,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.438815847994292
   },
   {
    "group": "refund:5",
@@ -2475,7 +2790,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -6.829887529908848
   },
   {
    "group": "refund:5",
@@ -2498,7 +2814,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.770410897971592
   },
   {
    "group": "refund:5",
@@ -2521,7 +2838,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.163393373648411
   },
   {
    "group": "refund:6",
@@ -2544,7 +2862,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -6.60961778099945
   },
   {
    "group": "refund:6",
@@ -2567,7 +2886,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.426992957881534
   },
   {
    "group": "refund:6",
@@ -2590,7 +2910,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.156031430203744
   },
   {
    "group": "refund:7",
@@ -2613,7 +2934,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -6.554639228427866
   },
   {
    "group": "refund:7",
@@ -2636,7 +2958,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.924372997190229
   },
   {
    "group": "refund:7",
@@ -2659,7 +2982,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.80751347792378
   },
   {
    "group": "refund:8",
@@ -2682,7 +3006,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 1.1087393193859643
   },
   {
    "group": "refund:8",
@@ -2705,7 +3030,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.19009562391181078
   },
   {
    "group": "refund:8",
@@ -2728,7 +3054,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.3154818662785711
   },
   {
    "group": "refund:9",
@@ -2751,7 +3078,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -6.808737560115079
   },
   {
    "group": "refund:9",
@@ -2774,7 +3102,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.164311969875547
   },
   {
    "group": "refund:9",
@@ -2797,7 +3126,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.477498753740107
   },
   {
    "group": "refund:10",
@@ -2820,7 +3150,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.8912713383471342
   },
   {
    "group": "refund:10",
@@ -2843,7 +3174,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.028409340904750835
   },
   {
    "group": "refund:10",
@@ -2866,7 +3198,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.3629363993680917
   },
   {
    "group": "refund:11",
@@ -2889,7 +3222,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -6.746075241880259
   },
   {
    "group": "refund:11",
@@ -2912,7 +3246,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.946180723333306
   },
   {
    "group": "refund:11",
@@ -2935,7 +3270,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.848996306866546
   },
   {
    "group": "refund:12",
@@ -2958,7 +3294,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.7461034890536106
   },
   {
    "group": "refund:12",
@@ -2981,7 +3318,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.16828496982236218
   },
   {
    "group": "refund:12",
@@ -3004,7 +3342,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.35075483630680215
   },
   {
    "group": "refund:13",
@@ -3027,7 +3366,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.5476038922612199
   },
   {
    "group": "refund:13",
@@ -3050,7 +3390,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.36895772853719083
   },
   {
    "group": "refund:13",
@@ -3073,7 +3414,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.052130412309622676
   },
   {
    "group": "refund:14",
@@ -3096,7 +3438,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -6.69185669263947
   },
   {
    "group": "refund:14",
@@ -3119,7 +3462,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.962371290639327
   },
   {
    "group": "refund:14",
@@ -3142,7 +3486,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.058743294192905
   },
   {
    "group": "letter:0",
@@ -3165,7 +3510,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.391916614881595
   },
   {
    "group": "letter:0",
@@ -3188,7 +3534,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.375288418309337
   },
   {
    "group": "letter:0",
@@ -3211,7 +3558,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.480599498257138
   },
   {
    "group": "letter:1",
@@ -3234,7 +3582,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.842929232256883
   },
   {
    "group": "letter:1",
@@ -3257,7 +3606,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.904475094714822
   },
   {
    "group": "letter:1",
@@ -3280,7 +3630,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.665911462111393
   },
   {
    "group": "letter:2",
@@ -3303,7 +3654,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -6.093178015794296
   },
   {
    "group": "letter:2",
@@ -3326,7 +3678,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.461540274631313
   },
   {
    "group": "letter:2",
@@ -3349,7 +3702,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -6.810370445175899
   },
   {
    "group": "letter:3",
@@ -3372,7 +3726,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.860602275184705
   },
   {
    "group": "letter:3",
@@ -3395,7 +3750,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.005940351383932
   },
   {
    "group": "letter:3",
@@ -3418,7 +3774,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.713168321027901
   },
   {
    "group": "letter:4",
@@ -3441,7 +3798,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.09409926771103405
   },
   {
    "group": "letter:4",
@@ -3464,7 +3822,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.3589321210044572
   },
   {
    "group": "letter:4",
@@ -3487,7 +3846,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.14121490297798628
   },
   {
    "group": "letter:5",
@@ -3510,7 +3870,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.40508835622820083
   },
   {
    "group": "letter:5",
@@ -3533,7 +3894,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.4676977362308914
   },
   {
    "group": "letter:5",
@@ -3556,7 +3918,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.0700068313871901
   },
   {
    "group": "letter:6",
@@ -3579,7 +3942,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.29839542501192234
   },
   {
    "group": "letter:6",
@@ -3602,7 +3966,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.09855526124196018
   },
   {
    "group": "letter:6",
@@ -3625,7 +3990,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.2822771871400001
   },
   {
    "group": "letter:7",
@@ -3648,7 +4014,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.22226893233123884
   },
   {
    "group": "letter:7",
@@ -3671,7 +4038,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.44934969147325393
   },
   {
    "group": "letter:7",
@@ -3694,7 +4062,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.37821046723923957
   },
   {
    "group": "letter:8",
@@ -3717,7 +4086,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.598247240706735
   },
   {
    "group": "letter:8",
@@ -3740,7 +4110,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.628806702176481
   },
   {
    "group": "letter:8",
@@ -3763,7 +4134,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.032816682054233
   },
   {
    "group": "letter:9",
@@ -3786,7 +4158,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.392203858827606
   },
   {
    "group": "letter:9",
@@ -3809,7 +4182,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.24118041788473155
   },
   {
    "group": "letter:9",
@@ -3832,7 +4206,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.08282849253964386
   },
   {
    "group": "letter:10",
@@ -3855,7 +4230,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.48452760343168
   },
   {
    "group": "letter:10",
@@ -3878,7 +4254,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.727696956188872
   },
   {
    "group": "letter:10",
@@ -3901,7 +4278,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.145790743593373
   },
   {
    "group": "letter:11",
@@ -3924,7 +4302,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.2574745387140815
   },
   {
    "group": "letter:11",
@@ -3947,7 +4326,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.422710598449736
   },
   {
    "group": "letter:11",
@@ -3970,7 +4350,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.1091765718898764
   },
   {
    "group": "letter:12",
@@ -3993,7 +4374,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.3697282637580189
   },
   {
    "group": "letter:12",
@@ -4016,7 +4398,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.17098311132796634
   },
   {
    "group": "letter:12",
@@ -4039,7 +4422,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.09203629285770504
   },
   {
    "group": "letter:13",
@@ -4062,7 +4446,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.870936492373447
   },
   {
    "group": "letter:13",
@@ -4085,7 +4470,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.207520812713332
   },
   {
    "group": "letter:13",
@@ -4108,7 +4494,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.135918389063018
   },
   {
    "group": "letter:14",
@@ -4131,7 +4518,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.895479203065099
   },
   {
    "group": "letter:14",
@@ -4154,7 +4542,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.405509912530759
   },
   {
    "group": "letter:14",
@@ -4177,7 +4566,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.96254959020409
   },
   {
    "group": "sum:0",
@@ -4200,7 +4590,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.0025617332653690705
   },
   {
    "group": "sum:0",
@@ -4223,7 +4614,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.1546559515660213
   },
   {
    "group": "sum:0",
@@ -4246,7 +4638,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.32531927158674945
   },
   {
    "group": "sum:1",
@@ -4269,7 +4662,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.3347095225728642
   },
   {
    "group": "sum:1",
@@ -4292,7 +4686,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.19606264243204857
   },
   {
    "group": "sum:1",
@@ -4315,7 +4710,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.21636609555278696
   },
   {
    "group": "sum:2",
@@ -4338,7 +4734,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.03248092978755085
   },
   {
    "group": "sum:2",
@@ -4361,7 +4758,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.04153211259384193
   },
   {
    "group": "sum:2",
@@ -4384,7 +4782,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.0953555351963627
   },
   {
    "group": "sum:3",
@@ -4407,7 +4806,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.39660335248704975
   },
   {
    "group": "sum:3",
@@ -4430,7 +4830,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.29186283526478496
   },
   {
    "group": "sum:3",
@@ -4453,7 +4854,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.18902021631392485
   },
   {
    "group": "sum:4",
@@ -4476,7 +4878,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.986083175830767
   },
   {
    "group": "sum:4",
@@ -4499,7 +4902,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.668628745524689
   },
   {
    "group": "sum:4",
@@ -4522,7 +4926,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.527168725217901
   },
   {
    "group": "sum:5",
@@ -4545,7 +4950,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.230473276797014
   },
   {
    "group": "sum:5",
@@ -4568,7 +4974,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.347213155861228
   },
   {
    "group": "sum:5",
@@ -4591,7 +4998,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.111932506539715
   },
   {
    "group": "sum:6",
@@ -4614,7 +5022,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.96083100530558
   },
   {
    "group": "sum:6",
@@ -4637,7 +5046,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.93360657945449
   },
   {
    "group": "sum:6",
@@ -4660,7 +5070,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.050740213277765
   },
   {
    "group": "sum:7",
@@ -4683,7 +5094,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.126082043562057
   },
   {
    "group": "sum:7",
@@ -4706,7 +5118,8 @@
    "STRESS_fresh": false,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.370203331801762
   },
   {
    "group": "sum:7",
@@ -4729,7 +5142,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.22855570966420985
   },
   {
    "group": "sum:8",
@@ -4752,7 +5166,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.019451565144609995
   },
   {
    "group": "sum:8",
@@ -4775,7 +5190,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.41673262182455945
   },
   {
    "group": "sum:8",
@@ -4798,7 +5214,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.0022268627615140146
   },
   {
    "group": "sum:9",
@@ -4821,7 +5238,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.548522379613371
   },
   {
    "group": "sum:9",
@@ -4844,7 +5262,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.14741826297512
   },
   {
    "group": "sum:9",
@@ -4867,7 +5286,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.052054061433644
   },
   {
    "group": "sum:10",
@@ -4890,7 +5310,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.376185176371735
   },
   {
    "group": "sum:10",
@@ -4913,7 +5334,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.62804871870899
   },
   {
    "group": "sum:10",
@@ -4936,7 +5358,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.203175800140105
   },
   {
    "group": "sum:11",
@@ -4959,7 +5382,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.31405608200045215
   },
   {
    "group": "sum:11",
@@ -4982,7 +5406,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.23076291503595425
   },
   {
    "group": "sum:11",
@@ -5005,7 +5430,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.3995720410713538
   },
   {
    "group": "sum:12",
@@ -5028,7 +5454,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.15402833793001608
   },
   {
    "group": "sum:12",
@@ -5051,7 +5478,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -0.14888491591967012
   },
   {
    "group": "sum:12",
@@ -5074,7 +5502,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.3005692613453179
   },
   {
    "group": "sum:13",
@@ -5097,7 +5526,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.970943607734989
   },
   {
    "group": "sum:13",
@@ -5120,7 +5550,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.44152766359567
   },
   {
    "group": "sum:13",
@@ -5143,7 +5574,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.07160242031528
   },
   {
    "group": "sum:14",
@@ -5166,7 +5598,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.119861574798669
   },
   {
    "group": "sum:14",
@@ -5189,7 +5622,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.429825078512959
   },
   {
    "group": "sum:14",
@@ -5212,7 +5646,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.2931361469309905
   },
   {
    "group": "expense:0",
@@ -5235,7 +5670,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.538382706683162
   },
   {
    "group": "expense:0",
@@ -5258,7 +5694,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.195969881898927
   },
   {
    "group": "expense:0",
@@ -5281,7 +5718,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.084547598507749
   },
   {
    "group": "expense:1",
@@ -5304,7 +5742,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.714790454112386
   },
   {
    "group": "expense:1",
@@ -5327,7 +5766,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.062994337552107
   },
   {
    "group": "expense:1",
@@ -5350,7 +5790,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.388824927843725
   },
   {
    "group": "expense:2",
@@ -5373,7 +5814,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.218367706415549
   },
   {
    "group": "expense:2",
@@ -5396,7 +5838,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.667392405121554
   },
   {
    "group": "expense:2",
@@ -5419,7 +5862,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.1480695144378315
   },
   {
    "group": "expense:3",
@@ -5442,7 +5886,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.119662000267827
   },
   {
    "group": "expense:3",
@@ -5465,7 +5910,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.863874168860367
   },
   {
    "group": "expense:3",
@@ -5488,7 +5934,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.491507999532217
   },
   {
    "group": "expense:4",
@@ -5511,7 +5958,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": false,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.322576622105277
   },
   {
    "group": "expense:4",
@@ -5534,7 +5982,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.950232953117339
   },
   {
    "group": "expense:4",
@@ -5557,7 +6006,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.321282539590189
   },
   {
    "group": "expense:5",
@@ -5580,7 +6030,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.2971290893694157
   },
   {
    "group": "expense:5",
@@ -5603,7 +6054,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.682801057461705
   },
   {
    "group": "expense:5",
@@ -5626,7 +6078,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.32732984784110386
   },
   {
    "group": "expense:6",
@@ -5649,7 +6102,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.17413957239339528
   },
   {
    "group": "expense:6",
@@ -5672,7 +6126,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.45950082940918613
   },
   {
    "group": "expense:6",
@@ -5695,7 +6150,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.7897713355557099
   },
   {
    "group": "expense:7",
@@ -5718,7 +6174,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -8.273227330076997
   },
   {
    "group": "expense:7",
@@ -5741,7 +6198,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.2605437303636995
   },
   {
    "group": "expense:7",
@@ -5764,7 +6222,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.387856922748224
   },
   {
    "group": "expense:8",
@@ -5787,7 +6246,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.339989485294128
   },
   {
    "group": "expense:8",
@@ -5810,7 +6270,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.3581358290376461
   },
   {
    "group": "expense:8",
@@ -5833,7 +6294,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.8629661674445139
   },
   {
    "group": "expense:9",
@@ -5856,7 +6318,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.130339631134776
   },
   {
    "group": "expense:9",
@@ -5879,7 +6342,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.549143132334709
   },
   {
    "group": "expense:9",
@@ -5902,7 +6366,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.504931907699875
   },
   {
    "group": "expense:10",
@@ -5925,7 +6390,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.2370709651797559
   },
   {
    "group": "expense:10",
@@ -5948,7 +6414,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.45278163002555855
   },
   {
    "group": "expense:10",
@@ -5971,7 +6438,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.772668250351408
   },
   {
    "group": "expense:11",
@@ -5994,7 +6462,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.918616654582831
   },
   {
    "group": "expense:11",
@@ -6017,7 +6486,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.64990520694703
   },
   {
    "group": "expense:11",
@@ -6040,7 +6510,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.769947409179583
   },
   {
    "group": "expense:12",
@@ -6063,7 +6534,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -0.0029159576728538528
   },
   {
    "group": "expense:12",
@@ -6086,7 +6558,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.2640005486623322
   },
   {
    "group": "expense:12",
@@ -6109,7 +6582,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.5991223384633293
   },
   {
    "group": "expense:13",
@@ -6132,7 +6606,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.25283345513283223
   },
   {
    "group": "expense:13",
@@ -6155,7 +6630,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": 0.6491355862694707
   },
   {
    "group": "expense:13",
@@ -6178,7 +6654,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": 0.16860679169273607
   },
   {
    "group": "expense:14",
@@ -6201,7 +6678,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -8.250815494674258
   },
   {
    "group": "expense:14",
@@ -6224,7 +6702,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": false
+   "correct": false,
+   "combo": -7.546710342988953
   },
   {
    "group": "expense:14",
@@ -6247,7 +6726,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": true
+   "correct": true,
+   "combo": -7.991746188353587
   },
   {
    "group": "probe:0",
@@ -6270,7 +6750,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": null
+   "correct": null,
+   "combo": 0.38320140537154257
   },
   {
    "group": "probe:0",
@@ -6293,7 +6774,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": null
+   "correct": null,
+   "combo": 1.2839012874027653
   },
   {
    "group": "probe:0",
@@ -6316,7 +6798,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": null
+   "correct": null,
+   "combo": 0.6823073812685212
   },
   {
    "group": "probe:1",
@@ -6339,7 +6822,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": null
+   "correct": null,
+   "combo": 0.90063864322581
   },
   {
    "group": "probe:1",
@@ -6362,7 +6846,8 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": null
+   "correct": null,
+   "combo": -0.08232415112999958
   },
   {
    "group": "probe:1",
@@ -6385,7 +6870,720 @@
    "STRESS_fresh": true,
    "STRESS_pinned": true,
    "STRESS_pinned_status": "full",
-   "correct": null
+   "correct": null,
+   "combo": -0.3574027097485965
+  },
+  {
+   "group": "probe:2",
+   "answer": null,
+   "ref": "no",
+   "REF_margin": 0.7299704073584407,
+   "REF_fragile": 0.24342105263157895,
+   "REF_fragile_content": 0.23055555555555557,
+   "ALT_margin": 0.7557823443670866,
+   "ALT_fragile": 0.2408625730994152,
+   "ALT_fragile_content": 0.22361111111111112,
+   "ALT_fragile_001": 0.08260233918128655,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.6033529847326435,
+   "STRESS_fragile": 0.2412280701754386,
+   "STRESS_fragile_content": 0.23055555555555557,
+   "STRESS_fragile_001": 0.08296783625730994,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": 0.3427706484606538
+  },
+  {
+   "group": "probe:2",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 0.9053181996003961,
+   "REF_fragile": 0.24451754385964913,
+   "REF_fragile_content": 0.23194444444444445,
+   "ALT_margin": 1.0151569459663414,
+   "ALT_fragile": 0.2496345029239766,
+   "ALT_fragile_content": 0.2375,
+   "ALT_fragile_001": 0.0891812865497076,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.0095826598438618,
+   "STRESS_fragile": 0.2565789473684211,
+   "STRESS_fragile_content": 0.2569444444444444,
+   "STRESS_fragile_001": 0.08333333333333333,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": 0.5692505132178034
+  },
+  {
+   "group": "probe:2",
+   "answer": null,
+   "ref": "no",
+   "REF_margin": 0.9699423832040044,
+   "REF_fragile": 0.24671052631578946,
+   "REF_fragile_content": 0.23194444444444445,
+   "ALT_margin": 1.1586063407047522,
+   "ALT_fragile": 0.2543859649122807,
+   "ALT_fragile_content": 0.24375,
+   "ALT_fragile_001": 0.08808479532163743,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.1022521561639878,
+   "STRESS_fragile": 0.25146198830409355,
+   "STRESS_fragile_content": 0.25,
+   "STRESS_fragile_001": 0.08698830409356725,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": 0.718182364096565
+  },
+  {
+   "group": "probe:3",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 0.7963690545209903,
+   "REF_fragile": 0.25243506493506496,
+   "REF_fragile_content": 0.25333333333333335,
+   "ALT_margin": 0.584639150759789,
+   "ALT_fragile": 0.2591991341991342,
+   "ALT_fragile_content": 0.255,
+   "ALT_fragile_001": 0.08685064935064934,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.65094950961449,
+   "STRESS_fragile": 0.25676406926406925,
+   "STRESS_fragile_content": 0.25875,
+   "STRESS_fragile_001": 0.08333333333333333,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": 0.15038590400654228
+  },
+  {
+   "group": "probe:3",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 1.2512336718944752,
+   "REF_fragile": 0.25405844155844154,
+   "REF_fragile_content": 0.245,
+   "ALT_margin": 1.4236262582226635,
+   "ALT_fragile": 0.24783549783549783,
+   "ALT_fragile_content": 0.23291666666666666,
+   "ALT_fragile_001": 0.09036796536796536,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.6228720231362617,
+   "STRESS_fragile": 0.25135281385281383,
+   "STRESS_fragile_content": 0.24625,
+   "STRESS_fragile_001": 0.0854978354978355,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": 0.9717864313828367
+  },
+  {
+   "group": "probe:3",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 1.0657123122826713,
+   "REF_fragile": 0.2587025316455696,
+   "REF_fragile_content": 0.2592147435897436,
+   "ALT_margin": 1.3502192099018726,
+   "ALT_fragile": 0.2645042194092827,
+   "ALT_fragile_content": 0.266025641025641,
+   "ALT_fragile_001": 0.0804324894514768,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.3875670557640123,
+   "STRESS_fragile": 0.2592299578059072,
+   "STRESS_fragile_content": 0.2592147435897436,
+   "STRESS_fragile_001": 0.08781645569620253,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": 0.9480567626444887
+  },
+  {
+   "group": "probe:4",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 2.13676890944079,
+   "REF_fragile": 0.24278846153846154,
+   "REF_fragile_content": 0.2332516339869281,
+   "ALT_margin": 2.109695562140163,
+   "ALT_fragile": 0.2518696581196581,
+   "ALT_fragile_content": 0.24428104575163398,
+   "ALT_fragile_001": 0.07692307692307693,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 2.0090220144660775,
+   "STRESS_fragile": 0.24893162393162394,
+   "STRESS_fragile_content": 0.24509803921568626,
+   "STRESS_fragile_001": 0.08680555555555555,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -5.582612130167529
+  },
+  {
+   "group": "probe:4",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 0.5852354723963861,
+   "REF_fragile": 0.25476190476190474,
+   "REF_fragile_content": 0.25339147286821706,
+   "ALT_margin": 0.657822172543449,
+   "ALT_fragile": 0.2526785714285714,
+   "ALT_fragile_content": 0.249515503875969,
+   "ALT_fragile_001": 0.08095238095238096,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.7091692153653971,
+   "STRESS_fragile": 0.2505952380952381,
+   "STRESS_fragile_content": 0.24612403100775193,
+   "STRESS_fragile_001": 0.07946428571428571,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -7.437415922694646
+  },
+  {
+   "group": "probe:4",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 1.705455017217161,
+   "REF_fragile": 0.25051440329218105,
+   "REF_fragile_content": 0.24575617283950618,
+   "ALT_margin": 1.8303978461848516,
+   "ALT_fragile": 0.2528292181069959,
+   "ALT_fragile_content": 0.2515432098765432,
+   "ALT_fragile_001": 0.08667695473251029,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.7239166628944256,
+   "STRESS_fragile": 0.25565843621399176,
+   "STRESS_fragile_content": 0.25462962962962965,
+   "STRESS_fragile_001": 0.084619341563786,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -6.837297627066178
+  },
+  {
+   "group": "probe:5",
+   "answer": null,
+   "ref": "A",
+   "REF_margin": 1.4999995498345604,
+   "REF_fragile": 0.23557692307692307,
+   "REF_fragile_content": 0.21691176470588236,
+   "ALT_margin": 1.4999995141924884,
+   "ALT_fragile": 0.23931623931623933,
+   "ALT_fragile_content": 0.22549019607843138,
+   "ALT_fragile_001": 0.07238247863247864,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.356265598559603,
+   "STRESS_fragile": 0.23637820512820512,
+   "STRESS_fragile_content": 0.22426470588235295,
+   "STRESS_fragile_001": 0.07852564102564102,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -5.738248349055375
+  },
+  {
+   "group": "probe:5",
+   "answer": null,
+   "ref": "B",
+   "REF_margin": 0.06250049072310393,
+   "REF_fragile": 0.23515981735159816,
+   "REF_fragile_content": 0.22010869565217392,
+   "ALT_margin": 0.06250051421433989,
+   "ALT_fragile": 0.2408675799086758,
+   "ALT_fragile_content": 0.223731884057971,
+   "ALT_fragile_001": 0.07734018264840183,
+   "ALT_fresh": true,
+   "ALT_pinned": false,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.025817359871666445,
+   "STRESS_fragile": 0.2348744292237443,
+   "STRESS_fragile_content": 0.22056159420289856,
+   "STRESS_fragile_001": 0.06906392694063927,
+   "STRESS_fresh": false,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -7.671517750625843
+  },
+  {
+   "group": "probe:5",
+   "answer": null,
+   "ref": "B",
+   "REF_margin": 0.8125001448556219,
+   "REF_fragile": 0.23519736842105263,
+   "REF_fragile_content": 0.2151360544217687,
+   "ALT_margin": 0.5625003677981932,
+   "ALT_fragile": 0.22642543859649122,
+   "ALT_fragile_content": 0.20875850340136054,
+   "ALT_fragile_001": 0.07401315789473684,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.6660463516610651,
+   "STRESS_fragile": 0.23108552631578946,
+   "STRESS_fragile_content": 0.21726190476190477,
+   "STRESS_fragile_001": 0.07593201754385964,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -6.8388154216754895
+  },
+  {
+   "group": "probe:6",
+   "answer": null,
+   "ref": "3",
+   "REF_margin": 1.0306256181813467e-07,
+   "REF_fragile": 0.2520581317204301,
+   "REF_fragile_content": 0.2435753493013972,
+   "ALT_margin": 0.06250010089763247,
+   "ALT_fragile": 0.24714381720430106,
+   "ALT_fragile_content": 0.23871007984031936,
+   "ALT_fragile_001": 0.08849966397849462,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.12240989803552549,
+   "STRESS_fragile": 0.24798387096774194,
+   "STRESS_fragile_content": 0.24251497005988024,
+   "STRESS_fragile_001": 0.0950100806451613,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -8.78746629695183
+  },
+  {
+   "group": "probe:6",
+   "answer": null,
+   "ref": "3",
+   "REF_margin": 0.25000005197954867,
+   "REF_fragile": 0.2371173469387755,
+   "REF_fragile_content": 0.22186229674796748,
+   "ALT_margin": 0.12500005379748758,
+   "ALT_fragile": 0.2405187074829932,
+   "ALT_fragile_content": 0.22707063008130082,
+   "ALT_fragile_001": 0.0772108843537415,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.16285039947198032,
+   "STRESS_fragile": 0.23818027210884354,
+   "STRESS_fragile_content": 0.22853150406504066,
+   "STRESS_fragile_001": 0.07521258503401361,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -7.596088381576663
+  },
+  {
+   "group": "probe:6",
+   "answer": null,
+   "ref": "1",
+   "REF_margin": 5.380399050736173e-07,
+   "REF_fragile": 0.24250162127107652,
+   "REF_fragile_content": 0.23035037878787878,
+   "ALT_margin": 0.2500004677563117,
+   "ALT_fragile": 0.2440418287937743,
+   "ALT_fragile_content": 0.23106060606060605,
+   "ALT_fragile_001": 0.08280642023346303,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.038611057133864035,
+   "STRESS_fragile": 0.23544909208819714,
+   "STRESS_fragile_content": 0.22378077651515152,
+   "STRESS_fragile_001": 0.08361705577172503,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -8.030641555589991
+  },
+  {
+   "group": "probe:7",
+   "answer": null,
+   "ref": "B",
+   "REF_margin": 0.12500019323349087,
+   "REF_fragile": 0.24228395061728394,
+   "REF_fragile_content": 0.22993827160493827,
+   "ALT_margin": 0.18750016566647232,
+   "ALT_fragile": 0.23945473251028807,
+   "ALT_fragile_content": 0.22685185185185186,
+   "ALT_fragile_001": 0.08719135802469136,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.2268097032906473,
+   "STRESS_fragile": 0.24691358024691357,
+   "STRESS_fragile_content": 0.24074074074074073,
+   "STRESS_fragile_001": 0.08410493827160494,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -8.531635636802664
+  },
+  {
+   "group": "probe:7",
+   "answer": null,
+   "ref": "A",
+   "REF_margin": 0.43749955784789973,
+   "REF_fragile": 0.24872967479674796,
+   "REF_fragile_content": 0.24356060606060606,
+   "ALT_margin": 0.43749949688946743,
+   "ALT_fragile": 0.2507621951219512,
+   "ALT_fragile_content": 0.24393939393939393,
+   "ALT_fragile_001": 0.08180894308943089,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.2427402518538938,
+   "STRESS_fragile": 0.24872967479674796,
+   "STRESS_fragile_content": 0.24507575757575759,
+   "STRESS_fragile_001": 0.08638211382113821,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -7.743394812053621
+  },
+  {
+   "group": "probe:7",
+   "answer": null,
+   "ref": "B",
+   "REF_margin": 1.0000000939392353,
+   "REF_fragile": 0.24427083333333333,
+   "REF_fragile_content": 0.23349056603773585,
+   "ALT_margin": 1.0000001103530582,
+   "ALT_fragile": 0.24401041666666667,
+   "ALT_fragile_content": 0.22916666666666666,
+   "ALT_fragile_001": 0.07864583333333333,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.0093842740815473,
+   "STRESS_fragile": 0.23854166666666668,
+   "STRESS_fragile_content": 0.22955974842767296,
+   "STRESS_fragile_001": 0.08359375,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -6.864583222980275
+  },
+  {
+   "group": "probe:8",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 1.3531728814690944,
+   "REF_fragile": 0.24698464912280702,
+   "REF_fragile_content": 0.24277210884353742,
+   "ALT_margin": 1.3203277135330405,
+   "ALT_fragile": 0.24862938596491227,
+   "ALT_fragile_content": 0.24107142857142858,
+   "ALT_fragile_001": 0.08360745614035088,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.3741515557307187,
+   "STRESS_fragile": 0.2461622807017544,
+   "STRESS_fragile_content": 0.2423469387755102,
+   "STRESS_fragile_001": 0.0805921052631579,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -7.040417900502047
+  },
+  {
+   "group": "probe:8",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 2.9211592646006874,
+   "REF_fragile": 0.25416666666666665,
+   "REF_fragile_content": 0.2465277777777778,
+   "ALT_margin": 2.833194822097368,
+   "ALT_fragile": 0.255,
+   "ALT_fragile_content": 0.24869791666666666,
+   "ALT_fragile_001": 0.08083333333333333,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 2.8085760089937435,
+   "STRESS_fragile": 0.2475,
+   "STRESS_fragile_content": 0.24088541666666666,
+   "STRESS_fragile_001": 0.0913888888888889,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -5.2501385112359635
+  },
+  {
+   "group": "probe:8",
+   "answer": null,
+   "ref": "yes",
+   "REF_margin": 1.2847351994315916,
+   "REF_fragile": 0.25844594594594594,
+   "REF_fragile_content": 0.2566489361702128,
+   "ALT_margin": 1.3169469541535777,
+   "ALT_fragile": 0.2581644144144144,
+   "ALT_fragile_content": 0.24867021276595744,
+   "ALT_fragile_001": 0.08727477477477477,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.3598225580877088,
+   "STRESS_fragile": 0.26238738738738737,
+   "STRESS_fragile_content": 0.2632978723404255,
+   "STRESS_fragile_001": 0.0945945945945946,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -7.410530523323899
+  },
+  {
+   "group": "probe:9",
+   "answer": null,
+   "ref": "B",
+   "REF_margin": 0.06250035031365209,
+   "REF_fragile": 0.2495567375886525,
+   "REF_fragile_content": 0.23942786069651742,
+   "ALT_margin": 0.3125002590577959,
+   "ALT_fragile": 0.24423758865248227,
+   "ALT_fragile_content": 0.23725124378109452,
+   "ALT_fragile_001": 0.07823581560283688,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.22285298747530025,
+   "STRESS_fragile": 0.24800531914893617,
+   "STRESS_fragile_content": 0.24347014925373134,
+   "STRESS_fragile_001": 0.0862145390070922,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -0.07867881895638851
+  },
+  {
+   "group": "probe:9",
+   "answer": null,
+   "ref": "A",
+   "REF_margin": 0.24999913022297304,
+   "REF_fragile": 0.24451754385964913,
+   "REF_fragile_content": 0.23743872549019607,
+   "ALT_margin": 0.24999906837148278,
+   "ALT_fragile": 0.2462719298245614,
+   "ALT_fragile_content": 0.23682598039215685,
+   "ALT_fragile_001": 0.08596491228070176,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 0.29050453308808255,
+   "STRESS_fragile": 0.24100877192982456,
+   "STRESS_fragile_content": 0.2337622549019608,
+   "STRESS_fragile_001": 0.08114035087719298,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": -0.179825493032026
+  },
+  {
+   "group": "probe:9",
+   "answer": null,
+   "ref": "B",
+   "REF_margin": 1.6875001925036244,
+   "REF_fragile": 0.23341836734693877,
+   "REF_fragile_content": 0.22124413145539906,
+   "ALT_margin": 1.5000003412922007,
+   "ALT_fragile": 0.24829931972789115,
+   "ALT_fragile_content": 0.238556338028169,
+   "ALT_fragile_001": 0.07334183673469388,
+   "ALT_fresh": true,
+   "ALT_pinned": true,
+   "ALT_pinned_status": "full",
+   "STRESS_margin": 1.5374577759506411,
+   "STRESS_fragile": 0.23660714285714285,
+   "STRESS_fragile_content": 0.22857981220657278,
+   "STRESS_fragile_001": 0.08290816326530612,
+   "STRESS_fresh": true,
+   "STRESS_pinned": true,
+   "STRESS_pinned_status": "full",
+   "correct": null,
+   "combo": 1.1332911576187312
   }
- ]
+ ],
+ "generation": {
+  "REF_single_pass_vs_incremental": {
+   "rate": 0.995,
+   "k": 592,
+   "n": 595,
+   "ci95": [
+    0.9853,
+    0.9983
+   ]
+  },
+  "ALT": {
+   "teacher_forced_agreement_fresh": {
+    "rate": 0.9916,
+    "k": 590,
+    "n": 595,
+    "ci95": [
+     0.9805,
+     0.9964
+    ]
+   },
+   "teacher_forced_agreement_pinned": {
+    "rate": 0.9882,
+    "k": 588,
+    "n": 595,
+    "ci95": [
+     0.9759,
+     0.9943
+    ]
+   },
+   "free_running_identical_fresh": 0.92,
+   "first_divergence_fresh": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    4,
+    null,
+    null,
+    null,
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "free_running_identical_pinned": 0.92,
+   "first_divergence_pinned": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    0,
+    null,
+    null,
+    null,
+    null,
+    4,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "STRESS": {
+   "teacher_forced_agreement_fresh": {
+    "rate": 0.9916,
+    "k": 590,
+    "n": 595,
+    "ci95": [
+     0.9805,
+     0.9964
+    ]
+   },
+   "teacher_forced_agreement_pinned": {
+    "rate": 0.9916,
+    "k": 590,
+    "n": 595,
+    "ci95": [
+     0.9805,
+     0.9964
+    ]
+   },
+   "free_running_identical_fresh": 0.8,
+   "first_divergence_fresh": [
+    null,
+    4,
+    null,
+    null,
+    null,
+    0,
+    null,
+    null,
+    null,
+    null,
+    4,
+    null,
+    null,
+    null,
+    null,
+    5,
+    15,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  }
+ },
+ "elapsed_s": 5712.5
 }

@@ -235,3 +235,12 @@ def test_partial_calibration_records_are_refused():
     with pytest.raises(CompileError, match="no records for executors"):
         compile_schedule([Node("a", "decide.classify", required_accuracy=0.9)], [S1, HUB],
                          token_budget=10**6, calibration={"decide.classify": [full, items[0]]})
+
+
+def test_node_ids_may_not_repeat_across_main_and_variants():
+    from dmc.scheduler import Guard, Program, compile_program
+
+    main = (Node("ok", "decide.classify", required_accuracy=0.9),)
+    variant = (Node("ok", "decide.classify", required_accuracy=0.9),)
+    with pytest.raises(CompileError, match="more than one graph"):
+        compile_program(Program(main, {"v": variant}, (Guard("g", "ok", "p", "v"),)), [HUB], token_budget=10**6)
