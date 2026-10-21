@@ -4,8 +4,9 @@ Decision-bearing values are extracted by scoring single-token option letters in 
 pass per option ordering, averaged over the canonical and the reversed ordering (R17). Nothing
 decision-bearing is read from sampled text. Generation is used only where the output is text:
 
-* ``create.reply``: best-of-K seeded candidates. Every candidate is run through the executable
-  verifier, and the passing candidate the model itself finds most likely wins. This is
+* ``create.reply``: best-of-K seeded candidates. Every candidate is cut to its last complete
+  sentence and run through the executable verifier, and the passing candidate the model itself
+  finds most likely wins. This is
   selection, never fusion (plan §I.2.4).
 * ``create.summary``: one greedy draft checked against the computed facts.
 * ``analyze.estimate``: program-of-thought. The model writes one arithmetic expression, which
@@ -125,6 +126,12 @@ INPUT_FIELDS = {"decide.claim_reason": ("text",), "tool.select": ("text",), "dec
                 "retrieve.policy": ("query",), "evaluate.pairwise": ("a", "b"), "analyze.estimate": ("text",)}
 
 
+def complete_sentences(text: str) -> str:
+    """Cut a generation at its last complete sentence: the token cap can stop it mid-word."""
+    ends = [m.end() for m in re.finditer(r"[.!?](?=\s|$)", text)]
+    return text[: ends[-1]].strip() if ends else text
+
+
 def _seed(payload: dict, i: int) -> int:
     """Sampling seed for candidate ``i``: a function of the request's content, so a replay or a
     recompile draws the same candidates (R9)."""
@@ -242,6 +249,7 @@ class LLMExecutor:
             seed = None if k == 1 else _seed(p, i)
             text, ids, mean_lp = self.lm.generate(prompt, self.max_reply_tokens, seed=seed)
             used[self.lm.role] += n_prompt + len(ids)
+            text = complete_sentences(text)  # verified as shipped
             checks = reply_checks(text, p["customer_name"], p["order_id"], p["decision"])
             cands.append({"text": text, "mean_logprob": round(mean_lp, 4), "checks": checks, "passed": all(checks.values())})
         passing = [c for c in cands if c["passed"]]

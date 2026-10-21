@@ -5,9 +5,12 @@
    never saw. It is compared with every single executor forced to answer alone, in particular
    "always spoke" and "always hub". Reported: accuracy, mean cost (hub-token equivalents), share
    answered by each rung, and predicted (calibration) vs realized (test) accuracy and cost.
-2. **Specialized MoE layers**: the capacity manifest (base vs goal-family capacity, wrong-family
-   accuracy, goal-off identity).
-3. **End-to-end goals** through the runtime, twice: the second pass must replay every node from
+2. **Ablations**: the same per-op compilation with only LLM rungs (no code, classic ML or System-1),
+   and with only the base hub and the spoke (no goal-family layers either).
+3. **Specialized MoE layers**: the capacity manifest (base vs goal-family capacity, wrong-family
+   accuracy, goal-off identity), and refund and support goals run end to end with LLM rungs only,
+   where the compiler must choose among the base hub, the hub with its family layers, and the spoke.
+4. **End-to-end goals** through the runtime, twice: the second pass must replay every node from
    receipts (D0) and return identical results.
 
     python -m gcam.evaluate
@@ -17,18 +20,20 @@ from __future__ import annotations
 
 import json
 import time
+from contextlib import contextmanager
 from pathlib import Path
 
 from dmc.scheduler import CompileError, Node, compile_schedule
 
 from .domain import build_world, claims, estimates, reply_pairs, tool_requests
 from .runtime import Runtime
-from .system import System
+from .system import ALIAS, System
 
 ROOT = Path(__file__).resolve().parents[1]
 BARS = {"decide.claim_reason": (0.92, 96), "tool.select": (0.92, 64), "evaluate.pairwise": (0.9, 256),
         "create.reply": (0.6, 160), "create.summary": (0.6, 200), "analyze.estimate": (0.9, 96),
         "decide.expense_review": (0.9, 64), "retrieve.policy": (0.85, 48)}
+LADDER = set(ALIAS.values())  # ladder rungs are named impl[alias]; exact rungs (code, forecaster) always stay
 
 
 def replay(ladder: tuple[str, ...], items: list[dict]) -> dict:
@@ -50,10 +55,31 @@ def replay(ladder: tuple[str, ...], items: list[dict]) -> dict:
             "answered_by": {k: round(v / n, 3) for k, v in answered_by.items()}}
 
 
-def per_op(system: System, lock_hash: str) -> dict:
+# Executor sets for the ablation: which rungs the compiler may use.
+ABLATIONS = {
+    "llm_only": lambda name: name.startswith(("hub", "spoke")),  # no code, classic ML or System-1 rungs
+    "llm_only_no_goal_capacity": lambda name: name.startswith(("hub[", "spoke[")),  # and no goal-family hub layers
+}
+ABLATION_OPS = ("decide.claim_reason", "tool.select", "evaluate.pairwise", "analyze.estimate", "decide.expense_review",
+                "retrieve.policy")
+
+
+@contextmanager
+def only_rungs(system: System, keep):
+    full = system.rungs
+    system.rungs = {n: r for n, r in full.items() if keep(n) or n.split("[")[1].rstrip("]") not in LADDER}
+    try:
+        yield
+    finally:
+        system.rungs = full
+
+
+def per_op(system: System, lock_hash: str, ops=None) -> dict:
     test = json.loads((system.art / "test_records.json").read_text())["records"]
     out = {}
     for op, (bar, cap) in BARS.items():
+        if ops is not None and op not in ops:
+            continue
         node = Node("n", op, required_accuracy=bar, input_cap=cap, requires_contract="D1")
         try:
             sch = compile_schedule([node], system.executors, token_budget=10**9, calibration=system.outcomes(),
@@ -130,6 +156,11 @@ def main() -> None:
     report = {"lock_hash": rt.lock_hash, "rungs": sorted(system.rungs)}
     report["per_op"] = per_op(system, rt.lock_hash)
     print("per-op done", f"{time.time() - t0:.0f}s", flush=True)
+    report["ablations"] = {}
+    for label, keep in ABLATIONS.items():
+        with only_rungs(system, keep):
+            report["ablations"][label] = per_op(system, rt.lock_hash, ABLATION_OPS)
+    print("ablations done", f"{time.time() - t0:.0f}s", flush=True)
     report["capacity"] = json.loads((system.art / "capacity" / "manifest.json").read_text())
     for fam in report["capacity"]["families"].values():
         fam.pop("train_log", None)
@@ -158,6 +189,12 @@ def main() -> None:
         "accuracy": round(sum(n.value["needs_review"] == bool(truth[n.value["expense_id"]]) for n in rows) / len(rows), 4),
         "answered_by": {e: sum(n.executor == e for n in rows) for e in sorted({n.executor for n in rows})},
     }
+    # The hub's goal-family layers in end-to-end goals: the same refund and support goals compiled
+    # without code and System-1 rungs, so the compiler must choose among hub, hub + family, spoke.
+    with only_rungs(system, ABLATIONS["llm_only"]):
+        rt_llm = Runtime(system, system.art / "store_llm_only")
+        llm_goals = [g for g in goals if g[0].startswith(("Customer", "Handle request")) and "Cancel" not in g[0]][:4]
+        report["llm_only_goals"] = [summarize_goal(rt_llm.run(text, **kw)) for text, kw in llm_goals]
     report["elapsed_s"] = round(time.time() - t0, 1)
     out = ROOT / "experiments" / "results" / "gcam_v1_eval.json"
     out.write_text(json.dumps(report, indent=1, default=str))
