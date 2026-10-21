@@ -55,7 +55,9 @@ class GoalGatedMoE(nn.Module):
     """Wraps a base MoE block; adds goal-gated experts with their own router rows."""
 
     def __init__(self, base: nn.Module, n_new: int, goals: list[str], variant: Variant,
-                 warm_start: list[int] | None = None):
+                 warm_start: list[int] | None = None, *, noise: float = 0.0,
+                 router_init: Literal["zero", "parent"] = "zero", bias_init: float = 0.0,
+                 generator: torch.Generator | None = None):
         super().__init__()
         self.base = base
         self.variant = variant
@@ -67,10 +69,20 @@ class GoalGatedMoE(nn.Module):
         if warm_start is not None:  # copy the given base experts (down-projection too)
             init_up = ex.gate_up_proj.data[warm_start].clone().float()
             init_down = ex.down_proj.data[warm_start].clone().float()
+            if noise > 0:  # perturb the copy only: the base must stay untouched (goal-off identity)
+                init_up += noise * init_up.std() * torch.randn(init_up.shape, generator=generator)
+                init_down += noise * init_down.std() * torch.randn(init_down.shape, generator=generator)
         self.new = NewExperts(n_new, hidden, inter, ex.act_fn, init_down, init_up).to(ex.down_proj.dtype)
-        self.router_new = nn.Parameter(torch.zeros(n_new, hidden, dtype=torch.float32))
+        rows = torch.zeros(n_new, hidden, dtype=torch.float32)
+        if router_init == "parent":
+            if warm_start is None:
+                raise ValueError("router_init='parent' needs warm_start parents")
+            rows = base.router.weight.data[warm_start].clone().float()
+            if noise > 0:
+                rows += noise * rows.std() * torch.randn(rows.shape, generator=generator)
+        self.router_new = nn.Parameter(rows)
         self.goals = {g: i for i, g in enumerate(goals)}
-        self.goal_bias = nn.Parameter(torch.zeros(len(goals), n_new))
+        self.goal_bias = nn.Parameter(torch.full((len(goals), n_new), float(bias_init)))
         self.active_goal: str | None = None
 
     def _bias(self) -> torch.Tensor | None:
@@ -130,13 +142,18 @@ class GoalGatedMoE(nn.Module):
 
 
 def expand(model, layers: list[int], n_new: int, goals: list[str], variant: Variant,
-           warm_start: dict[int, list[int]] | None = None) -> list[GoalGatedMoE]:
-    """Replace ``model.model.layers[i].block_sparse_moe`` with goal-gated wrappers."""
+           warm_start: dict[int, list[int]] | None = None, **init) -> list[GoalGatedMoE]:
+    """Replace ``model.model.layers[i].block_sparse_moe`` with goal-gated wrappers.
+
+    ``init`` is passed to ``GoalGatedMoE``: ``noise`` (relative std of the perturbation added to
+    copied experts and parent router rows), ``router_init`` ("zero" or "parent"), ``bias_init``
+    and ``generator``.
+    """
     wrapped = []
     for i in layers:
         layer = model.model.layers[i]
         base = layer.block_sparse_moe
-        w = GoalGatedMoE(base, n_new, goals, variant, (warm_start or {}).get(i))
+        w = GoalGatedMoE(base, n_new, goals, variant, (warm_start or {}).get(i), **init)
         layer.block_sparse_moe = w
         wrapped.append(w)
     return wrapped

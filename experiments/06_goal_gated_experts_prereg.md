@@ -34,3 +34,36 @@ goal bias; AdamW lr 1e-3, 200 steps, batch 8, seed 0):
 **Success (per arm):** accuracy gain ≥ +10 points with CI lower bound > 0; goal-off identity
 holds; goal-on wikitext CE rise ≤ 5%. Generalization note: test items come from a different
 seed (new numbers/words), same templates; a template-held-out split is out of scope here.
+
+---
+
+**Amendment 1, registered 2026-10-21, before any run** (round-4 review M8).
+
+- *Goal split and wrong-goal test.* The goal `numeric` is trained on the families {compare, even,
+  sum, expense} only (training items from `generate(150, seed=100)` restricted to them). Test:
+  those families' items in `generate(20, seed=0)` (240 decisions). **Wrong-goal test:** the
+  held-out families {refund, letter} (120 decisions) evaluated *with the goal on*, against the base.
+- *Arms* (all 150 steps, batch 8, AdamW lr 1e-3, seed 0; one new expert per layer in all 24
+  layers where applicable):
+  1. `routed` — parent = the layer's most-selected base expert on the goal's training prompts;
+     the copy and its router row (initialized from the parent's row) both get Gaussian noise of
+     0.05 × their std; initial goal bias +0.1 (so the copy is preferred over its identical
+     parent at the start instead of losing the lowest-index tie-break). The **parent itself is
+     not perturbed**, unlike UMoE, because the base must stay bit-identical with the goal off;
+     this deviation from the plan's "noise on both" is deliberate and will be stated in the plan.
+  2. `additive` — as registered originally (zero down-projection, zero router row, bias 0).
+  3. `router_only` — as `routed` but with an exact (noise-free) parent copy, and only the router
+     row and goal bias are trained (experts frozen).
+  4. `random_parent` — as `routed` but the parent is a random base expert (seeded).
+  5. `lora` — ordinary fine-tuning baseline (item i): rank-r LoRA on each layer's hot experts
+     (80% of selection mass on the goal's training prompts), router untouched, r chosen so the
+     trainable-parameter count matches `routed` as closely as an integer rank allows.
+- *Primary comparison:* each new-capacity arm (`routed`, `additive`) vs `lora` on goal accuracy,
+  paired group-bootstrap 95% CI. **Success for an arm:** CI lower bound > 0 vs `lora`, goal-off
+  bit-identity holds, goal-on wikitext CE rise ≤ 5%. Gains vs the base are reported but are not
+  the test (the base is near chance on several families, so any supervision clears +10 points).
+- *Secondary:* wrong-goal accuracy change vs base on held-out families (with CI); new-expert
+  traffic share on goal prompts vs wikitext; `router_only` and `random_parent` vs `routed`
+  (does training the expert matter; does the discovered parent matter).
+- *Scope:* in-template generalization only (same templates, new numbers/words); this cannot
+  speak to production-scale claims about item (ii).
