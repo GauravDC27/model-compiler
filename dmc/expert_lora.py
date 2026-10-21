@@ -28,8 +28,12 @@ class HotExpertLoRA(nn.Module):
         self.b_gu = nn.Parameter(torch.zeros(n, inter2, rank, dtype=dt))
         self.a_d = nn.Parameter(torch.randn(n, rank, inter, dtype=dt) / inter**0.5)
         self.b_d = nn.Parameter(torch.zeros(n, hidden, rank, dtype=dt))
+        # Switched per request by the compiler's goal; inactive means exactly the base experts.
+        self.active = True
 
     def forward(self, hidden_states, top_k_index, top_k_weights):
+        if not self.active:
+            return self.base(hidden_states, top_k_index, top_k_weights)
         ex = self.base
         out = torch.zeros_like(hidden_states)
         for e in torch.unique(top_k_index).tolist():
