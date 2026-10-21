@@ -285,7 +285,7 @@ def build_html(sheets: list[tuple[str, str, str]], style: str, font_css: str, pa
         <li><strong>Trust.</strong> Replay is exact by construction. Each executor declares the determinism contract it delivers and each node the one it requires. Every call leaves a receipt.</li>
       </ul>
       <h3>Built so far</h3>
-      <p>The scheduler (joint calibration, caps, guards, variants, recompiles, capability ceilings, confirmation for irreversible actions), goal-gated experts, hot-expert LoRA and the trust layer exist as tested Python (83 tests). CPU pilots on a small MoE are pre-registered. Three are done, one is running and three are queued.</p>
+      <p>The scheduler (joint calibration, caps, guards, variants, recompiles, capability ceilings, confirmation for irreversible actions), goal-gated experts, hot-expert LoRA and the trust layer exist as tested Python (112 tests). GCAM v1 runs nine goal families end to end on CPU: compiled ladders match or beat a dense specialist on every decision op at under 0.2% of its cost on classification, and the hub's goal-family layers lift it from 0.27 to 0.96 and 0.50 to 0.98 on their families. Four CPU pilots are done and three are queued.</p>
     </div>
     <div>
       <h3>Targets (fixed before measurement)</h3>

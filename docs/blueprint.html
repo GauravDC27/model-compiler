@@ -74,6 +74,7 @@ h1 em{font-style:normal; color:var(--accent)}
 .sheet-h h2{font-size:clamp(24px,3vw,32px); font-weight:750; font-stretch:80%; flex:1 1 320px}
 .ref{font-family:var(--mono); font-size:12px; color:var(--muted)}
 .claim{margin-top:14px; max-width:72ch; font-size:18px}
+.note{font-size:13px;color:var(--muted);margin:10px 0 0}
 figure{margin:18px 0 0; background:var(--panel); border:1px solid var(--rule)}
 .fig{overflow-x:auto; padding:10px}
 .fig svg{display:block; width:100%; min-width:900px; height:auto}
@@ -1009,7 +1010,7 @@ tr:last-child td{border-bottom:none}
 <!-- ============================ SHEET 11 ============================ -->
 <section class="sheet" id="s11">
   <div class="sheet-h"><span class="sheet-no">Sheet 11</span><h2>What exists in the repo</h2><span class="ref">Plan Part III, Part IV</span></div>
-  <p class="claim">The compile-time machinery and the hub extensions exist as tested Python, with 83 tests in the suite. The CPU pilots run on granite-3.1-1b-a400m and are pre-registered before they run.</p>
+  <p class="claim">The compile-time machinery, the hub extensions and GCAM v1 exist as tested Python, with 112 tests in the suite. GCAM v1 runs nine goal families end to end on CPU, and every part of the architecture carries at least one of them. The CPU pilots run on granite-3.1-1b-a400m and are pre-registered before they run.</p>
   <div class="tbl"><table>
     <thead><tr><th>Module</th><th>What it does</th><th>Sheets</th><th>Status</th></tr></thead>
     <tbody>
@@ -1036,6 +1037,21 @@ tr:last-child td{border-bottom:none}
       <tr><td>04 Margin regularization</td><td>Can training widen router margins?</td><td><span class="pill queued">queued</span></td><td>—</td></tr>
     </tbody>
   </table></div>
+  <div class="tbl"><table>
+    <thead><tr><th>GCAM v1 on CPU (held-out items)</th><th>Compiled ladder</th><th>Accuracy · cost</th><th>Always spoke</th></tr></thead>
+    <tbody>
+      <tr><td>Refund-claim reason</td><td>keywords → encoder</td><td>0.963 · 1</td><td>0.95 · 777</td></tr>
+      <tr><td>Tool selection</td><td>keywords → encoder</td><td>0.950 · 1</td><td>0.825 · 959</td></tr>
+      <tr><td>Reply judging</td><td>executable verifiers</td><td>1.00 · 0</td><td>0.95 · 1,327</td></tr>
+      <tr><td>Expense review</td><td>GBDT → System-1 memo head</td><td>0.917 · 0.3</td><td>0.33 · 1,446</td></tr>
+      <tr><td>Cost estimate</td><td>arithmetic grammar → spoke program-of-thought</td><td>0.933 · 174</td><td>0.70 · 337</td></tr>
+      <tr><td>Policy retrieval</td><td>TF-IDF → encoder → spoke</td><td>1.00 · 1,112</td><td>0.92 · 2,956</td></tr>
+      <tr><td>Hub goal-gated experts (claims)</td><td colspan="3">base hub 0.271 → 0.958 with the family on; goal off is bit-identical</td></tr>
+      <tr><td>Hub hot-expert LoRA (tools)</td><td colspan="3">base hub 0.50 → 0.979; with LLM rungs only, the compiler picks these layers over the spoke</td></tr>
+      <tr><td>18 end-to-end goals</td><td colspan="3">all within their compiled bounds; confirmation gates the destructive tool; D0 replay exact at zero cost</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Cost is in hub-token equivalents per item (spoke tokens weigh 3.75, encoder 0.057, code and classic ML 0). Details and what did not work: <span class="mono">docs/GCAM_V1.md</span>.</p>
 </section>
 
 <footer class="foot">
