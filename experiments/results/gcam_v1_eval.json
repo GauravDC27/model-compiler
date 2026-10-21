@@ -1,0 +1,2840 @@
+{
+ "lock_hash": "sha256:51e9c99d86eda45745f1a9d023aeb631d1b84ea875e32abd95b2ee5295fbfbb4",
+ "rungs": [
+  "code.analytics[analyze.collect]",
+  "code.analytics[analyze.refund_rates]",
+  "code.analytics[create.policy_answer]",
+  "code.analytics[create.summary_template]",
+  "code.args[tool.args]",
+  "code.arith[estimate]",
+  "code.confirm[meta.confirm]",
+  "code.keywords[claim]",
+  "code.keywords[tool]",
+  "code.lookup[tool.get_order]",
+  "code.policy[decide.refund]",
+  "code.tools[tool.execute]",
+  "code.verify[pair]",
+  "hub.policy[claim]",
+  "hub.support[tool]",
+  "hub[claim]",
+  "hub[estimate]",
+  "hub[expense]",
+  "hub[pair]",
+  "hub[policy]",
+  "hub[reply]",
+  "hub[summary]",
+  "hub[tool]",
+  "ml.forecast[forecast.orders]",
+  "ml.gbdt[expense]",
+  "ml.tfidf[policy]",
+  "s1.encoder[claim]",
+  "s1.encoder[expense]",
+  "s1.encoder[policy]",
+  "s1.encoder[tool]",
+  "s1.hubprobe[claim]",
+  "spoke[claim]",
+  "spoke[estimate]",
+  "spoke[expense]",
+  "spoke[pair]",
+  "spoke[policy]",
+  "spoke[reply2]",
+  "spoke[summary]",
+  "spoke[tool]"
+ ],
+ "per_op": {
+  "decide.claim_reason": {
+   "bar": 0.92,
+   "n_test": 80,
+   "ladder": [
+    "code.keywords[claim]",
+    "s1.encoder[claim]"
+   ],
+   "predicted": {
+    "accuracy": 0.9625,
+    "cost": 0.95
+   },
+   "realized": {
+    "accuracy": 0.9625,
+    "cost": 1.0,
+    "answered_by": {
+     "code.keywords[claim]": 0.5,
+     "s1.encoder[claim]": 0.5
+    }
+   },
+   "single_executor": {
+    "code.keywords[claim]": {
+     "accuracy": 0.625,
+     "cost": 0.0
+    },
+    "s1.encoder[claim]": {
+     "accuracy": 0.9625,
+     "cost": 1.7
+    },
+    "s1.hubprobe[claim]": {
+     "accuracy": 0.9,
+     "cost": 19.2
+    },
+    "hub[claim]": {
+     "accuracy": 0.2625,
+     "cost": 225.0
+    },
+    "hub.policy[claim]": {
+     "accuracy": 0.95,
+     "cost": 225.0
+    },
+    "spoke[claim]": {
+     "accuracy": 0.95,
+     "cost": 777.0
+    }
+   },
+   "vs_always_spoke": {
+    "accuracy_delta": 0.0125,
+    "cost_ratio": 0.001
+   }
+  },
+  "tool.select": {
+   "bar": 0.92,
+   "n_test": 80,
+   "ladder": [
+    "code.keywords[tool]",
+    "s1.encoder[tool]"
+   ],
+   "predicted": {
+    "accuracy": 0.9875,
+    "cost": 0.863
+   },
+   "realized": {
+    "accuracy": 0.95,
+    "cost": 0.9,
+    "answered_by": {
+     "code.keywords[tool]": 0.487,
+     "s1.encoder[tool]": 0.512
+    }
+   },
+   "single_executor": {
+    "code.keywords[tool]": {
+     "accuracy": 0.575,
+     "cost": 0.0
+    },
+    "s1.encoder[tool]": {
+     "accuracy": 0.95,
+     "cost": 1.4
+    },
+    "hub[tool]": {
+     "accuracy": 0.625,
+     "cost": 267.7
+    },
+    "hub.support[tool]": {
+     "accuracy": 1.0,
+     "cost": 267.7
+    },
+    "spoke[tool]": {
+     "accuracy": 0.825,
+     "cost": 959.0
+    }
+   },
+   "vs_always_spoke": {
+    "accuracy_delta": 0.125,
+    "cost_ratio": 0.001
+   }
+  },
+  "evaluate.pairwise": {
+   "bar": 0.9,
+   "n_test": 40,
+   "ladder": [
+    "code.verify[pair]"
+   ],
+   "predicted": {
+    "accuracy": 1.0,
+    "cost": 0.0
+   },
+   "realized": {
+    "accuracy": 1.0,
+    "cost": 0.0,
+    "answered_by": {
+     "code.verify[pair]": 1.0
+    }
+   },
+   "single_executor": {
+    "code.verify[pair]": {
+     "accuracy": 1.0,
+     "cost": 0.0
+    },
+    "hub[pair]": {
+     "accuracy": 0.7,
+     "cost": 386.9
+    },
+    "spoke[pair]": {
+     "accuracy": 0.95,
+     "cost": 1327.3
+    }
+   },
+   "vs_always_spoke": {
+    "accuracy_delta": 0.05,
+    "cost_ratio": 0.0
+   }
+  },
+  "create.reply": {
+   "bar": 0.6,
+   "n_test": 9,
+   "ladder": [
+    "hub[reply]"
+   ],
+   "predicted": {
+    "accuracy": 0.777778,
+    "cost": 860.444
+   },
+   "realized": {
+    "accuracy": 0.5556,
+    "cost": 862.2,
+    "answered_by": {
+     "hub[reply]": 1.0
+    }
+   },
+   "single_executor": {
+    "hub[reply]": {
+     "accuracy": 0.5556,
+     "cost": 862.2
+    }
+   },
+   "vs_always_spoke": null
+  },
+  "create.summary": {
+   "bar": 0.6,
+   "n_test": 7,
+   "ladder": [
+    "hub[summary]"
+   ],
+   "predicted": {
+    "accuracy": 0.875,
+    "cost": 180.125
+   },
+   "realized": {
+    "accuracy": 1.0,
+    "cost": 174.9,
+    "answered_by": {
+     "hub[summary]": 1.0
+    }
+   },
+   "single_executor": {
+    "hub[summary]": {
+     "accuracy": 1.0,
+     "cost": 174.9
+    },
+    "spoke[summary]": {
+     "accuracy": 1.0,
+     "cost": 650.7
+    }
+   },
+   "vs_always_spoke": {
+    "accuracy_delta": 0.0,
+    "cost_ratio": 0.269
+   }
+  },
+  "analyze.estimate": {
+   "bar": 0.9,
+   "n_test": 30,
+   "ladder": [
+    "code.arith[estimate]",
+    "spoke[estimate]"
+   ],
+   "predicted": {
+    "accuracy": 0.933333,
+    "cost": 173.767
+   },
+   "realized": {
+    "accuracy": 0.9333,
+    "cost": 174.0,
+    "answered_by": {
+     "code.arith[estimate]": 0.5,
+     "spoke[estimate]": 0.5
+    }
+   },
+   "single_executor": {
+    "code.arith[estimate]": {
+     "accuracy": 0.5,
+     "cost": 0.0
+    },
+    "hub[estimate]": {
+     "accuracy": 0.3333,
+     "cost": 91.8
+    },
+    "spoke[estimate]": {
+     "accuracy": 0.7,
+     "cost": 336.8
+    }
+   },
+   "vs_always_spoke": {
+    "accuracy_delta": 0.2333,
+    "cost_ratio": 0.517
+   }
+  },
+  "decide.expense_review": {
+   "bar": 0.9,
+   "n_test": 120,
+   "ladder": [
+    "ml.gbdt[expense]",
+    "s1.encoder[expense]"
+   ],
+   "predicted": {
+    "accuracy": 0.9375,
+    "cost": 0.425
+   },
+   "realized": {
+    "accuracy": 0.9167,
+    "cost": 0.3,
+    "answered_by": {
+     "ml.gbdt[expense]": 0.667,
+     "s1.encoder[expense]": 0.333
+    }
+   },
+   "single_executor": {
+    "ml.gbdt[expense]": {
+     "accuracy": 0.8,
+     "cost": 0.0
+    },
+    "s1.encoder[expense]": {
+     "accuracy": 0.9333,
+     "cost": 1.0
+    },
+    "hub[expense]": {
+     "accuracy": 0.4,
+     "cost": 420.1
+    },
+    "spoke[expense]": {
+     "accuracy": 0.3333,
+     "cost": 1446.1
+    }
+   },
+   "vs_always_spoke": {
+    "accuracy_delta": 0.5834,
+    "cost_ratio": 0.0
+   }
+  },
+  "retrieve.policy": {
+   "bar": 0.85,
+   "n_test": 24,
+   "ladder": [
+    "ml.tfidf[policy]",
+    "s1.encoder[policy]",
+    "spoke[policy]"
+   ],
+   "predicted": {
+    "accuracy": 1.0,
+    "cost": 1113.083
+   },
+   "realized": {
+    "accuracy": 1.0,
+    "cost": 1111.5,
+    "answered_by": {
+     "ml.tfidf[policy]": 0.208,
+     "s1.encoder[policy]": 0.417,
+     "spoke[policy]": 0.375
+    }
+   },
+   "single_executor": {
+    "ml.tfidf[policy]": {
+     "accuracy": 0.4583,
+     "cost": 0.0
+    },
+    "s1.encoder[policy]": {
+     "accuracy": 0.7917,
+     "cost": 1.0
+    },
+    "hub[policy]": {
+     "accuracy": 0.1667,
+     "cost": 863.4
+    },
+    "spoke[policy]": {
+     "accuracy": 0.9167,
+     "cost": 2955.6
+    }
+   },
+   "vs_always_spoke": {
+    "accuracy_delta": 0.0833,
+    "cost_ratio": 0.376
+   }
+  }
+ },
+ "ablations": {
+  "llm_only": {
+   "decide.claim_reason": {
+    "bar": 0.92,
+    "n_test": 80,
+    "ladder": [
+     "hub.policy[claim]"
+    ],
+    "predicted": {
+     "accuracy": 0.95,
+     "cost": 224.425
+    },
+    "realized": {
+     "accuracy": 0.95,
+     "cost": 225.0,
+     "answered_by": {
+      "hub.policy[claim]": 1.0
+     }
+    },
+    "single_executor": {
+     "code.keywords[claim]": {
+      "accuracy": 0.625,
+      "cost": 0.0
+     },
+     "s1.encoder[claim]": {
+      "accuracy": 0.9625,
+      "cost": 1.7
+     },
+     "s1.hubprobe[claim]": {
+      "accuracy": 0.9,
+      "cost": 19.2
+     },
+     "hub[claim]": {
+      "accuracy": 0.2625,
+      "cost": 225.0
+     },
+     "hub.policy[claim]": {
+      "accuracy": 0.95,
+      "cost": 225.0
+     },
+     "spoke[claim]": {
+      "accuracy": 0.95,
+      "cost": 777.0
+     }
+    },
+    "vs_always_spoke": {
+     "accuracy_delta": 0.0,
+     "cost_ratio": 0.29
+    }
+   },
+   "tool.select": {
+    "bar": 0.92,
+    "n_test": 80,
+    "ladder": [
+     "hub.support[tool]"
+    ],
+    "predicted": {
+     "accuracy": 0.9625,
+     "cost": 267.2
+    },
+    "realized": {
+     "accuracy": 1.0,
+     "cost": 267.7,
+     "answered_by": {
+      "hub.support[tool]": 1.0
+     }
+    },
+    "single_executor": {
+     "code.keywords[tool]": {
+      "accuracy": 0.575,
+      "cost": 0.0
+     },
+     "s1.encoder[tool]": {
+      "accuracy": 0.95,
+      "cost": 1.4
+     },
+     "hub[tool]": {
+      "accuracy": 0.625,
+      "cost": 267.7
+     },
+     "hub.support[tool]": {
+      "accuracy": 1.0,
+      "cost": 267.7
+     },
+     "spoke[tool]": {
+      "accuracy": 0.825,
+      "cost": 959.0
+     }
+    },
+    "vs_always_spoke": {
+     "accuracy_delta": 0.175,
+     "cost_ratio": 0.279
+    }
+   },
+   "evaluate.pairwise": {
+    "compile_error": "node 'n' needs accuracy 0.9 but the best ladder for 'evaluate.pairwise' reaches 0.875"
+   },
+   "analyze.estimate": {
+    "compile_error": "node 'n' needs accuracy 0.9 but the best ladder for 'analyze.estimate' reaches 0.766667"
+   },
+   "decide.expense_review": {
+    "compile_error": "node 'n' needs accuracy 0.9 but the best ladder for 'decide.expense_review' reaches 0.5125"
+   },
+   "retrieve.policy": {
+    "bar": 0.85,
+    "n_test": 24,
+    "ladder": [
+     "spoke[policy]"
+    ],
+    "predicted": {
+     "accuracy": 0.916667,
+     "cost": 2956.875
+    },
+    "realized": {
+     "accuracy": 0.9167,
+     "cost": 2955.6,
+     "answered_by": {
+      "spoke[policy]": 1.0
+     }
+    },
+    "single_executor": {
+     "ml.tfidf[policy]": {
+      "accuracy": 0.4583,
+      "cost": 0.0
+     },
+     "s1.encoder[policy]": {
+      "accuracy": 0.7917,
+      "cost": 1.0
+     },
+     "hub[policy]": {
+      "accuracy": 0.1667,
+      "cost": 863.4
+     },
+     "spoke[policy]": {
+      "accuracy": 0.9167,
+      "cost": 2955.6
+     }
+    },
+    "vs_always_spoke": {
+     "accuracy_delta": 0.0,
+     "cost_ratio": 1.0
+    }
+   }
+  },
+  "llm_only_no_goal_capacity": {
+   "decide.claim_reason": {
+    "bar": 0.92,
+    "n_test": 80,
+    "ladder": [
+     "spoke[claim]"
+    ],
+    "predicted": {
+     "accuracy": 0.95,
+     "cost": 775.562
+    },
+    "realized": {
+     "accuracy": 0.95,
+     "cost": 777.0,
+     "answered_by": {
+      "spoke[claim]": 1.0
+     }
+    },
+    "single_executor": {
+     "code.keywords[claim]": {
+      "accuracy": 0.625,
+      "cost": 0.0
+     },
+     "s1.encoder[claim]": {
+      "accuracy": 0.9625,
+      "cost": 1.7
+     },
+     "s1.hubprobe[claim]": {
+      "accuracy": 0.9,
+      "cost": 19.2
+     },
+     "hub[claim]": {
+      "accuracy": 0.2625,
+      "cost": 225.0
+     },
+     "hub.policy[claim]": {
+      "accuracy": 0.95,
+      "cost": 225.0
+     },
+     "spoke[claim]": {
+      "accuracy": 0.95,
+      "cost": 777.0
+     }
+    },
+    "vs_always_spoke": {
+     "accuracy_delta": 0.0,
+     "cost_ratio": 1.0
+    }
+   },
+   "tool.select": {
+    "compile_error": "node 'n' needs accuracy 0.92 but the best ladder for 'tool.select' reaches 0.8125"
+   },
+   "evaluate.pairwise": {
+    "compile_error": "node 'n' needs accuracy 0.9 but the best ladder for 'evaluate.pairwise' reaches 0.875"
+   },
+   "analyze.estimate": {
+    "compile_error": "node 'n' needs accuracy 0.9 but the best ladder for 'analyze.estimate' reaches 0.766667"
+   },
+   "decide.expense_review": {
+    "compile_error": "node 'n' needs accuracy 0.9 but the best ladder for 'decide.expense_review' reaches 0.5125"
+   },
+   "retrieve.policy": {
+    "bar": 0.85,
+    "n_test": 24,
+    "ladder": [
+     "spoke[policy]"
+    ],
+    "predicted": {
+     "accuracy": 0.916667,
+     "cost": 2956.875
+    },
+    "realized": {
+     "accuracy": 0.9167,
+     "cost": 2955.6,
+     "answered_by": {
+      "spoke[policy]": 1.0
+     }
+    },
+    "single_executor": {
+     "ml.tfidf[policy]": {
+      "accuracy": 0.4583,
+      "cost": 0.0
+     },
+     "s1.encoder[policy]": {
+      "accuracy": 0.7917,
+      "cost": 1.0
+     },
+     "hub[policy]": {
+      "accuracy": 0.1667,
+      "cost": 863.4
+     },
+     "spoke[policy]": {
+      "accuracy": 0.9167,
+      "cost": 2955.6
+     }
+    },
+    "vs_always_spoke": {
+     "accuracy_delta": 0.0,
+     "cost_ratio": 1.0
+    }
+   }
+  }
+ },
+ "capacity": {
+  "model": "ibm-granite/granite-3.1-1b-a400m-instruct",
+  "steps": {
+   "policy": 40,
+   "support": 90
+  },
+  "batch": 4,
+  "lr": {
+   "policy": 0.0001,
+   "support": 0.0003
+  },
+  "families": {
+   "policy": {
+    "kind": "goal_gated_experts",
+    "trainable_parameters": 12591112,
+    "accuracy_with_family": 0.9583333333333334,
+    "accuracy_with_other_family": 0.7083333333333334,
+    "state_hash": "sha256:bc666f71824473640a2a87f0bf9c2def716f0cba6df717120f36169ff99fb17a",
+    "variant": "additive",
+    "new_expert_share": {
+     "all_tokens": 0.349,
+     "answer_token": 0.11
+    }
+   },
+   "support": {
+    "kind": "hot_expert_lora",
+    "trainable_parameters": 6006784,
+    "accuracy_with_family": 0.9791666666666666,
+    "accuracy_with_other_family": 0.8958333333333334,
+    "state_hash": "sha256:d88dfd40f65aa6921c79ea7e24bc4bfc947633eb473f65a25b2b114b06117779",
+    "hot_sizes": {
+     "0": 21,
+     "1": 11,
+     "2": 12,
+     "3": 17,
+     "4": 20,
+     "5": 18,
+     "6": 18,
+     "7": 17,
+     "8": 15,
+     "9": 17,
+     "10": 18,
+     "11": 17,
+     "12": 18,
+     "13": 18,
+     "14": 21,
+     "15": 19,
+     "16": 18,
+     "17": 20,
+     "18": 20,
+     "19": 19,
+     "20": 19,
+     "21": 17,
+     "22": 14,
+     "23": 15
+    },
+    "rank": 4
+   }
+  },
+  "base": {
+   "policy": {
+    "accuracy": 0.2708333333333333
+   },
+   "support": {
+    "accuracy": 0.5
+   }
+  },
+  "goal_off_bit_identical": true,
+  "elapsed_s": 2133.1
+ },
+ "goals": [
+  {
+   "goal": "Customer C-1146 requests a refund for order A-5010: \"The puzzle was torn when it arrived. Please help.\"",
+   "family": "refund_decision",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 0,
+   "worst_case": 96,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:fd5d4b6ed674ecc0ef389b419ea21296ebd347a93d289a964ab1055b8dcbb720",
+   "nodes": [
+    {
+     "node": "reason",
+     "op": "decide.claim_reason",
+     "ladder": [
+      "code.keywords[claim]",
+      "s1.encoder[claim]"
+     ],
+     "executor": "code.keywords[claim]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "order",
+     "op": "tool.get_order",
+     "ladder": [
+      "code.lookup[tool.get_order]"
+     ],
+     "executor": "code.lookup[tool.get_order]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "decision",
+     "op": "decide.refund",
+     "ladder": [
+      "code.policy[decide.refund]"
+     ],
+     "executor": "code.policy[decide.refund]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "reason": "damaged",
+    "decision": {
+     "decision": "deny",
+     "rule": "P2",
+     "explanation": "Damaged item reported 174 days after delivery (limit 90)."
+    }
+   }
+  },
+  {
+   "goal": "Customer C-1186 requests a refund for order A-5011: \"Hello, two weeks and counting, the board game is nowhere to be seen. I would like a refund.\"",
+   "family": "refund_decision",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 2,
+   "worst_case": 96,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:fd5d4b6ed674ecc0ef389b419ea21296ebd347a93d289a964ab1055b8dcbb720",
+   "nodes": [
+    {
+     "node": "reason",
+     "op": "decide.claim_reason",
+     "ladder": [
+      "code.keywords[claim]",
+      "s1.encoder[claim]"
+     ],
+     "executor": "s1.encoder[claim]",
+     "escalations": 1,
+     "cost": 2,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "order",
+     "op": "tool.get_order",
+     "ladder": [
+      "code.lookup[tool.get_order]"
+     ],
+     "executor": "code.lookup[tool.get_order]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "decision",
+     "op": "decide.refund",
+     "ladder": [
+      "code.policy[decide.refund]"
+     ],
+     "executor": "code.policy[decide.refund]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "reason": "not_received",
+    "decision": {
+     "decision": "deny",
+     "rule": "P3",
+     "explanation": "Tracking shows the order was delivered; open a carrier investigation before refunding."
+    }
+   }
+  },
+  {
+   "goal": "Customer C-1145 requests a refund for order A-5012: \"Hello, the label says toy robot but inside was a completely different product. What can you do?\"",
+   "family": "refund_decision",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 2,
+   "worst_case": 96,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:fd5d4b6ed674ecc0ef389b419ea21296ebd347a93d289a964ab1055b8dcbb720",
+   "nodes": [
+    {
+     "node": "reason",
+     "op": "decide.claim_reason",
+     "ladder": [
+      "code.keywords[claim]",
+      "s1.encoder[claim]"
+     ],
+     "executor": "s1.encoder[claim]",
+     "escalations": 1,
+     "cost": 2,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "order",
+     "op": "tool.get_order",
+     "ladder": [
+      "code.lookup[tool.get_order]"
+     ],
+     "executor": "code.lookup[tool.get_order]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "decision",
+     "op": "decide.refund",
+     "ladder": [
+      "code.policy[decide.refund]"
+     ],
+     "executor": "code.policy[decide.refund]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "reason": "wrong_item",
+    "decision": {
+     "decision": "deny",
+     "rule": "P4",
+     "explanation": "Wrong item reported 176 days after delivery (limit 60)."
+    }
+   }
+  },
+  {
+   "goal": "Handle request from C-1141: \"Can someone phone me tomorrow at 3pm?\"",
+   "family": "support_request",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 0,
+   "worst_case": 64,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:2b6c3fb32b95160c0729b1955fa2276809d14e938e9750be7e739e068f7676be",
+   "nodes": [
+    {
+     "node": "tool",
+     "op": "tool.select",
+     "ladder": [
+      "code.keywords[tool]",
+      "s1.encoder[tool]"
+     ],
+     "executor": "code.keywords[tool]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "args",
+     "op": "tool.args",
+     "ladder": [
+      "code.args[tool.args]"
+     ],
+     "executor": "code.args[tool.args]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "confirm",
+     "op": "meta.confirm",
+     "ladder": [
+      "code.confirm[meta.confirm]"
+     ],
+     "executor": "code.confirm[meta.confirm]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "execute",
+     "op": "tool.execute",
+     "ladder": [
+      "code.tools[tool.execute]"
+     ],
+     "executor": "code.tools[tool.execute]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "tool": "schedule_callback",
+    "args": {
+     "tool": "schedule_callback",
+     "args": {
+      "customer_id": "C-1141",
+      "date": "2026-10-22",
+      "time": "15:00"
+     },
+     "missing": [],
+     "invalid": []
+    },
+    "execute": {
+     "scheduled": "2026-10-22 15:00",
+     "customer_id": "C-1141",
+     "idempotency_key": "sha256:ad537a314d05eff193d7e03c4f7b4e45bb47174438c17371ca7c51b4c3926a8a"
+    }
+   }
+  },
+  {
+   "goal": "Handle request from C-1132: \"Excuse me, any news on A-5215? I am wondering how far along it is.\"",
+   "family": "support_request",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 2,
+   "worst_case": 64,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:2b6c3fb32b95160c0729b1955fa2276809d14e938e9750be7e739e068f7676be",
+   "nodes": [
+    {
+     "node": "tool",
+     "op": "tool.select",
+     "ladder": [
+      "code.keywords[tool]",
+      "s1.encoder[tool]"
+     ],
+     "executor": "s1.encoder[tool]",
+     "escalations": 1,
+     "cost": 2,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "args",
+     "op": "tool.args",
+     "ladder": [
+      "code.args[tool.args]"
+     ],
+     "executor": "code.args[tool.args]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "confirm",
+     "op": "meta.confirm",
+     "ladder": [
+      "code.confirm[meta.confirm]"
+     ],
+     "executor": "code.confirm[meta.confirm]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "execute",
+     "op": "tool.execute",
+     "ladder": [
+      "code.tools[tool.execute]"
+     ],
+     "executor": "code.tools[tool.execute]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "tool": "get_order_status",
+    "args": {
+     "tool": "get_order_status",
+     "args": {
+      "order_id": "A-5215"
+     },
+     "missing": [],
+     "invalid": []
+    },
+    "execute": {
+     "status": "delivered",
+     "order_date": "2026-05-08",
+     "delivered_date": "2026-05-14"
+    }
+   }
+  },
+  {
+   "goal": "Handle request from C-1222: \"Cancel order A-8374.\"",
+   "family": "support_request",
+   "status": "abstained",
+   "reason": "guard approved failed on node confirm",
+   "events": [
+    "guard approved failed on confirm -> abstain"
+   ],
+   "cost": 0,
+   "worst_case": 64,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:2b6c3fb32b95160c0729b1955fa2276809d14e938e9750be7e739e068f7676be",
+   "nodes": [
+    {
+     "node": "tool",
+     "op": "tool.select",
+     "ladder": [
+      "code.keywords[tool]",
+      "s1.encoder[tool]"
+     ],
+     "executor": "code.keywords[tool]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "args",
+     "op": "tool.args",
+     "ladder": [
+      "code.args[tool.args]"
+     ],
+     "executor": "code.args[tool.args]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "confirm",
+     "op": "meta.confirm",
+     "ladder": [
+      "code.confirm[meta.confirm]"
+     ],
+     "executor": "code.confirm[meta.confirm]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "tool": "cancel_order",
+    "args": {
+     "tool": "cancel_order",
+     "args": {
+      "order_id": "A-8374"
+     },
+     "missing": [],
+     "invalid": []
+    },
+    "confirm": {
+     "approved": false,
+     "why": "needs explicit approval 'cancel_order:A-8374'",
+     "capability": "destructive"
+    }
+   }
+  },
+  {
+   "goal": "Handle request from C-1222: \"Cancel order A-8374.\"",
+   "family": "support_request",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 0,
+   "worst_case": 64,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:2b6c3fb32b95160c0729b1955fa2276809d14e938e9750be7e739e068f7676be",
+   "nodes": [
+    {
+     "node": "tool",
+     "op": "tool.select",
+     "ladder": [
+      "code.keywords[tool]",
+      "s1.encoder[tool]"
+     ],
+     "executor": "code.keywords[tool]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": true,
+     "cap_hits": 0
+    },
+    {
+     "node": "args",
+     "op": "tool.args",
+     "ladder": [
+      "code.args[tool.args]"
+     ],
+     "executor": "code.args[tool.args]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": true,
+     "cap_hits": 0
+    },
+    {
+     "node": "confirm",
+     "op": "meta.confirm",
+     "ladder": [
+      "code.confirm[meta.confirm]"
+     ],
+     "executor": "code.confirm[meta.confirm]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "execute",
+     "op": "tool.execute",
+     "ladder": [
+      "code.tools[tool.execute]"
+     ],
+     "executor": "code.tools[tool.execute]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "tool": "cancel_order",
+    "args": {
+     "args": {
+      "order_id": "A-8374"
+     },
+     "invalid": [],
+     "missing": [],
+     "tool": "cancel_order"
+    },
+    "execute": {
+     "cancelled": true,
+     "reason": "cancelled before shipping",
+     "idempotency_key": "sha256:a26f8624d48a6cfc6974330dff50468f134a89c3910133dfab58aa2d23dae676"
+    }
+   }
+  },
+  {
+   "goal": "Which reply to C-1035 about order A-7584 is better? A: \"Hi Ines, thank you for letting us know about order A-7584. I am sorry the headphones arrived damaged. I ",
+   "family": "compare_replies",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 0,
+   "worst_case": 0,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:ef9a64ddf3ccdd1f8f77dbb2e19e235e4dc0b922851086080f0e3dfddd0d75e3",
+   "nodes": [
+    {
+     "node": "verdict",
+     "op": "evaluate.pairwise",
+     "ladder": [
+      "code.verify[pair]"
+     ],
+     "executor": "code.verify[pair]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "verdict": "A"
+   }
+  },
+  {
+   "goal": "Which reply to C-1033 about order A-5836 is better? A: \"Hi Mei, thank you for letting us know about order A-5836. I am sorry the smart speaker arrived damaged. ",
+   "family": "compare_replies",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 0,
+   "worst_case": 0,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:ef9a64ddf3ccdd1f8f77dbb2e19e235e4dc0b922851086080f0e3dfddd0d75e3",
+   "nodes": [
+    {
+     "node": "verdict",
+     "op": "evaluate.pairwise",
+     "ladder": [
+      "code.verify[pair]"
+     ],
+     "executor": "code.verify[pair]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "verdict": "A"
+   }
+  },
+  {
+   "goal": "Write a reply to C-1217 about order A-5015 that arrived damaged",
+   "family": "write_reply",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 882,
+   "worst_case": 4226,
+   "bound_respected": true,
+   "seconds": 34.6,
+   "schedule_hash": "sha256:884764d2c5657b300d1cfb24c1a7e20d5efc349eda2e0adaf642112a59682a4f",
+   "nodes": [
+    {
+     "node": "order",
+     "op": "tool.get_order",
+     "ladder": [
+      "code.lookup[tool.get_order]"
+     ],
+     "executor": "code.lookup[tool.get_order]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "decision",
+     "op": "decide.refund",
+     "ladder": [
+      "code.policy[decide.refund]"
+     ],
+     "executor": "code.policy[decide.refund]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "reply",
+     "op": "create.reply",
+     "ladder": [
+      "hub[reply]"
+     ],
+     "executor": "hub[reply]",
+     "escalations": 0,
+     "cost": 882,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "decision": {
+     "decision": "deny",
+     "rule": "P2",
+     "explanation": "Damaged item reported 176 days after delivery (limit 90)."
+    },
+    "reply": "Hi Zoe,\n\nI'm really sorry to hear about the damage to your A-5015 blender. Unfortunately, due to the delivery window being more than 90 days since you received your order, we're unable to offer a refund under the standard return policy P2. We value your business and understand the inconvenience caused.\n\nWe'll do our best to resolve this for you. Please allow us 24 hours to process your request and get back to you with further instructions."
+   }
+  },
+  {
+   "goal": "Which category had the highest refund rate in the last 90 days?",
+   "family": "refund_analytics",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 174,
+   "worst_case": 222,
+   "bound_respected": true,
+   "seconds": 5.3,
+   "schedule_hash": "sha256:5496ad06df3a9a943ffe20302e295bf01c7d4bcb21d7c72ffb70bcd7f6e2cc45",
+   "nodes": [
+    {
+     "node": "rates",
+     "op": "analyze.refund_rates",
+     "ladder": [
+      "code.analytics[analyze.refund_rates]"
+     ],
+     "executor": "code.analytics[analyze.refund_rates]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "summary",
+     "op": "create.summary",
+     "ladder": [
+      "hub[summary]"
+     ],
+     "executor": "hub[summary]",
+     "escalations": 0,
+     "cost": 174,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "rates": {
+     "days": 90,
+     "top_category": "apparel",
+     "top_rate": 0.1597,
+     "rest_rate": 0.0613,
+     "z": 6.09,
+     "p_value": 0.0,
+     "significant": true,
+     "rates": {
+      "apparel": {
+       "refunds": 61,
+       "orders": 382,
+       "rate": 0.1597
+      },
+      "electronics": {
+       "refunds": 30,
+       "orders": 433,
+       "rate": 0.0693
+      },
+      "grocery": {
+       "refunds": 6,
+       "orders": 247,
+       "rate": 0.0243
+      },
+      "home": {
+       "refunds": 26,
+       "orders": 330,
+       "rate": 0.0788
+      },
+      "toys": {
+       "refunds": 17,
+       "orders": 278,
+       "rate": 0.0612
+      }
+     }
+    },
+    "summary": "The analysis reveals a statistically significant difference in refund rates between apparel and all other categories, with apparel having a 16.0% refund rate, significantly higher than the 6.1% rate for all other categories."
+   }
+  },
+  {
+   "goal": "Estimate: If we refund 20% of 500 orders that average $60, what is the total refund cost?",
+   "family": "cost_estimate",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 0,
+   "worst_case": 771,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:62e0f4eef3562808eac069b0c7b78f77beba44c1505d0ce0ca52173d4afaa947",
+   "nodes": [
+    {
+     "node": "estimate",
+     "op": "analyze.estimate",
+     "ladder": [
+      "code.arith[estimate]",
+      "spoke[estimate]"
+     ],
+     "executor": "code.arith[estimate]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "estimate": 6000.0
+   }
+  },
+  {
+   "goal": "Estimate: We ship 340 parcels at $80 per label and 15% need a second label. What is the total label spend?",
+   "family": "cost_estimate",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 353,
+   "worst_case": 771,
+   "bound_respected": true,
+   "seconds": 4.3,
+   "schedule_hash": "sha256:62e0f4eef3562808eac069b0c7b78f77beba44c1505d0ce0ca52173d4afaa947",
+   "nodes": [
+    {
+     "node": "estimate",
+     "op": "analyze.estimate",
+     "ladder": [
+      "code.arith[estimate]",
+      "spoke[estimate]"
+     ],
+     "executor": "spoke[estimate]",
+     "escalations": 1,
+     "cost": 353,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "estimate": 31280.0
+   }
+  },
+  {
+   "goal": "Review expense reports from the last 7 days",
+   "family": "expense_review",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 21,
+   "worst_case": 4544,
+   "bound_respected": true,
+   "seconds": 0.7,
+   "schedule_hash": "sha256:698e941039d4a36b862a047faa604b5530e0f0c6835201febd6c1168204b617d",
+   "nodes": [
+    {
+     "node": "x000",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x001",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x002",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x003",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x004",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x005",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x006",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x007",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x008",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x009",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x010",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x011",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x012",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x013",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x014",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x015",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x016",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x017",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x018",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x019",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x020",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x021",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x022",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x023",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x024",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x025",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x026",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x027",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x028",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x029",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x030",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x031",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x032",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x033",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x034",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x035",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x036",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x037",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x038",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x039",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x040",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x041",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x042",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x043",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x044",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x045",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x046",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x047",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x048",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x049",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x050",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x051",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x052",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x053",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x054",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x055",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x056",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x057",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x058",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x059",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x060",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x061",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x062",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x063",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x064",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x065",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x066",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x067",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x068",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x069",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "s1.encoder[expense]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "x070",
+     "op": "decide.expense_review",
+     "ladder": [
+      "ml.gbdt[expense]",
+      "s1.encoder[expense]"
+     ],
+     "executor": "ml.gbdt[expense]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "flagged",
+     "op": "analyze.collect",
+     "ladder": [
+      "code.analytics[analyze.collect]"
+     ],
+     "executor": "code.analytics[analyze.collect]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "flagged": {
+     "flagged": [
+      "E-20086",
+      "E-20205",
+      "E-20514",
+      "E-20633",
+      "E-20840",
+      "E-20877",
+      "E-21276",
+      "E-21561"
+     ],
+     "n_reviewed": 71
+    }
+   }
+  },
+  {
+   "goal": "Forecast daily orders for the next 7 days",
+   "family": "forecast_orders",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 0,
+   "worst_case": 0,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:3967232ae49ecf4da765f44cb98defc0300c17059ed8b9ecb7a0bf50b0da54f5",
+   "nodes": [
+    {
+     "node": "forecast",
+     "op": "forecast.orders",
+     "ladder": [
+      "ml.forecast[forecast.orders]"
+     ],
+     "executor": "ml.forecast[forecast.orders]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "forecast": {
+     "model": "ridge(weekday+trend)",
+     "backtest_mae": 4.35,
+     "baseline_mae": 6.43,
+     "interval": "80%",
+     "forecast": [
+      {
+       "date": "2026-10-21",
+       "point": 18.6,
+       "lo": 12.1,
+       "hi": 25.3
+      },
+      {
+       "date": "2026-10-22",
+       "point": 20.9,
+       "lo": 14.4,
+       "hi": 27.6
+      },
+      {
+       "date": "2026-10-23",
+       "point": 21.6,
+       "lo": 15.1,
+       "hi": 28.2
+      },
+      {
+       "date": "2026-10-24",
+       "point": 25.5,
+       "lo": 19.0,
+       "hi": 32.1
+      },
+      {
+       "date": "2026-10-25",
+       "point": 23.1,
+       "lo": 16.6,
+       "hi": 29.7
+      },
+      {
+       "date": "2026-10-26",
+       "point": 18.6,
+       "lo": 12.1,
+       "hi": 25.2
+      },
+      {
+       "date": "2026-10-27",
+       "point": 19.7,
+       "lo": 13.1,
+       "hi": 26.3
+      }
+     ]
+    }
+   }
+  },
+  {
+   "goal": "What does our policy say about damaged items?",
+   "family": "policy_question",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 1,
+   "worst_case": 3410,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": "sha256:2a6bcef0b3159eea8cfb887b7da1b82cb9830849bcf388cb2a746684a713b57b",
+   "nodes": [
+    {
+     "node": "section",
+     "op": "retrieve.policy",
+     "ladder": [
+      "ml.tfidf[policy]",
+      "s1.encoder[policy]",
+      "spoke[policy]"
+     ],
+     "executor": "s1.encoder[policy]",
+     "escalations": 1,
+     "cost": 1,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "answer",
+     "op": "create.policy_answer",
+     "ladder": [
+      "code.analytics[create.policy_answer]"
+     ],
+     "executor": "code.analytics[create.policy_answer]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "section": {
+     "id": "P2",
+     "title": "Damaged or defective items",
+     "score": 0.6421
+    },
+    "answer": "Policy P2, Damaged or defective items: Items that arrive damaged, broken or defective are refunded within 90 days of delivery, including grocery items. A photo of the damage is requested."
+   }
+  },
+  {
+   "goal": "What does our policy say about a parcel that is two weeks late?",
+   "family": "policy_question",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 2971,
+   "worst_case": 3410,
+   "bound_respected": true,
+   "seconds": 8.1,
+   "schedule_hash": "sha256:2a6bcef0b3159eea8cfb887b7da1b82cb9830849bcf388cb2a746684a713b57b",
+   "nodes": [
+    {
+     "node": "section",
+     "op": "retrieve.policy",
+     "ladder": [
+      "ml.tfidf[policy]",
+      "s1.encoder[policy]",
+      "spoke[policy]"
+     ],
+     "executor": "spoke[policy]",
+     "escalations": 2,
+     "cost": 2971,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "answer",
+     "op": "create.policy_answer",
+     "ladder": [
+      "code.analytics[create.policy_answer]"
+     ],
+     "executor": "code.analytics[create.policy_answer]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "section": {
+     "id": "P3",
+     "title": "Items not received",
+     "score": 0.997
+    },
+    "answer": "Policy P3, Items not received: If an order has not been delivered 10 days after it was placed, the customer receives a full refund or a replacement. Before 10 days, ask them to wait."
+   }
+  },
+  {
+   "goal": "Customer C-1146 requests a refund: \"It broke.\"",
+   "family": null,
+   "status": "clarify",
+   "reason": "Which order is the refund for?",
+   "events": [],
+   "cost": 0,
+   "worst_case": 0,
+   "bound_respected": true,
+   "seconds": 0.0,
+   "schedule_hash": null,
+   "nodes": [],
+   "result": {}
+  }
+ ],
+ "replay": {
+  "all_nodes_replayed": true,
+  "identical_results": true,
+  "replay_cost": 0,
+  "effects_applied": 2
+ },
+ "expense_goal": {
+  "rows": 71,
+  "flagged": 8,
+  "accuracy": 0.9296,
+  "answered_by": {
+   "ml.gbdt[expense]": 50,
+   "s1.encoder[expense]": 21
+  }
+ },
+ "llm_only_goals": [
+  {
+   "goal": "Customer C-1146 requests a refund for order A-5010: \"The puzzle was torn when it arrived. Please help.\"",
+   "family": "refund_decision",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 212,
+   "worst_case": 394,
+   "bound_respected": true,
+   "seconds": 1.8,
+   "schedule_hash": "sha256:83a99e3df55ca066f539215b7a98a1f093af931076cf1d0da75f9cdef2cecb60",
+   "nodes": [
+    {
+     "node": "reason",
+     "op": "decide.claim_reason",
+     "ladder": [
+      "hub.policy[claim]"
+     ],
+     "executor": "hub.policy[claim]",
+     "escalations": 0,
+     "cost": 212,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "order",
+     "op": "tool.get_order",
+     "ladder": [
+      "code.lookup[tool.get_order]"
+     ],
+     "executor": "code.lookup[tool.get_order]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "decision",
+     "op": "decide.refund",
+     "ladder": [
+      "code.policy[decide.refund]"
+     ],
+     "executor": "code.policy[decide.refund]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "reason": "damaged",
+    "decision": {
+     "decision": "deny",
+     "rule": "P2",
+     "explanation": "Damaged item reported 174 days after delivery (limit 90)."
+    }
+   }
+  },
+  {
+   "goal": "Customer C-1186 requests a refund for order A-5011: \"Hello, two weeks and counting, the board game is nowhere to be seen. I would like a refund.\"",
+   "family": "refund_decision",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 232,
+   "worst_case": 394,
+   "bound_respected": true,
+   "seconds": 1.7,
+   "schedule_hash": "sha256:83a99e3df55ca066f539215b7a98a1f093af931076cf1d0da75f9cdef2cecb60",
+   "nodes": [
+    {
+     "node": "reason",
+     "op": "decide.claim_reason",
+     "ladder": [
+      "hub.policy[claim]"
+     ],
+     "executor": "hub.policy[claim]",
+     "escalations": 0,
+     "cost": 232,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "order",
+     "op": "tool.get_order",
+     "ladder": [
+      "code.lookup[tool.get_order]"
+     ],
+     "executor": "code.lookup[tool.get_order]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "decision",
+     "op": "decide.refund",
+     "ladder": [
+      "code.policy[decide.refund]"
+     ],
+     "executor": "code.policy[decide.refund]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "reason": "not_received",
+    "decision": {
+     "decision": "deny",
+     "rule": "P3",
+     "explanation": "Tracking shows the order was delivered; open a carrier investigation before refunding."
+    }
+   }
+  },
+  {
+   "goal": "Customer C-1145 requests a refund for order A-5012: \"Hello, the label says toy robot but inside was a completely different product. What can you do?\"",
+   "family": "refund_decision",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 228,
+   "worst_case": 394,
+   "bound_respected": true,
+   "seconds": 1.7,
+   "schedule_hash": "sha256:83a99e3df55ca066f539215b7a98a1f093af931076cf1d0da75f9cdef2cecb60",
+   "nodes": [
+    {
+     "node": "reason",
+     "op": "decide.claim_reason",
+     "ladder": [
+      "hub.policy[claim]"
+     ],
+     "executor": "hub.policy[claim]",
+     "escalations": 0,
+     "cost": 228,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "order",
+     "op": "tool.get_order",
+     "ladder": [
+      "code.lookup[tool.get_order]"
+     ],
+     "executor": "code.lookup[tool.get_order]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "decision",
+     "op": "decide.refund",
+     "ladder": [
+      "code.policy[decide.refund]"
+     ],
+     "executor": "code.policy[decide.refund]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "reason": "wrong_item",
+    "decision": {
+     "decision": "deny",
+     "rule": "P4",
+     "explanation": "Wrong item reported 176 days after delivery (limit 60)."
+    }
+   }
+  },
+  {
+   "goal": "Handle request from C-1141: \"Can someone phone me tomorrow at 3pm?\"",
+   "family": "support_request",
+   "status": "done",
+   "reason": null,
+   "events": [],
+   "cost": 254,
+   "worst_case": 378,
+   "bound_respected": true,
+   "seconds": 2.3,
+   "schedule_hash": "sha256:7e0170140c7b9bce8b90c9f975529784a07c1359e56fe525aceb2e7a70517575",
+   "nodes": [
+    {
+     "node": "tool",
+     "op": "tool.select",
+     "ladder": [
+      "hub.support[tool]"
+     ],
+     "executor": "hub.support[tool]",
+     "escalations": 0,
+     "cost": 254,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "args",
+     "op": "tool.args",
+     "ladder": [
+      "code.args[tool.args]"
+     ],
+     "executor": "code.args[tool.args]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "confirm",
+     "op": "meta.confirm",
+     "ladder": [
+      "code.confirm[meta.confirm]"
+     ],
+     "executor": "code.confirm[meta.confirm]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    },
+    {
+     "node": "execute",
+     "op": "tool.execute",
+     "ladder": [
+      "code.tools[tool.execute]"
+     ],
+     "executor": "code.tools[tool.execute]",
+     "escalations": 0,
+     "cost": 0,
+     "replayed": false,
+     "cap_hits": 0
+    }
+   ],
+   "result": {
+    "tool": "schedule_callback",
+    "args": {
+     "tool": "schedule_callback",
+     "args": {
+      "customer_id": "C-1141",
+      "date": "2026-10-22",
+      "time": "15:00"
+     },
+     "missing": [],
+     "invalid": []
+    },
+    "execute": {
+     "scheduled": "2026-10-22 15:00",
+     "customer_id": "C-1141",
+     "idempotency_key": "sha256:ad537a314d05eff193d7e03c4f7b4e45bb47174438c17371ca7c51b4c3926a8a"
+    }
+   }
+  }
+ ],
+ "elapsed_s": 72.1
+}

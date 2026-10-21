@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CITE = re.compile(r"`?((?:dmc|gcam|tests|experiments)/[\w/.-]+?\.(?:py|md|json))(?:::(\w+))?`?")
-DOCS = ("docs/PLAN.md", "docs/blueprint.html", "docs/pdf/build_blueprint_pdf.py")
+DOCS = ("docs/PLAN.md", "docs/blueprint.html", "docs/pdf/build_blueprint_pdf.py", "docs/GCAM_V1.md")
 
 
 def test_cited_files_and_symbols_exist():
