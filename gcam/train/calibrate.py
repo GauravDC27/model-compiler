@@ -178,26 +178,25 @@ def main() -> None:
     s1 = fit_system1(world, items)
     print("system-1 fitted", f"{time.time() - t0:.0f}s", flush=True)
 
-    # Write the sklearn artifacts first (System reads them), with a placeholder probe.
-    saved = {"encoder_heads": s1["encoder_heads"], "retrieval_tau": s1["retrieval_tau"], "tfidf": s1["tfidf"],
-             "gbdt": s1["gbdt"], "probe_layer": PROBE_LAYER, "probe_heads": {}}
-    with open(art / "system1.pkl", "wb") as f:
-        pickle.dump(saved, f)
     old_cal = json.loads((art / "calibration.json").read_text()) if OPS else None
     old_test = json.loads((art / "test_records.json").read_text()) if OPS else None
-    if OPS:  # the probe reads the hub's claims features only: keep it
+    probe = {}
+    if OPS:  # the probe reads the hub's claims features only: keep it when there is one
         with open(art / "system1.pkl", "rb") as f:
-            saved_old = pickle.load(f)
-        saved["probe_heads"] = saved_old["probe_heads"]
-        with open(art / "system1.pkl", "wb") as f:
-            pickle.dump(saved, f)
+            probe = pickle.load(f).get("probe_heads", {})
+    # Write the sklearn artifacts first (System reads them), with the kept probe or a placeholder.
+    saved = {"encoder_heads": s1["encoder_heads"], "retrieval_tau": s1["retrieval_tau"], "tfidf": s1["tfidf"],
+             "gbdt": s1["gbdt"], "probe_layer": PROBE_LAYER, "probe_heads": probe}
+    with open(art / "system1.pkl", "wb") as f:
+        pickle.dump(saved, f)
     system = System(llms=True, art=art, world=world)
-    if not OPS:
+    if not probe:
         saved["probe_heads"] = fit_probe(system.models["hub"], items)
         with open(art / "system1.pkl", "wb") as f:
             pickle.dump(saved, f)
     system.impls["s1.hubprobe"].heads = saved["probe_heads"]
-    print("probe fitted" if not OPS else f"probe kept; recalibrating {OPS}", f"{time.time() - t0:.0f}s", flush=True)
+    print("probe kept" if probe else "probe fitted", f"recalibrating {OPS}" if OPS else "", f"{time.time() - t0:.0f}s",
+          flush=True)
 
     # LLM thresholds on the threshold split (spoke is always the last rung: no threshold needed).
     thresholds = {k: v for k, v in old_cal["thresholds"].items() if k.split("|")[1] not in OPS} if OPS else {}
