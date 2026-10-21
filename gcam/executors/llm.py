@@ -121,6 +121,12 @@ INPUT_FIELDS = {"decide.claim_reason": ("text",), "tool.select": ("text",), "dec
                 "retrieve.policy": ("query",), "evaluate.pairwise": ("a", "b"), "analyze.estimate": ("text",)}
 
 
+def _seed(payload: dict, i: int) -> int:
+    """Sampling seed for candidate ``i``: a function of the request's content, so a replay or a
+    recompile draws the same candidates (R9)."""
+    return int(content_hash({"payload": payload, "candidate": i}).split(":")[1][:15], 16)
+
+
 def prompts(op: str, payload: dict, k: int = 3) -> list[tuple[str, str]]:
     """The (system, user) prompts an executor processes for one call, in order."""
     if op in CHOICE:

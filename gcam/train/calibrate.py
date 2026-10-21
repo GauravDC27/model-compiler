@@ -163,7 +163,6 @@ def main() -> None:
     s1 = fit_system1(world, items)
     print("system-1 fitted", f"{time.time() - t0:.0f}s", flush=True)
 
-    from ..models import HUB_ID, LM  # noqa: F401  (System loads the hub and spoke)
     # Write the sklearn artifacts first (System reads them), with a placeholder probe.
     saved = {"encoder_heads": s1["encoder_heads"], "retrieval_tau": s1["retrieval_tau"], "tfidf": s1["tfidf"],
              "gbdt": s1["gbdt"], "probe_layer": PROBE_LAYER, "probe_heads": {}}

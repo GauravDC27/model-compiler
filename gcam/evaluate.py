@@ -22,9 +22,8 @@ from pathlib import Path
 from dmc.scheduler import CompileError, Node, compile_schedule
 
 from .domain import build_world, claims, estimates, reply_pairs, tool_requests
-from .models import artifacts_dir
 from .runtime import Runtime
-from .system import CANDIDATES, System
+from .system import System
 
 ROOT = Path(__file__).resolve().parents[1]
 BARS = {"decide.claim_reason": (0.92, 96), "tool.select": (0.92, 64), "evaluate.pairwise": (0.9, 256),

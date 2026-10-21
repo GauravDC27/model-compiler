@@ -122,3 +122,45 @@ def test_tfidf_retrieves_the_right_section():
     r = PolicyTfidf()
     assert r.run("retrieve.policy", {"query": "damaged items"}, forced=True).value["id"] == "P2"
     assert r.run("retrieve.policy", {"query": "callbacks on weekdays"}, forced=True).value["id"] == "P6"
+
+
+class _FakeLM:
+    """Stands in for a model: candidate text depends only on the sampling seed."""
+
+    role = "hub"
+    model_id = "fake"
+
+    def __init__(self):
+        self.seeds = []
+
+    def render(self, system, user):
+        return system + "\n" + user
+
+    def n_tokens(self, text):
+        return len(text.split())
+
+    def generate(self, prompt, max_new_tokens, *, seed=None):
+        self.seeds.append(seed)
+        if seed is not None and seed % 2:  # odd seeds write a reply that passes every check
+            text = ("Hi Ana, thank you for telling us about order A-1. We will refund you and you will hear "
+                    "from us within 24 hours.")
+        else:
+            text = "Sorry about that."
+        return text, list(range(len(text.split()))), -1.0 - (seed or 0) % 7 / 10
+
+
+def test_best_of_k_reply_is_seeded_by_content_and_selects_a_verified_candidate():
+    from gcam.executors.llm import LLMExecutor, _seed
+
+    p = {"customer_name": "Ana Lopez", "order_id": "A-1", "product": "lamp", "reason": "damaged",
+         "decision": "approve", "rule": "P2"}
+    lm = _FakeLM()
+    res = LLMExecutor("hub", lm, k=3).run("create.reply", p, forced=False)
+    assert lm.seeds == [_seed(p, i) for i in range(3)] and len(set(lm.seeds)) == 3
+    again = _FakeLM()
+    assert LLMExecutor("hub", again, k=3).run("create.reply", p, forced=False).value == res.value  # replayable
+    passing = [c["passed"] for c in res.detail["candidates"]]
+    assert passing == [s % 2 == 1 for s in lm.seeds]  # the verifier ran on every candidate
+    assert res.answered == any(passing) and (not any(passing) or "A-1" in res.value)
+    forced = LLMExecutor("hub", _FakeLM(), k=1).run("create.reply_fallback", p, forced=True)
+    assert forced.answered and forced.detail["candidates"][0]["passed"] is False  # k = 1 is greedy (seed None)
