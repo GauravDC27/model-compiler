@@ -49,3 +49,20 @@ def test_out_of_grammar_is_clarify_not_guess(tmp_path):
     c = make(tmp_path, backend_for("x", 0, 0))
     out = c.run("Write me a poem about the sea", CTX)
     assert isinstance(out.result, Clarify)
+
+
+def test_case_marginalization_reads_capitalized_preference(tmp_path):
+    from dmc.ir import DecideClassify
+
+    op = DecideClassify(context=CTX, ambiguities=(), question="Is 91 prime?", labels=("yes", "no"),
+                        policy=None, evidence=())
+    b = TableBackend({})
+    for order in label_orderings(op.labels):
+        prompt = b.render_chat(SYSTEM, render_user(op, order))
+        # The model says "No" (capitalized) with high probability, lowercase forms are rare.
+        b.scores.update({(prompt, "yes"): -4.0, (prompt, "no"): -4.2, (prompt, "No"): -0.1,
+                         (prompt, "Yes"): -3.0})
+    plain = DecideProfile(b, abstain_margin=0.0).run(op)
+    marg = DecideProfile(b, abstain_margin=0.0, marginalize_case=True).run(op)
+    assert plain.label == "yes"  # misled by lowercase-only scoring
+    assert marg.label == "no"

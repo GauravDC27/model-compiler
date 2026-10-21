@@ -44,6 +44,16 @@ def render_user(op: DecideClassify, labels: tuple[str, ...]) -> str:
     return "\n".join(lines)
 
 
+def surface_forms(label: str) -> tuple[str, ...]:
+    """Case variants a model may use to say the same label ("no", "No", "NO")."""
+    return tuple(dict.fromkeys((label, label.capitalize(), label.upper())))
+
+
+def _logsumexp(xs: list[float]) -> float:
+    m = max(xs)
+    return m + math.log(sum(math.exp(x - m) for x in xs))
+
+
 def label_orderings(labels: tuple[str, ...]) -> list[tuple[str, ...]]:
     """Canonical order and its reverse: cheap, fixed, and symmetric across positions."""
     canon = tuple(sorted(labels))
@@ -55,21 +65,45 @@ class DecideProfile:
     name = "decide"
     result_type = DecisionResult
 
-    def __init__(self, backend: Backend, *, temperature: float = 1.0, abstain_margin: float = 0.5):
+    def __init__(
+        self,
+        backend: Backend,
+        *,
+        temperature: float = 1.0,
+        abstain_margin: float = 0.5,
+        marginalize_case: bool = False,
+    ):
         self.backend = backend
         self.temperature = temperature
         self.abstain_margin = abstain_margin
+        # Score a label as the total probability of its case variants, so a model that
+        # prefers "No" over "no" is not read as unsure (verbalizer sensitivity).
+        self.marginalize_case = marginalize_case
 
     @property
     def version(self) -> str:
-        return f"{TEMPLATE_VERSION};T={self.temperature};abstain={self.abstain_margin}"
+        return (
+            f"{TEMPLATE_VERSION};T={self.temperature};abstain={self.abstain_margin}"
+            f";case={int(self.marginalize_case)}"
+        )
+
+    def _label_scores(self, prompt: str, order: tuple[str, ...]) -> list[float]:
+        if not self.marginalize_case:
+            return self.backend.score(prompt, list(order))
+        forms = [surface_forms(lab) for lab in order]
+        flat = self.backend.score(prompt, [f for fs in forms for f in fs])
+        out, i = [], 0
+        for fs in forms:
+            out.append(_logsumexp(flat[i:i + len(fs)]))
+            i += len(fs)
+        return out
 
     def run(self, op: DecideClassify) -> DecisionResult:
         totals = {lab: 0.0 for lab in op.labels}
         orderings = label_orderings(op.labels)
         for order in orderings:
             prompt = self.backend.render_chat(SYSTEM, render_user(op, order))
-            for lab, s in zip(order, self.backend.score(prompt, list(order))):
+            for lab, s in zip(order, self._label_scores(prompt, order)):
                 totals[lab] += s / len(orderings)
         # Deterministic ranking: score descending, then label text ascending on exact ties.
         ranked = sorted(totals, key=lambda lab: (-totals[lab], lab))
