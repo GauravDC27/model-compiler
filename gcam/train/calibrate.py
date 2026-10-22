@@ -48,7 +48,7 @@ OPS = tuple(o for o in os.environ.get("GCAM_OPS", "").split(",") if o)
 TARGET = 0.99  # answered accuracy every abstention threshold must reach (frontier models score ~1.0 here)
 TEACHER = Path(__file__).resolve().parents[1] / "data" / "teacher.json"
 # Sized for a 4-core CPU (~0.9 s per hub forward, ~1.5 s per spoke forward).
-N = {"fit": 480, "thr": 80, "cal": 80, "test": 80, "pair_thr": 20, "pair": 40, "reply": 9, "est": 30,
+N = {"fit": 480, "thr": 200, "cal": 80, "test": 80, "pair_thr": 20, "pair": 40, "reply": 9, "est": 30,
      "policy": 24, "exp_cal": 80, "exp_test": 120}
 if SMOKE:
     N = {k: max(4, v // 15) for k, v in N.items()}
@@ -132,7 +132,9 @@ def correct(op: str, value, truth, payload) -> bool:
 def teacher() -> dict:
     """Training texts a frontier teacher wrote from the label definitions and training-split examples
     only (capability transfer; it never saw calibration, dev-test or benchmark items)."""
-    return json.loads(TEACHER.read_text()) if TEACHER.exists() else {}
+    if not TEACHER.exists():
+        return {}
+    return {k: v for k, v in json.loads(TEACHER.read_text()).items() if not k.startswith("_")}
 
 
 def training_memos(rng: random.Random) -> list[tuple[str, str]]:
