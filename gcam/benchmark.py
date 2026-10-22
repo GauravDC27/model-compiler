@@ -312,12 +312,43 @@ def score(models: list[str]) -> dict:
     return report
 
 
+SHORT = {"claude-opus-5-5": "Opus 5.5", "claude-fable-5-1": "Fable 5.1", "claude-haiku-5-5": "Haiku 5.5"}
+NAMES = {"decide.claim_reason": "Refund-claim reason", "tool.select": "Tool selection", "evaluate.pairwise": "Reply judging",
+         "analyze.estimate": "Cost estimate", "retrieve.policy": "Policy retrieval", "create.reply": "Customer reply",
+         "create.summary": "Analytics summary", "decide.expense_review": "Expense review"}
+
+
+def render(report: dict) -> str:
+    """Markdown tables from benchmark_report.json: accuracy and deviation, then cost and latency."""
+    models = [m for m in SHORT if any(m in e.get("reference", {}) for e in report["ops"].values())]
+    acc = ["| Use case (n) | GCAM | " + " | ".join(SHORT[m] for m in models) + " | GCAM − best reference (95% CI) |",
+           "|---|---|" + "---|" * len(models) + "---|"]
+    cost = ["| Use case | GCAM $/1k | " + " | ".join(f"{SHORT[m]} $/1k" for m in models)
+            + " | GCAM p50 / p90 latency | GCAM answered by |", "|---|---|" + "---|" * len(models) + "---|---|"]
+    for op, e in report["ops"].items():
+        if "gcam" not in e or "accuracy" not in e["gcam"]:
+            acc.append(f"| {NAMES[op]} | compile error | " + " | ".join("" for _ in models) + " | |")
+            continue
+        g, refs = e["gcam"], e["reference"]
+        best = max(models, key=lambda m: refs[m]["accuracy"])
+        d = refs[best]["gcam_minus_reference"]
+        acc.append(f"| {NAMES[op]} ({e['n']}) | {g['accuracy']:.3f} | " + " | ".join(f"{refs[m]['accuracy']:.3f}" for m in models)
+                   + f" | {d['diff']:+.3f} ({d['ci95'][0]:+.3f}, {d['ci95'][1]:+.3f}) |")
+        by = ", ".join(f"{k.split('[')[0]} {v:.0%}" for k, v in g["answered_by"].items() if v)
+        cost.append(f"| {NAMES[op]} | {g['dollars_per_1k']:.4f} | "
+                    + " | ".join(f"{refs[m]['dollars_per_1k_lower_bound']:.3f}" for m in models)
+                    + f" | {g['latency_p50_s'] * 1000:.0f} ms / {g['latency_p90_s'] * 1000:.0f} ms | {by} |")
+    return "\n".join(acc) + "\n\n" + "\n".join(cost) + "\n"
+
+
 def main() -> None:
     cmd = sys.argv[1] if len(sys.argv) > 1 else "score"
     if cmd == "export":
         export()
     elif cmd == "gcam":
         run_gcam()
+    elif cmd == "render":
+        print(render(json.loads((RESULTS / "benchmark_report.json").read_text())))
     else:
         print(json.dumps(score(sys.argv[2:] or list(PRICE)), indent=1))
 
