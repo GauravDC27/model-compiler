@@ -22,7 +22,14 @@ from dmc.scheduler import Guard, Node, Program
 from .domain import NOW_DT, World
 from .goal_ir import Goal
 
-TEMPLATE_VERSION = "gcam.plans/1"
+TEMPLATE_VERSION = "gcam.plans/2"
+# Accuracy bar per op (op -> bar, input cap). Decision ops are set at parity with frontier models on
+# the benchmark (they score 1.0 on all but expense review, 0.92 there): 0.98 allows one error in 80
+# calibration items. Text generation is verifier-gated: only verified text ships (else the variant,
+# else abstention), so its bar prices how often the main path suffices.
+BARS = {"decide.claim_reason": (0.98, 96), "tool.select": (0.98, 64), "evaluate.pairwise": (0.98, 256),
+        "create.reply": (0.6, 160), "create.reply_fallback": (0.5, 160), "create.summary": (0.6, 200),
+        "analyze.estimate": (0.98, 96), "decide.expense_review": (0.92, 64), "retrieve.policy": (0.98, 48)}
 
 Builder = Callable[[Goal, dict[str, Any], World], dict]
 
@@ -57,8 +64,9 @@ def _plain(row: dict) -> dict:
     return out
 
 
-def _node(nid: str, op: str, deps: tuple[str, ...] = (), *, bar: float = 0.99, cap: int = 0,
-          contract: str = "D0", caps: frozenset[str] = frozenset({"read"}), group: str | None = None) -> Node:
+def _node(nid: str, op: str, deps: tuple[str, ...] = (), *, contract: str = "D0",
+          caps: frozenset[str] = frozenset({"read"}), group: str | None = None) -> Node:
+    bar, cap = BARS.get(op, (0.99, 0))  # exact ops (code, the forecaster) meet any bar
     return Node(nid, op, deps, required_accuracy=bar, prefix_group=group, requires_contract=contract,
                 input_cap=cap, capabilities=caps)
 
@@ -67,7 +75,7 @@ def _plan_refund(goal: Goal, world: World) -> GoalPlan:
     nodes = {
         "order": NodePlan(_node("order", "tool.get_order", contract="D1"),
                           lambda g, o, w: {"order_id": g.slots["order"]}),
-        "reason": NodePlan(_node("reason", "decide.claim_reason", bar=0.92, cap=96),
+        "reason": NodePlan(_node("reason", "decide.claim_reason"),
                            lambda g, o, w: {"text": g.slots["claim"]}),
         "decision": NodePlan(_node("decision", "decide.refund", ("order", "reason"), contract="D1"),
                              lambda g, o, w: {"order": o["order"], "reason": o["reason"], "now": g.context.now}),
@@ -79,7 +87,7 @@ def _plan_refund(goal: Goal, world: World) -> GoalPlan:
 def _plan_support(goal: Goal, world: World) -> GoalPlan:
     effect = frozenset({"read", "write", "destructive"})  # the most any allowed tool needs
     nodes = {
-        "tool": NodePlan(_node("tool", "tool.select", bar=0.92, cap=64),
+        "tool": NodePlan(_node("tool", "tool.select"),
                          lambda g, o, w: {"text": g.slots["request"]}),
         "args": NodePlan(_node("args", "tool.args", ("tool",), contract="D1"),
                          lambda g, o, w: {"tool": o["tool"], "text": g.slots["request"],
@@ -100,7 +108,7 @@ def _plan_compare(goal: Goal, world: World) -> GoalPlan:
         cust = w.customer(g.slots["customer"])
         return {"a": g.slots["a"], "b": g.slots["b"], "customer_name": cust["name"], "order_id": g.slots["order"],
                 "eligible": None}
-    nodes = {"verdict": NodePlan(_node("verdict", "evaluate.pairwise", bar=0.9, cap=256), build)}
+    nodes = {"verdict": NodePlan(_node("verdict", "evaluate.pairwise"), build)}
     return _assemble(goal, nodes, (), {}, ("verdict",), frozenset({"read"}))
 
 
@@ -118,9 +126,9 @@ def _plan_write(goal: Goal, world: World) -> GoalPlan:
                              lambda g, o, w: {"order": o["order"], "reason": g.slots["reason"], "now": g.context.now}),
         # Verifier-gated generation: only a verified reply ships (else the variant, else abstain), so the
         # bar prices how often the main path suffices, not whether shipped text is right.
-        "reply": NodePlan(_node("reply", "create.reply", ("decision",), bar=0.6, cap=160), reply_payload),
+        "reply": NodePlan(_node("reply", "create.reply", ("decision",)), reply_payload),
         # Variant: the specialist spoke writes the reply when no hub candidate passes the verifier.
-        "reply_spoke": NodePlan(_node("reply_spoke", "create.reply_fallback", bar=0.5, cap=160), reply_payload),
+        "reply_spoke": NodePlan(_node("reply_spoke", "create.reply_fallback"), reply_payload),
     }
     guards = (Guard("order_found", "order", "order_found", "abstain"),
               Guard("reply_verified", "reply", "reply_verified", "spoke_reply"),
@@ -134,7 +142,7 @@ def _plan_analytics(goal: Goal, world: World) -> GoalPlan:
     nodes = {
         "rates": NodePlan(_node("rates", "analyze.refund_rates", contract="D1"),
                           lambda g, o, w: {"days": g.slots["days"], "now": g.context.now}),
-        "summary": NodePlan(_node("summary", "create.summary", ("rates",), bar=0.6, cap=200),  # verifier-gated
+        "summary": NodePlan(_node("summary", "create.summary", ("rates",)),
                             lambda g, o, w: {"facts": o["rates"]}),
         "summary_template": NodePlan(_node("summary_template", "create.summary_template", contract="D1"),
                                      lambda g, o, w: {"facts": o["rates"]}),
@@ -145,7 +153,7 @@ def _plan_analytics(goal: Goal, world: World) -> GoalPlan:
 
 
 def _plan_estimate(goal: Goal, world: World) -> GoalPlan:
-    nodes = {"estimate": NodePlan(_node("estimate", "analyze.estimate", bar=0.9, cap=96),
+    nodes = {"estimate": NodePlan(_node("estimate", "analyze.estimate"),
                                   lambda g, o, w: {"text": g.slots["question"]})}
     return _assemble(goal, nodes, (), {}, ("estimate",), frozenset({"read"}))
 
@@ -157,7 +165,7 @@ def _plan_expenses(goal: Goal, world: World) -> GoalPlan:
     for i, row in enumerate(rows):
         nid = f"x{i:03d}"
         ids.append(nid)
-        nodes[nid] = NodePlan(_node(nid, "decide.expense_review", bar=0.9, cap=64, group="expense"),
+        nodes[nid] = NodePlan(_node(nid, "decide.expense_review", group="expense"),
                               lambda g, o, w, i=i: {"row": expense_rows(g, w)[i]})
     nodes["flagged"] = NodePlan(_node("flagged", "analyze.collect", tuple(ids), contract="D1"),
                                 lambda g, o, w, ids=tuple(ids): {"rows": [o[n] for n in ids]})
@@ -172,7 +180,7 @@ def _plan_forecast(goal: Goal, world: World) -> GoalPlan:
 
 def _plan_policy(goal: Goal, world: World) -> GoalPlan:
     nodes = {
-        "section": NodePlan(_node("section", "retrieve.policy", bar=0.85, cap=48),
+        "section": NodePlan(_node("section", "retrieve.policy"),
                             lambda g, o, w: {"query": g.slots["topic"]}),
         "answer": NodePlan(_node("answer", "create.policy_answer", ("section",), contract="D1"),
                            lambda g, o, w: {"section": o["section"], "query": g.slots["topic"]}),

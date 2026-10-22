@@ -26,13 +26,12 @@ from pathlib import Path
 from dmc.scheduler import CompileError, Node, compile_schedule
 
 from .domain import build_world, claims, estimates, reply_pairs, tool_requests
+from .planner import BARS as PLAN_BARS
 from .runtime import Runtime
 from .system import ALIAS, System
 
 ROOT = Path(__file__).resolve().parents[1]
-BARS = {"decide.claim_reason": (0.92, 96), "tool.select": (0.92, 64), "evaluate.pairwise": (0.9, 256),
-        "create.reply": (0.6, 160), "create.summary": (0.6, 200), "analyze.estimate": (0.9, 96),
-        "decide.expense_review": (0.9, 64), "retrieve.policy": (0.85, 48)}
+BARS = {op: v for op, v in PLAN_BARS.items() if op != "create.reply_fallback"}  # the plans' bars (gcam/planner.py)
 LADDER = set(ALIAS.values())  # ladder rungs are named impl[alias]; exact rungs (code, forecaster) always stay
 
 

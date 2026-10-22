@@ -32,8 +32,8 @@ from ..executors.llm import CLAIM_OPTIONS, SYSTEMS, TOOL_OPTIONS, LLMExecutor, c
 from ..models import HUB_ID, LETTERS, LM, Capacity, artifacts_dir
 
 SMOKE = bool(os.environ.get("GCAM_SMOKE"))
-# ~3 s per forward + backward on this 4-core CPU. Policy: 160 sequences; support: 360.
-STEPS = {"policy": 2, "support": 2} if SMOKE else {"policy": 40, "support": 90}
+# ~3 s per forward + backward on this 4-core CPU: 320 sequences for policy, 360 for support.
+STEPS = {"policy": 2, "support": 2} if SMOKE else {"policy": 80, "support": 90}
 BATCH = 4
 LR = {"policy": 1e-4, "support": 3e-4}
 GOAL_LAYERS = range(16, 24)  # the hub's last 8 of 24 layers
@@ -47,13 +47,17 @@ SPECS = {
 
 def _data(world):
     oids = list(world.orders.order_id[:400])
+    from .calibrate import teacher  # frontier-teacher phrasings of the training labels (capability transfer)
+    t = teacher()
     return {
         "policy": {
-            "train": [(c.text, c.reason) for c in claims(480, split="train", seed=1)],
+            "train": [(c.text, c.reason) for c in claims(480, split="train", seed=1)]
+            + [(x, y) for y, xs in t.get("claims", {}).items() for x in xs],
             "eval": [(c.text, c.reason) for c in claims(24, split="train", seed=9) + claims(24, split="test", seed=9)],
         },
         "support": {
-            "train": [(r.text, r.tool) for r in tool_requests(480, split="train", seed=1, order_ids=oids)],
+            "train": [(r.text, r.tool) for r in tool_requests(480, split="train", seed=1, order_ids=oids)]
+            + [(x, y) for y, xs in t.get("tools", {}).items() for x in xs],
             "eval": [(r.text, r.tool) for r in tool_requests(24, split="train", seed=9, order_ids=oids)
                      + tool_requests(24, split="test", seed=9, order_ids=oids)],
         },

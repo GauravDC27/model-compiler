@@ -27,12 +27,15 @@ from __future__ import annotations
 import json
 import os
 import pickle
+import random
 import time
 from datetime import timedelta
+from pathlib import Path
 
 import numpy as np
 
-from ..domain import (NOW, NOW_DT, CLAIM_REASONS, TOOLS, build_world, claims, estimates, policy_queries, reply_pairs,
+from ..domain import (MEMO_CLEAR, MEMO_RISK_DOWN, MEMO_RISK_UP, NOW, NOW_DT, CLAIM_REASONS, FIRST, POLICY,
+                      POLICY_QUERIES, TOOLS, build_world, claims, estimates, policy_queries, reply_pairs,
                       tool_requests)
 from ..executors.classic import ExpenseGBDT, PolicyTfidf, conformal_threshold
 from ..executors.code import refund_rule, reply_checks, summary_checks
@@ -42,9 +45,10 @@ from ..system import CANDIDATES, System, rung_name
 
 SMOKE = bool(os.environ.get("GCAM_SMOKE"))
 OPS = tuple(o for o in os.environ.get("GCAM_OPS", "").split(",") if o)
-TARGET = 0.95
+TARGET = 0.99  # answered accuracy every abstention threshold must reach (frontier models score ~1.0 here)
+TEACHER = Path(__file__).resolve().parents[1] / "data" / "teacher.json"
 # Sized for a 4-core CPU (~0.9 s per hub forward, ~1.5 s per spoke forward).
-N = {"fit": 480, "thr": 40, "cal": 80, "test": 80, "pair_thr": 20, "pair": 40, "reply": 9, "est": 30,
+N = {"fit": 480, "thr": 80, "cal": 80, "test": 80, "pair_thr": 20, "pair": 40, "reply": 9, "est": 30,
      "policy": 24, "exp_cal": 80, "exp_test": 120}
 if SMOKE:
     N = {k: max(4, v // 15) for k, v in N.items()}
@@ -125,28 +129,59 @@ def correct(op: str, value, truth, payload) -> bool:
     return value == truth
 
 
+def teacher() -> dict:
+    """Training texts a frontier teacher wrote from the label definitions and training-split examples
+    only (capability transfer; it never saw calibration, dev-test or benchmark items)."""
+    return json.loads(TEACHER.read_text()) if TEACHER.exists() else {}
+
+
+def training_memos(rng: random.Random) -> list[tuple[str, str]]:
+    """Training-wording memos with their signal (the domain's training templates, filled in)."""
+    out = []
+    for signal, memos in (("neither", MEMO_CLEAR.values()), ("review", MEMO_RISK_UP), ("approve", MEMO_RISK_DOWN)):
+        for m in memos:
+            out += [(m.format(who=rng.choice(FIRST), n=rng.randint(1000, 9999)), signal) for _ in range(4)]
+    return out
+
+
 def fit_system1(world, items) -> dict:
     enc = Encoder()
     heads = {}
+    t = teacher()
     fit_claims = [(c.text, c.reason) for c in claims(N["fit"], split="train", seed=1)]
+    fit_claims += [(x, y) for y, xs in t.get("claims", {}).items() for x in xs]
     oids = list(world.orders.order_id[:400])
     fit_tools = [(r.text, r.tool) for r in tool_requests(N["fit"], split="train", seed=1, order_ids=oids)]
+    fit_tools += [(x, y) for y, xs in t.get("tools", {}).items() for x in xs]
     for op, data, labels in (("decide.claim_reason", fit_claims, CLAIM_REASONS), ("tool.select", fit_tools, TOOLS)):
-        X = np.stack([enc.embed(t)[0] for t, _ in data])
+        X = np.stack([enc.embed(x)[0] for x, _ in data])
         head = LinearHead(tuple(labels)).fit(X, [y for _, y in data])
         thr = items[op]["thr"]
         head.calibrate(np.stack([enc.embed(p["text"])[0] for p, _ in thr]), [y for _, y in thr], TARGET)
         heads[op] = head
-    # memo head for expense review: memo text -> approve/review, trained on the fit-period rows
-    ex = items["decide.expense_review"]
-    to_label = lambda b: "review" if b else "approve"  # noqa: E731
-    head = LinearHead(("approve", "review")).fit(np.stack([enc.embed(r["memo"])[0] for r in ex["fit"]]),
-                                                  [to_label(r["needs_review"]) for r in ex["fit"]])
-    head.calibrate(np.stack([enc.embed(p["row"]["memo"])[0] for p, _ in ex["thr"]]), [to_label(y) for _, y in ex["thr"]],
-                   TARGET)
-    heads["decide.expense_review"] = head
-    # dense retrieval margin threshold
-    s1 = EncoderHeads(enc, heads)
+    # policy-section head: training queries + teacher queries -> section
+    pol = [(q, s.id) for s in POLICY for q in POLICY_QUERIES[s.id]["train"]]
+    pol += [(x, y) for y, xs in t.get("policy", {}).items() for x in xs]
+    if t.get("policy"):
+        head = LinearHead(tuple(s.id for s in POLICY)).fit(np.stack([enc.embed(x)[0] for x, _ in pol]), [y for _, y in pol])
+        thr = items["retrieve.policy"]["thr"]
+        head.calibrate(np.stack([enc.embed(p["query"])[0] for p, _ in thr]), [y for _, y in thr], TARGET)
+        heads["retrieve.policy"] = head
+    # expense: the GBDT on the structured fields, and the memo-signal head for the reports it hands off
+    gbdt = ExpenseGBDT().fit(items["decide.expense_review"]["fit"])
+    gbdt.calibrate([p["row"] for p, _ in items["decide.expense_review"]["thr"]], TARGET)
+    memos = training_memos(random.Random(5)) + [(x, y) for y, xs in t.get("memos", {}).items() for x in xs]
+    heads["memo.signal"] = LinearHead(("approve", "neither", "review")).fit(
+        np.stack([enc.embed(x)[0] for x, _ in memos]), [y for _, y in memos])
+    s1 = EncoderHeads(enc, heads, gbdt=gbdt)
+    # The memo head's threshold is set on the decision it makes (memo signal, or the GBDT on a
+    # neutral memo) for the reports the GBDT abstains on.
+    handed = [(p, y) for p, y in items["decide.expense_review"]["thr"] if not gbdt.run(
+        "decide.expense_review", p, forced=False).answered]
+    out = [s1.run("decide.expense_review", p, forced=True) for p, _ in handed]
+    heads["memo.signal"].tau = conformal_threshold([o.confidence for o in out],
+                                                   [o.value["needs_review"] == y for o, (_, y) in zip(out, handed)], TARGET)
+    # dense retrieval margin threshold (used when no section head is trained)
     thr = items["retrieve.policy"]["thr"]
     res = [s1.run("retrieve.policy", p, forced=True) for p, _ in thr]
     retrieval_tau = conformal_threshold([r.confidence for r in res], [r.value["id"] == y for r, (_, y) in zip(res, thr)],
@@ -155,14 +190,13 @@ def fit_system1(world, items) -> dict:
     res = [tfidf.run("retrieve.policy", p, forced=True) for p, _ in thr]
     tfidf.tau = conformal_threshold([r.confidence for r in res], [r.value["id"] == y for r, (_, y) in zip(res, thr)],
                                     TARGET)
-    gbdt = ExpenseGBDT().fit(items["decide.expense_review"]["fit"])
-    gbdt.calibrate([p["row"] for p, _ in items["decide.expense_review"]["thr"]], TARGET)
     return {"encoder_heads": heads, "retrieval_tau": retrieval_tau, "tfidf": tfidf, "gbdt": gbdt, "enc": enc}
 
 
 def fit_probe(hub, items) -> dict[str, LinearHead]:
     probe = HubProbe(hub, PROBE_LAYER, {})
     data = [(c.text, c.reason) for c in claims(N["fit"], split="train", seed=1)]
+    data += [(x, y) for y, xs in teacher().get("claims", {}).items() for x in xs]
     X = np.stack([probe.features(t)[0] for t, _ in data])
     head = LinearHead(tuple(CLAIM_REASONS), C=0.5).fit(X, [y for _, y in data])
     thr = items["decide.claim_reason"]["thr"]

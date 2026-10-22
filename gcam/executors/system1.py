@@ -2,7 +2,9 @@
 generated tokens, and abstain upward when calibrated confidence is low.
 
 * ``EncoderHeads`` — all-MiniLM-L6-v2 sentence embeddings (mean pooled, normalized) with a
-  logistic-regression head per task, plus dense retrieval over the policy sections.
+  logistic-regression head per task: claim reason, tool, policy section, and the expense memo's
+  signal (approve / review / neither), which decides a borderline report the GBDT hands off;
+  dense retrieval over the policy sections when no section head is trained.
 * ``HubProbe`` — a logistic-regression decision head on the hub's own hidden states (a probe at
   a middle layer): the decision that would otherwise cost a full prompt costs one prefill of the
   bare text.
@@ -70,15 +72,23 @@ class LinearHead:
 
 class EncoderHeads:
     name = "s1.encoder"
-    version = "s1.encoder/1"
+    version = "s1.encoder/2"
 
-    def __init__(self, encoder: Encoder, heads: dict[str, LinearHead], retrieval_tau: float = 0.0):
+    def __init__(self, encoder: Encoder, heads: dict[str, LinearHead], retrieval_tau: float = 0.0, gbdt=None):
         self.encoder = encoder
-        self.heads = heads  # op -> head
+        self.heads = heads  # op (or "memo.signal") -> head
         self.retrieval_tau = retrieval_tau
+        self.gbdt = gbdt  # the structured-field model a neutral memo defers to
         self.section_vecs = np.stack([encoder.embed(f"{s.title}. {s.text}")[0] for s in POLICY])
 
     def run(self, op: str, payload: dict, *, forced: bool) -> ExecResult:
+        if op == "retrieve.policy" and op in self.heads:
+            v, n = self.encoder.embed(payload["query"])
+            head = self.heads[op]
+            label, conf = head.predict(v)
+            sec = next(s for s in POLICY if s.id == label)
+            value = {"id": sec.id, "title": sec.title, "score": round(conf, 4)}
+            return ExecResult(forced or conf >= head.tau, value, conf, usage={"encoder": n})
         if op == "retrieve.policy":
             v, n = self.encoder.embed(payload["query"])
             s = self.section_vecs @ v
@@ -87,14 +97,16 @@ class EncoderHeads:
             sec = POLICY[int(order[0])]
             value = {"id": sec.id, "title": sec.title, "score": round(float(s[order[0]]), 4)}
             return ExecResult(forced or margin >= self.retrieval_tau, value, margin, usage={"encoder": n})
-        if op not in self.heads:
+        if op not in self.heads and not (op == "decide.expense_review" and "memo.signal" in self.heads):
             raise NotSupported(op)
-        if op == "decide.expense_review":  # the memo head: reads only the free text the GBDT never sees
+        if op == "decide.expense_review":  # P5: on a borderline report the memo decides
             row = payload["row"]
             v, n = self.encoder.embed(row["memo"])
-            label, conf = self.heads[op].predict(v)
-            value = {"expense_id": row["expense_id"], "needs_review": label == "review"}
-            return ExecResult(forced or conf >= self.heads[op].tau, value, conf, usage={"encoder": n})
+            head = self.heads["memo.signal"]
+            signal, conf = head.predict(v)
+            review = signal == "review" if signal != "neither" else bool(self.gbdt.proba([row])[0] > 0.5)
+            value = {"expense_id": row["expense_id"], "needs_review": review}
+            return ExecResult(forced or conf >= head.tau, value, conf, usage={"encoder": n}, detail={"signal": signal})
         v, n = self.encoder.embed(payload["text"])
         head = self.heads[op]
         label, conf = head.predict(v)

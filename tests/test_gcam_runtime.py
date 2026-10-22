@@ -54,8 +54,8 @@ def _records():
     for i in range(20):
         rows.append({rung_name("code.keywords", "decide.claim_reason"): {"answered": i < 12, "correct": i < 12,
                                                                         "correct_forced": i < 14, "tokens": 0},
-                     rung_name("spoke", "decide.claim_reason"): {"answered": True, "correct": i != 19,
-                                                                "correct_forced": i != 19, "tokens": 120}})
+                     rung_name("spoke", "decide.claim_reason"): {"answered": True, "correct": True,
+                                                                "correct_forced": True, "tokens": 120}})
     tools = [{rung_name("code.keywords", "tool.select"): {"answered": i < 10, "correct": i < 10, "correct_forced": i < 12,
                                                           "tokens": 0},
               rung_name("spoke", "tool.select"): {"answered": True, "correct": True, "correct_forced": True, "tokens": 150}}

@@ -194,7 +194,7 @@ def test_held_out_period_memos_use_unseen_wording(world):
     assert all(m.startswith(train) for m in ex[ex.date < cut].memo)
 
 
-def test_memo_head_reads_only_the_memo():
+def test_memo_signal_decides_borderline_reports_and_defers_on_neutral_memos():
     import numpy as np
 
     from gcam.executors.system1 import EncoderHeads, LinearHead
@@ -206,14 +206,23 @@ def test_memo_head_reads_only_the_memo():
                 v[sum(map(ord, w)) % 64] += 1.0
             return v / (np.linalg.norm(v) or 1.0), len(text.split())
 
+    class StubGBDT:  # the structured-field model: says "review" for amounts over 500
+        def proba(self, rows):
+            return np.array([0.9 if r["amount"] > 500 else 0.1 for r in rows])
+
     enc = BagEncoder()
     memos = [("receipt lost, amount from memory", "review"), ("cash payment, no invoice available", "review"),
              ("pre-approved by finance, approval ref FIN-1234", "approve"),
-             ("client-billable, recharged on invoice INV-5678", "approve")] * 5
-    head = LinearHead(("approve", "review")).fit(np.stack([enc.embed(m)[0] for m, _ in memos]), [y for _, y in memos])
+             ("client-billable, recharged on invoice INV-5678", "approve"),
+             ("printer paper and toner for the office", "neither"), ("train to client site for workshop", "neither")] * 5
+    head = LinearHead(("approve", "neither", "review")).fit(np.stack([enc.embed(m)[0] for m, _ in memos]),
+                                                            [y for _, y in memos])
     head.tau = 0.0
-    s1 = EncoderHeads(enc, {"decide.expense_review": head})
-    row = {"expense_id": "E-1", "memo": "receipt lost, amount from memory", "amount": 99999.0}
+    s1 = EncoderHeads(enc, {"memo.signal": head}, gbdt=StubGBDT())
+    row = {"expense_id": "E-1", "memo": "receipt lost, amount from memory", "amount": 20.0}
     res = s1.run("decide.expense_review", {"row": row}, forced=False)
-    assert res.answered and res.value == {"expense_id": "E-1", "needs_review": True}
-    assert res.usage == {"encoder": 5}
+    assert res.answered and res.value == {"expense_id": "E-1", "needs_review": True}  # the memo decides
+    assert res.usage == {"encoder": 5} and res.detail["signal"] == "review"
+    neutral = {"expense_id": "E-2", "memo": "printer paper and toner for the office", "amount": 900.0}
+    res = s1.run("decide.expense_review", {"row": neutral}, forced=False)
+    assert res.detail["signal"] == "neither" and res.value["needs_review"] is True  # deferred to the GBDT

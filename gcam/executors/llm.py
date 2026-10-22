@@ -9,8 +9,9 @@ decision-bearing is read from sampled text. Generation is used only where the ou
   finds most likely wins. This is
   selection, never fusion (plan §I.2.4).
 * ``create.summary``: one greedy draft checked against the computed facts.
-* ``analyze.estimate``: program-of-thought. The model writes one arithmetic expression, which
-  is parsed and evaluated by code; an expression that does not parse is an abstention.
+* ``analyze.estimate``: program-of-thought. The model writes a line or two of reasoning, then one
+  arithmetic expression, which is parsed and evaluated by code; an expression that does not parse
+  is an abstention.
 """
 
 from __future__ import annotations
@@ -54,8 +55,9 @@ SYSTEMS = {
                      "the order number, say what happens next, and never promise anything that is not stated."),
     "create.summary": ("You write a two-sentence summary of an analysis for a manager. Use only the numbers given, "
                        "exactly as written, and say whether the difference is statistically significant."),
-    "analyze.estimate": ("You turn a business arithmetic question into a single Python arithmetic expression. Reply with the "
-                         "expression only: numbers, + - * / and parentheses, no words and no units."),
+    "analyze.estimate": ("You solve business arithmetic questions. First write one or two short lines of reasoning that say "
+                         "what is being counted and how. Then write the final line as 'Expression: <one Python arithmetic "
+                         "expression>' using only numbers, + - * / and parentheses."),
 }
 
 
@@ -124,6 +126,9 @@ CHOICE = {
 # Payload fields that carry the node's capped input (truncated by the runtime to the node's cap).
 INPUT_FIELDS = {"decide.claim_reason": ("text",), "tool.select": ("text",), "decide.expense_review": ("row.memo",),
                 "retrieve.policy": ("query",), "evaluate.pairwise": ("a", "b"), "analyze.estimate": ("text",)}
+
+
+ESTIMATE_TOKENS = 120  # reasoning lines + the expression
 
 
 def complete_sentences(text: str) -> str:
@@ -270,9 +275,9 @@ class LLMExecutor:
 
     def _estimate(self, p: dict, forced: bool) -> ExecResult:
         prompt = self.lm.render(SYSTEMS["analyze.estimate"], p["text"])
-        text, ids, _ = self.lm.generate(prompt, 48)
-        expr = text.strip().strip("`").replace("python", "").strip().splitlines()[0] if text.strip() else ""
-        expr = re.sub(r"^[A-Za-z_ ]+=", "", expr).strip()
+        text, ids, _ = self.lm.generate(prompt, ESTIMATE_TOKENS)
+        found = re.findall(r"Expression:\s*`?([^`\n]+)`?", text)  # the program after a short reasoning step
+        expr = re.sub(r"^[A-Za-z_ ]+=", "", found[-1]).strip() if found else ""
         usage = {self.lm.role: self.lm.n_tokens(prompt) + len(ids)}
         try:
             value = round(safe_eval(expr), 2)

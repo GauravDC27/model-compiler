@@ -25,7 +25,7 @@ from .domain import World, build_world
 from .executors.base import COST_WEIGHT
 from .executors.classic import OrderForecaster
 from .executors.code import EffectLog, build_code_executors
-from .executors.llm import LLMExecutor
+from .executors.llm import ESTIMATE_TOKENS, LLMExecutor
 from .models import HUB_ID, SPOKE_ID, LM, Capacity, artifacts_dir
 
 ALIAS = {
@@ -53,7 +53,7 @@ EXACT = {
     "create.policy_answer": "code.analytics", "forecast.orders": "ml.forecast",
 }
 LATENCY = {"code": 0, "ml": 1, "s1": 1, "hub": 4, "spoke": 12}
-GENERATIVE = {"create.reply": 3 * 110, "create.reply_fallback": 3 * 110, "create.summary": 90, "analyze.estimate": 48}
+GENERATIVE = {"create.reply": 3 * 110, "create.reply_fallback": 3 * 110, "create.summary": 90, "analyze.estimate": ESTIMATE_TOKENS}
 
 
 @dataclass
@@ -119,7 +119,7 @@ class System:
         if saved is not None:
             enc = Encoder()
             self.models["encoder"] = enc
-            self.impls["s1.encoder"] = EncoderHeads(enc, saved["encoder_heads"], saved["retrieval_tau"])
+            self.impls["s1.encoder"] = EncoderHeads(enc, saved["encoder_heads"], saved["retrieval_tau"], gbdt=saved["gbdt"])
             self.impls["s1.hubprobe"] = HubProbe(hub, saved["probe_layer"], saved["probe_heads"])
 
     # ---------------------------------------------------------------- registry

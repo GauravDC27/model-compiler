@@ -1,0 +1,34 @@
+{
+ "decide.claim_reason": {
+  "file": "experiments/benchmark/decide.claim_reason.md",
+  "n": 200
+ },
+ "tool.select": {
+  "file": "experiments/benchmark/tool.select.md",
+  "n": 200
+ },
+ "evaluate.pairwise": {
+  "file": "experiments/benchmark/evaluate.pairwise.md",
+  "n": 80
+ },
+ "analyze.estimate": {
+  "file": "experiments/benchmark/analyze.estimate.md",
+  "n": 60
+ },
+ "retrieve.policy": {
+  "file": "experiments/benchmark/retrieve.policy.md",
+  "n": 48
+ },
+ "create.reply": {
+  "file": "experiments/benchmark/create.reply.md",
+  "n": 30
+ },
+ "create.summary": {
+  "file": "experiments/benchmark/create.summary.md",
+  "n": 15
+ },
+ "decide.expense_review": {
+  "file": "experiments/benchmark/decide.expense_review.md",
+  "n": 149
+ }
+}
