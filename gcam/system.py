@@ -35,8 +35,11 @@ ALIAS = {
 }
 # Ladder ops and the implementations that may serve them (cheapest first is the scheduler's job).
 CANDIDATES = {
-    "decide.claim_reason": ("code.keywords", "s1.encoder", "s1.hubprobe", "s1.agree", "hub", "hub.policy", "spoke"),
-    "tool.select": ("code.keywords", "s1.encoder", "s1.hubprobe", "s1.agree", "hub", "hub.support", "spoke"),
+    # On claims and tools a System-1 answer needs two independent views to agree (s1.agree: the encoder
+    # head and the hub probe). Alone, the encoder head was confidently wrong on a held-out phrasing
+    # family (dev-test tools 0.950) in a way no threshold separated; the agreement rung was 1.000.
+    "decide.claim_reason": ("code.keywords", "s1.agree", "hub", "hub.policy", "spoke"),
+    "tool.select": ("code.keywords", "s1.agree", "hub", "hub.support", "spoke"),
     "evaluate.pairwise": ("code.verify", "hub", "spoke"),
     "create.reply": ("hub",),  # the spoke writes only in the pre-compiled fallback variant
     "create.reply_fallback": ("spoke",),
