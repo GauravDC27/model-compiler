@@ -8,6 +8,7 @@ generated tokens, and abstain upward when calibrated confidence is low.
 * ``HubProbe`` — a logistic-regression decision head on the hub's own hidden states (a probe at
   a middle layer): the decision that would otherwise cost a full prompt costs one prefill of the
   bare text.
+* ``Agreement`` — answers only when the encoder head and the hub probe agree.
 
 Each input is encoded alone at its own length (no padding, no batch-mates), the CPU analogue of
 a batch-invariant lane.
@@ -136,3 +137,28 @@ class HubProbe:
         v, n = self.features(payload["text"])
         label, conf = self.heads[op].predict(v)
         return ExecResult(forced or conf >= self.heads[op].tau, label, conf, usage={"hub": n})
+
+
+class Agreement:
+    """Two independent System-1 views of the same text, the MiniLM head and the hub-state probe,
+    answering only when both give the same label: an error has to be shared by both views to pass.
+    Confidence is the lower of the two; on a forced call that disagrees, the more confident view wins."""
+
+    name = "s1.agree"
+    version = "s1.agree/1"
+
+    def __init__(self, encoder: EncoderHeads, probe: HubProbe, tau: dict[str, float] | None = None):
+        self.encoder = encoder
+        self.probe = probe
+        self.tau = dict(tau or {})
+
+    def run(self, op: str, payload: dict, *, forced: bool) -> ExecResult:
+        if op not in self.encoder.heads or op not in self.probe.heads:
+            raise NotSupported(op)
+        a = self.encoder.run(op, payload, forced=True)
+        b = self.probe.run(op, payload, forced=True)
+        agree = a.value == b.value
+        conf = min(a.confidence, b.confidence) if agree else 0.0
+        value = a.value if agree or a.confidence >= b.confidence else b.value
+        return ExecResult(forced or (agree and conf >= self.tau.get(op, 0.0)), value, conf, {**a.usage, **b.usage},
+                          {"agree": agree})

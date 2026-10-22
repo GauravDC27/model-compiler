@@ -195,15 +195,26 @@ def fit_system1(world, items) -> dict:
     return {"encoder_heads": heads, "retrieval_tau": retrieval_tau, "tfidf": tfidf, "gbdt": gbdt, "enc": enc}
 
 
-def fit_probe(hub, items) -> dict[str, LinearHead]:
+PROBE_OPS = ("decide.claim_reason", "tool.select")
+
+
+def fit_probe(hub, items, world) -> dict[str, LinearHead]:
+    """Hub-state probe heads for claims and tools, on training phrasings plus teacher texts."""
     probe = HubProbe(hub, PROBE_LAYER, {})
-    data = [(c.text, c.reason) for c in claims(N["fit"], split="train", seed=1)]
-    data += [(x, y) for y, xs in teacher().get("claims", {}).items() for x in xs]
-    X = np.stack([probe.features(t)[0] for t, _ in data])
-    head = LinearHead(tuple(CLAIM_REASONS), C=0.5).fit(X, [y for _, y in data])
-    thr = items["decide.claim_reason"]["thr"]
-    head.calibrate(np.stack([probe.features(p["text"])[0] for p, _ in thr]), [y for _, y in thr], TARGET)
-    return {"decide.claim_reason": head}
+    t = teacher()
+    oids = list(world.orders.order_id[:400])
+    data = {"decide.claim_reason": ([(c.text, c.reason) for c in claims(N["fit"], split="train", seed=1)]
+                                    + [(x, y) for y, xs in t.get("claims", {}).items() for x in xs], CLAIM_REASONS),
+            "tool.select": ([(r.text, r.tool) for r in tool_requests(N["fit"], split="train", seed=1, order_ids=oids)]
+                            + [(x, y) for y, xs in t.get("tools", {}).items() for x in xs], TOOLS)}
+    heads = {}
+    for op, (rows, labels) in data.items():
+        X = np.stack([probe.features(x)[0] for x, _ in rows])
+        head = LinearHead(tuple(labels), C=0.5).fit(X, [y for _, y in rows])
+        thr = items[op]["thr"]
+        head.calibrate(np.stack([probe.features(p["text"])[0] for p, _ in thr]), [y for _, y in thr], TARGET)
+        heads[op] = head
+    return heads
 
 
 def main() -> None:
@@ -226,11 +237,19 @@ def main() -> None:
     with open(art / "system1.pkl", "wb") as f:
         pickle.dump(saved, f)
     system = System(llms=True, art=art, world=world)
-    if not probe:
-        saved["probe_heads"] = fit_probe(system.models["hub"], items)
-        with open(art / "system1.pkl", "wb") as f:
-            pickle.dump(saved, f)
+    if any(op not in probe for op in PROBE_OPS):
+        probe = {}
+        saved["probe_heads"] = fit_probe(system.models["hub"], items, world)
     system.impls["s1.hubprobe"].heads = saved["probe_heads"]
+    # The agreement rung's thresholds, on the threshold split.
+    agree = system.impls["s1.agree"]
+    for op in PROBE_OPS:
+        out = [agree.run(op, p, forced=True) for p, _ in items[op]["thr"]]
+        agree.tau[op] = conformal_threshold([o.confidence for o in out],
+                                            [o.value == y for o, (_, y) in zip(out, items[op]["thr"])], TARGET)
+    saved["agree_tau"] = dict(agree.tau)
+    with open(art / "system1.pkl", "wb") as f:
+        pickle.dump(saved, f)
     print("probe kept" if probe else "probe fitted", f"recalibrating {OPS}" if OPS else "", f"{time.time() - t0:.0f}s",
           flush=True)
 
@@ -284,7 +303,8 @@ def main() -> None:
     meta = {"target": TARGET, "sizes": {op: {s: len(v) for s, v in d.items() if s != "fit"} for op, d in items.items()},
             "probe_layer": PROBE_LAYER, "encoder_thresholds": {op: h.tau for op, h in s1["encoder_heads"].items()},
             "retrieval_tau": s1["retrieval_tau"], "tfidf_tau": s1["tfidf"].tau, "gbdt_tau": s1["gbdt"].tau,
-            "probe_tau": saved["probe_heads"]["decide.claim_reason"].tau, "elapsed_s": round(time.time() - t0, 1)}
+            "probe_tau": {op: h.tau for op, h in saved["probe_heads"].items()}, "agree_tau": saved["agree_tau"],
+            "elapsed_s": round(time.time() - t0, 1)}
     if OPS:
         meta["recalibrated"] = old_cal["meta"].get("recalibrated", []) + [{"ops": list(OPS),
                                                                            "elapsed_s": meta["elapsed_s"]}]

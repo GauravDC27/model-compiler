@@ -35,8 +35,8 @@ ALIAS = {
 }
 # Ladder ops and the implementations that may serve them (cheapest first is the scheduler's job).
 CANDIDATES = {
-    "decide.claim_reason": ("code.keywords", "s1.encoder", "s1.hubprobe", "hub", "hub.policy", "spoke"),
-    "tool.select": ("code.keywords", "s1.encoder", "hub", "hub.support", "spoke"),
+    "decide.claim_reason": ("code.keywords", "s1.encoder", "s1.hubprobe", "s1.agree", "hub", "hub.policy", "spoke"),
+    "tool.select": ("code.keywords", "s1.encoder", "s1.hubprobe", "s1.agree", "hub", "hub.support", "spoke"),
     "evaluate.pairwise": ("code.verify", "hub", "spoke"),
     "create.reply": ("hub",),  # the spoke writes only in the pre-compiled fallback variant
     "create.reply_fallback": ("spoke",),
@@ -96,7 +96,7 @@ class System:
 
     # ---------------------------------------------------------------- models
     def _load_llms(self, saved) -> None:
-        from .executors.system1 import Encoder, EncoderHeads, HubProbe
+        from .executors.system1 import Agreement, Encoder, EncoderHeads, HubProbe
 
         hub = LM(HUB_ID, "hub")
         cap = Capacity(hub)
@@ -121,6 +121,8 @@ class System:
             self.models["encoder"] = enc
             self.impls["s1.encoder"] = EncoderHeads(enc, saved["encoder_heads"], saved["retrieval_tau"], gbdt=saved["gbdt"])
             self.impls["s1.hubprobe"] = HubProbe(hub, saved["probe_layer"], saved["probe_heads"])
+            self.impls["s1.agree"] = Agreement(self.impls["s1.encoder"], self.impls["s1.hubprobe"],
+                                               saved.get("agree_tau", {}))
 
     # ---------------------------------------------------------------- registry
     def _samples(self) -> dict[str, dict]:
@@ -148,6 +150,8 @@ class System:
         if fam in ("code", "ml"):
             return 0, 0, 0
         w = COST_WEIGHT["spoke" if impl == "spoke" else "encoder" if impl == "s1.encoder" else "hub"]
+        if impl == "s1.agree":  # one encoder pass and one hub prefill over the input
+            return 0, math.ceil(COST_WEIGHT["encoder"] + COST_WEIGHT["hub"]), 0
         if impl in ("s1.encoder", "s1.hubprobe"):
             return 0, math.ceil(w), 0
         from .executors.llm import prompts

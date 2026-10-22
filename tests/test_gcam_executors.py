@@ -226,3 +226,24 @@ def test_memo_signal_decides_borderline_reports_and_defers_on_neutral_memos():
     neutral = {"expense_id": "E-2", "memo": "printer paper and toner for the office", "amount": 900.0}
     res = s1.run("decide.expense_review", {"row": neutral}, forced=False)
     assert res.detail["signal"] == "neither" and res.value["needs_review"] is True  # deferred to the GBDT
+
+
+def test_agreement_answers_only_when_both_views_agree():
+    from gcam.executors.base import ExecResult
+    from gcam.executors.system1 import Agreement
+
+    class View:
+        def __init__(self, label, conf, usage):
+            self.heads = {"tool.select": None}
+            self.label, self.conf, self.usage = label, conf, usage
+
+        def run(self, op, payload, *, forced):
+            return ExecResult(True, self.label, self.conf, self.usage)
+
+    both = Agreement(View("cancel_order", 0.9, {"encoder": 5}), View("cancel_order", 0.8, {"hub": 7}), {"tool.select": 0.7})
+    r = both.run("tool.select", {"text": "x"}, forced=False)
+    assert r.answered and r.value == "cancel_order" and r.confidence == 0.8 and r.usage == {"encoder": 5, "hub": 7}
+    split = Agreement(View("get_order_status", 0.95, {"encoder": 5}), View("cancel_order", 0.6, {"hub": 7}),
+                      {"tool.select": 0.0})
+    assert not split.run("tool.select", {"text": "x"}, forced=False).answered  # disagreement escalates
+    assert split.run("tool.select", {"text": "x"}, forced=True).value == "get_order_status"  # forced: the surer view
