@@ -1049,6 +1049,7 @@ tr:last-child td{border-bottom:none}
       <tr><td>Hub goal-gated experts (claims)</td><td colspan="3">base hub 0.271 → 0.958 with the family on; goal off is bit-identical</td></tr>
       <tr><td>Hub hot-expert LoRA (tools)</td><td colspan="3">base hub 0.50 → 0.979; with LLM rungs only, the compiler picks these layers over the spoke</td></tr>
       <tr><td>18 end-to-end goals</td><td colspan="3">all within their compiled bounds; confirmation gates the destructive tool; D0 replay exact at zero cost</td></tr>
+      <tr><td>vs Opus 5.5 / Fable 5.1 / Haiku 5.5</td><td colspan="3">782 fresh held-out items: GCAM 0.992 vs 0.985 / 0.985 / 0.982; parity on 6 of 8 use cases, +4.7 points on expense review, one miss on policy retrieval; decisions at $0.005 per 1k requests vs $0.61 / $1.51 / $0.015 (docs/GCAM_BENCHMARK.md)</td></tr>
     </tbody>
   </table></div>
   <p class="note">Cost is in hub-token equivalents per item (spoke tokens weigh 3.75, encoder 0.057, code and classic ML 0). Details and what did not work: <span class="mono">docs/GCAM_V1.md</span>.</p>

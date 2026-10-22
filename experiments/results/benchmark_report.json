@@ -1,0 +1,499 @@
+{
+ "cpu_dollars_per_hour": 0.2016,
+ "prices_per_mtok": {
+  "claude-fable-5-1": [
+   10.0,
+   50.0
+  ],
+  "claude-opus-5-5": [
+   4.0,
+   20.0
+  ],
+  "claude-sonnet-5-5": [
+   2.0,
+   10.0
+  ],
+  "claude-haiku-5-5": [
+   0.1,
+   0.5
+  ]
+ },
+ "ops": {
+  "decide.claim_reason": {
+   "n": 200,
+   "gcam": {
+    "ladder": [
+     "code.keywords[claim]",
+     "s1.agree[claim]",
+     "hub.policy[claim]"
+    ],
+    "accuracy": 1.0,
+    "main_path_accuracy": 1.0,
+    "dollars_per_1k": 0.01117,
+    "latency_p50_s": 0.107,
+    "latency_p90_s": 0.3288,
+    "tok_eq_mean": 21.6,
+    "answered_by": {
+     "code.keywords[claim]": 0.5,
+     "s1.agree[claim]": 0.46,
+     "hub.policy[claim]": 0.04
+    }
+   },
+   "reference": {
+    "claude-opus-5-5": {
+     "accuracy": 1.0,
+     "answered": 200,
+     "dollars_per_1k_lower_bound": 0.3827,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.02919
+    },
+    "claude-fable-5-1": {
+     "accuracy": 1.0,
+     "answered": 200,
+     "dollars_per_1k_lower_bound": 0.9567,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.01168
+    },
+    "claude-haiku-5-5": {
+     "accuracy": 1.0,
+     "answered": 200,
+     "dollars_per_1k_lower_bound": 0.0096,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 1.16756
+    }
+   }
+  },
+  "tool.select": {
+   "n": 200,
+   "gcam": {
+    "ladder": [
+     "code.keywords[tool]",
+     "s1.agree[tool]"
+    ],
+    "accuracy": 1.0,
+    "main_path_accuracy": 1.0,
+    "dollars_per_1k": 0.00688,
+    "latency_p50_s": 0.0006,
+    "latency_p90_s": 0.2942,
+    "tok_eq_mean": 10.2,
+    "answered_by": {
+     "code.keywords[tool]": 0.495,
+     "s1.agree[tool]": 0.505
+    }
+   },
+   "reference": {
+    "claude-opus-5-5": {
+     "accuracy": 1.0,
+     "answered": 200,
+     "dollars_per_1k_lower_bound": 0.4782,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.01439
+    },
+    "claude-fable-5-1": {
+     "accuracy": 1.0,
+     "answered": 200,
+     "dollars_per_1k_lower_bound": 1.1956,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.00575
+    },
+    "claude-haiku-5-5": {
+     "accuracy": 1.0,
+     "answered": 200,
+     "dollars_per_1k_lower_bound": 0.012,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.57547
+    }
+   }
+  },
+  "evaluate.pairwise": {
+   "n": 80,
+   "gcam": {
+    "ladder": [
+     "code.verify[pair]"
+    ],
+    "accuracy": 1.0,
+    "main_path_accuracy": 1.0,
+    "dollars_per_1k": 2e-05,
+    "latency_p50_s": 0.0004,
+    "latency_p90_s": 0.0004,
+    "tok_eq_mean": 0.0,
+    "answered_by": {
+     "code.verify[pair]": 1.0
+    }
+   },
+   "reference": {
+    "claude-opus-5-5": {
+     "accuracy": 1.0,
+     "answered": 80,
+     "dollars_per_1k_lower_bound": 0.6721,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 3e-05
+    },
+    "claude-fable-5-1": {
+     "accuracy": 1.0,
+     "answered": 80,
+     "dollars_per_1k_lower_bound": 1.6801,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 1e-05
+    },
+    "claude-haiku-5-5": {
+     "accuracy": 1.0,
+     "answered": 80,
+     "dollars_per_1k_lower_bound": 0.0168,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.00119
+    }
+   }
+  },
+  "analyze.estimate": {
+   "n": 60,
+   "gcam": {
+    "ladder": [
+     "code.arith[estimate]",
+     "spoke[estimate]"
+    ],
+    "accuracy": 1.0,
+    "main_path_accuracy": 1.0,
+    "dollars_per_1k": 0.22749,
+    "latency_p50_s": 3.3901,
+    "latency_p90_s": 8.8629,
+    "tok_eq_mean": 254.9,
+    "answered_by": {
+     "code.arith[estimate]": 0.5,
+     "spoke[estimate]": 0.5
+    }
+   },
+   "reference": {
+    "claude-opus-5-5": {
+     "accuracy": 1.0,
+     "answered": 60,
+     "dollars_per_1k_lower_bound": 0.24,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.94787
+    },
+    "claude-fable-5-1": {
+     "accuracy": 1.0,
+     "answered": 60,
+     "dollars_per_1k_lower_bound": 0.6,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.37915
+    },
+    "claude-haiku-5-5": {
+     "accuracy": 1.0,
+     "answered": 60,
+     "dollars_per_1k_lower_bound": 0.006,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 37.915
+    }
+   }
+  },
+  "retrieve.policy": {
+   "n": 48,
+   "gcam": {
+    "ladder": [
+     "ml.tfidf[policy]",
+     "s1.encoder[policy]"
+    ],
+    "accuracy": 0.9792,
+    "main_path_accuracy": 0.9792,
+    "dollars_per_1k": 0.00021,
+    "latency_p50_s": 0.0047,
+    "latency_p90_s": 0.0069,
+    "tok_eq_mean": 0.9,
+    "answered_by": {
+     "ml.tfidf[policy]": 0.146,
+     "s1.encoder[policy]": 0.854
+    }
+   },
+   "reference": {
+    "claude-opus-5-5": {
+     "accuracy": 1.0,
+     "answered": 48,
+     "dollars_per_1k_lower_bound": 1.5436,
+     "gcam_minus_reference": {
+      "diff": -0.0208,
+      "ci95": [
+       -0.0625,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.00014
+    },
+    "claude-fable-5-1": {
+     "accuracy": 1.0,
+     "answered": 48,
+     "dollars_per_1k_lower_bound": 3.859,
+     "gcam_minus_reference": {
+      "diff": -0.0208,
+      "ci95": [
+       -0.0625,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 5e-05
+    },
+    "claude-haiku-5-5": {
+     "accuracy": 1.0,
+     "answered": 48,
+     "dollars_per_1k_lower_bound": 0.0386,
+     "gcam_minus_reference": {
+      "diff": -0.0208,
+      "ci95": [
+       -0.0625,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.00544
+    }
+   }
+  },
+  "create.reply": {
+   "n": 30,
+   "gcam": {
+    "ladder": [
+     "hub[reply]"
+    ],
+    "accuracy": 1.0,
+    "main_path_accuracy": 0.8,
+    "dollars_per_1k": 2.11288,
+    "latency_p50_s": 28.8506,
+    "latency_p90_s": 76.4158,
+    "tok_eq_mean": 1437.6,
+    "answered_by": {
+     "hub[reply]": 0.8
+    }
+   },
+   "reference": {
+    "claude-opus-5-5": {
+     "accuracy": 1.0,
+     "answered": 30,
+     "dollars_per_1k_lower_bound": 2.1152,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.9989
+    },
+    "claude-fable-5-1": {
+     "accuracy": 1.0,
+     "answered": 30,
+     "dollars_per_1k_lower_bound": 5.5813,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.37856
+    },
+    "claude-haiku-5-5": {
+     "accuracy": 1.0,
+     "answered": 30,
+     "dollars_per_1k_lower_bound": 0.0485,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 43.5975
+    }
+   }
+  },
+  "create.summary": {
+   "n": 15,
+   "gcam": {
+    "ladder": [
+     "hub[summary]"
+    ],
+    "accuracy": 1.0,
+    "main_path_accuracy": 1.0,
+    "dollars_per_1k": 0.25856,
+    "latency_p50_s": 4.5896,
+    "latency_p90_s": 4.8966,
+    "tok_eq_mean": 175.1,
+    "answered_by": {
+     "hub[summary]": 1.0
+    }
+   },
+   "reference": {
+    "claude-opus-5-5": {
+     "accuracy": 1.0,
+     "answered": 15,
+     "dollars_per_1k_lower_bound": 1.7792,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.14532
+    },
+    "claude-fable-5-1": {
+     "accuracy": 1.0,
+     "answered": 15,
+     "dollars_per_1k_lower_bound": 4.548,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.05685
+    },
+    "claude-haiku-5-5": {
+     "accuracy": 1.0,
+     "answered": 15,
+     "dollars_per_1k_lower_bound": 0.0455,
+     "gcam_minus_reference": {
+      "diff": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 5.68514
+    }
+   }
+  },
+  "decide.expense_review": {
+   "n": 149,
+   "gcam": {
+    "ladder": [
+     "ml.gbdt[expense]",
+     "s1.encoder[expense]"
+    ],
+    "accuracy": 0.9664,
+    "main_path_accuracy": 0.9664,
+    "dollars_per_1k": 0.0003,
+    "latency_p50_s": 0.0023,
+    "latency_p90_s": 0.0093,
+    "tok_eq_mean": 0.4,
+    "answered_by": {
+     "ml.gbdt[expense]": 0.577,
+     "s1.encoder[expense]": 0.423
+    }
+   },
+   "reference": {
+    "claude-opus-5-5": {
+     "accuracy": 0.9195,
+     "answered": 149,
+     "dollars_per_1k_lower_bound": 0.7384,
+     "gcam_minus_reference": {
+      "diff": 0.047,
+      "ci95": [
+       0.0,
+       0.1007
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.00041
+    },
+    "claude-fable-5-1": {
+     "accuracy": 0.9195,
+     "answered": 149,
+     "dollars_per_1k_lower_bound": 1.846,
+     "gcam_minus_reference": {
+      "diff": 0.047,
+      "ci95": [
+       0.0,
+       0.1007
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.00016
+    },
+    "claude-haiku-5-5": {
+     "accuracy": 0.906,
+     "answered": 149,
+     "dollars_per_1k_lower_bound": 0.0185,
+     "gcam_minus_reference": {
+      "diff": 0.0604,
+      "ci95": [
+       0.0067,
+       0.1141
+      ]
+     },
+     "cost_ratio_gcam_over_reference": 0.01625
+    }
+   }
+  }
+ }
+}

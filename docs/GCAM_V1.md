@@ -91,6 +91,8 @@ Model weights and trained artifacts live in `artifacts/gcam/` (not committed). E
 
 ## Results
 
+For the comparison with frontier models (Claude Opus 5.5, Fable 5.1, Haiku 5.5) on a fresh held-out benchmark, and the training that brought every use case to parity, see `docs/GCAM_BENCHMARK.md`. The numbers below are v1's.
+
 All numbers are from `experiments/results/gcam_v1_eval.json`. The hub's capacity was trained for about 36 minutes; System-1 fitting and calibration took about 2.5 hours, with partial recalibrations noted in the calibration meta. Everything ran on 4 CPU cores.
 
 Every ladder below was compiled from the calibration records alone. The test items were generated from different seeds, and half of them use held-out phrasings. Cost is in hub-token equivalents per item.
